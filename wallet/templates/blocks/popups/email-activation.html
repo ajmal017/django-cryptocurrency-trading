@@ -1,0 +1,6 @@
+<div class="popup popup--narrow popup--activation js-email-activation-toggle"><button class="popup__close" onclick="emailActivation.close()" type="button"></button>
+    <div class="popup__container"><button class="popup__close-inner" type="button" onclick="emailActivation.close()"></button>
+        <h3 class="popup__heading">Please follow the link sent to your email<br> for verifying your email</h3>
+        <div class="popup__btn-wrapper"><button class="popup__btn popup__small-btn btn btn--dark" type="button" onclick="location.href='mailto:{{ user.email }}';">Open Email</button><button class="popup__btn popup__small-btn btn btn--light" type="button" onclick="location.href='/accounts/send_new_email';">Resend Code</button></div>
+    </div>
+</div>

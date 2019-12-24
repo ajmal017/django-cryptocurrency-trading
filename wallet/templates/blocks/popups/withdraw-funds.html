@@ -1,0 +1,16 @@
+<div class="popup popup--wide popup--withdraw js-withdraw-funds-toggle"><button class="popup__close" onclick="withdrawFunds.close()" type="button"></button>
+    <div class="popup__container"> <button class="popup__close-inner" type="button" onclick="withdrawFunds.close()"></button>
+        <h3 class="popup__heading">WITHDRAW</h3>
+        <div class="popup__wrapper">
+            <div class="popup__field field"><input class="field__input" type="number" placeholder="Amount to withdraw" /></div>
+            <div class="popup__field popup__select field field--arrow field--alt-arrow"><select class="field__input js-native-select-toggle">
+                    <option selected="selected" disabled="disabled">Select account where you wish to withdraw</option>
+                    <option>Option 1</option>
+                    <option>Option 2</option>
+                    <option>Option 3</option>
+                </select></div>
+            <div class="popup__textarea field"><textarea class="field__input" rows="7" placeholder="Description of this transaction for self-reference (optional)"></textarea></div>
+            <div class="popup__btn-wrapper"><button class="popup__btn btn btn--dark" type="button">Withdraw</button><button class="popup__btn btn btn--light" type="reset">Cancel</button></div>
+        </div>
+    </div>
+</div>

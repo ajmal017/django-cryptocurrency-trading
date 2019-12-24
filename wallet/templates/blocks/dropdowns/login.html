@@ -1,0 +1,10 @@
+<aside class="page__dropdown dropdown js-login-target">
+    <div class="dropdown__inner">
+        <header class="dropdown__header">
+            <h3 class="dropdown__heading">Login</h3><button class="dropdown__close" onclick="login.close()" type="button"></button>
+        </header>
+        <form id="login_form" action="/accounts/login" method="post">{{ form.non_field_errors }}
+            {% csrf_token %}<input class="dropdown__field" type="email" name="username" placeholder="Email Address" value="test@test.com" />{{ form.username.errors }}<input class="dropdown__field" type="password" name="password" placeholder="Password" value="123lalala321" />{{ form.password.errors }}<button class="dropdown__submit btn btn--light" type="submit">LOGIN</button>{{ form.errors }}</form>
+        <footer class="dropdown__buttons"><button class="dropdown__text-btn" onclick="switchToRegister()" type="button">Create Account</button><button class="dropdown__text-btn js-forgot-pwd-trigger" onclick="forgotPW.open()" type="button">I forgot my password </button></footer>
+    </div>
+</aside>

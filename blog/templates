@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog archive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#6d39c5">
+    <meta name="theme-color" content="#6d39c5">
+    <link href="/css/styles.min.css" rel="stylesheet">
+</head>
+
+<body class="page">
+    <aside class="price-bar">
+        <div class="price-bar__container"><span class="price-bar__item"> <span class="price-bar__currency">BTC/USD</span><span class="price-bar__value">10400.99</span><span class="price-bar__change is-positive">+0.19%</span></span><span class="price-bar__item"> <span class="price-bar__currency">ETH/USD</span><span class="price-bar__value">129.99</span><span class="price-bar__change is-negative">-1.29%</span></span><span class="price-bar__item"> <span class="price-bar__currency">XRP/USD</span><span class="price-bar__value">0.2625</span><span class="price-bar__change is-positive">+3.29% </span></span></div>
+    </aside>
+    <header class="page__header header">
+        <div class="header__container">
+            <div class="header__inner">
+                <div class="header__wrapper"><a class="header__logo-wrapper" href="/index"><img class="header__logo" src="/images/logos/logo-dark.png" alt=""><img class="header__logo header__logo--desktop" src="/images/logos/logo-header.png" alt=""></a>
+                    <div class="nav-toggle nav-toggle--mobile js-mobile-menu-trigger">
+                        <div class="nav-toggle__bar"></div>
+                        <div class="nav-toggle__bar"></div>
+                        <div class="nav-toggle__bar"></div>
+                    </div>
+                </div>
+                <nav class="header__nav nav {% if user.is_authenticated %} is-logged {% endif %}">
+                    <div class="nav__list-wrapper">
+                        <ul class="nav__mobile-list js-mobile-menu-target">
+                            {% if user.is_authenticated %}
+                            <li class="nav__item user">
+                                <div class="user__picture"><img class="user__img" src="{{ MEDIA_URL }}/{{ user.profile_photo }}" alt=""></div>
+                                <p class="user__data"><span class="user__text">1.554 BTC in Wallet</span><span class="user__text">You can send up to 1.200 BTC</span></p>
+                            </li>
+                            <li class="nav__item"><a class="nav__link" href="/index">Home</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/buy">I’m a Buyer</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/sell-details">I’m a Seller</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/blog">Our Blog</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/overview">Dashboard</a></li>
+                            <li class="nav__item"><a class="nav__link" href="#">Transactions</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/messages">Messages</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/fund">Funding</a></li>
+                            <li class="nav__item"><a class="nav__link" href="#">Offers </a></li>
+                            <li class="nav__item"><a class="nav__link" href="#">Trade History</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/affiliates">Affiliates</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/support-center">Support</a></li>
+                            <li class="nav__item"><a class="nav__link" href="/index">Logout</a></li>
+                            {% else %}
+                            <li class="nav__item"><a class="nav__link" href="/index">Home</a></li>
+                            <li class="nav__item js-login-trigger" onclick="login.open()"><button class="nav__link" type="button">Login</button></li>
+                            <li class="nav__item js-register-trigger" onclick="register.open()"><button class="nav__link" type="button">Register</button></li>
+                            <li class="nav__item js-support-trigger" onclick="support.open()"><button class="nav__link" type="button">Support</button></li>
+                            {% endif %}
+                        </ul>
+                        <ul class="nav__desktop-list nav__list--desktop">
+                            {% if user.is_authenticated %}
+                            <li class="nav__item nav__user js-user-menu-trigger" onclick="userMenu.open()">
+                                <div class="nav__user-inner"><img class="user__img" src="{{ MEDIA_URL }}/{{ user.profile_photo }}" alt=""></div>
+                            </li>
+                            {% endif %}
+                            <li class="nav__item"><a class="nav__link" href="/index">Home Page</a></li>
+                            {% if user.is_authenticated == False %}
+                            <li class="nav__item js-login-trigger" onclick="login.open()"><button class="nav__link" type="button">Login</button></li>
+                            <li class="nav__item js-register-trigger" onclick="register.open()"><button class="nav__link" type="button">Register</button></li>
+                            {% endif %}
+                            <li class="nav__item js-support-trigger" onclick="support.open()"><button class="nav__link" type="button">Support</button></li>
+                            <li class="nav__item"><button class="scroll-btn" data-toggle="scrollBtn"></button></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <div class="header__links">
+                <div class="header__extra-links"><a class="header__extra-link" href="/buy">I’m a buyer </a><a class="header__extra-link" href="/sell-details">I’m a seller</a><a class="header__extra-link" href="/blog">Blog</a></div><a class="header__link header__link--trade" href="/new-offer">Create new offer</a><a class="header__link header__link--refer" href="/refer">Refer a friend</a>
+            </div>
+        </div>
+    </header>
+    <section class="banner banner--bare">
+        <div class="page__container banner__container">
+            <h1 class="banner__heading">The ultimate guidebook for your succes</h1>
+            <p class="banner__subheading">Read our blog</p>
+        </div>
+    </section>
+    <div class="page__container archive">
+        <div class="js-articles-container"></div><button class="archive__load-more btn btn--light js-load-articles-button" type="button" onclick="archive.loadArticles()">I want to load more!</button>
+    </div>
+    <!--Article template-->
+    <div class="js-article-template" hidden>
+        <article class="archive__item">
+            <div class="archive__img-wrapper"><img class="archive__img" src="/images/bitcoin_wp.jpg" alt=""></div>
+            <h2 class="archive__heading"><a class="archive__link" href="#"> </a></h2><time class="archive__pub-data" datetime="2019-05-01 00:00">Test</time>
+            <p class="archive__excerpt"></p><a class="archive__read-more" href="#">READ MORE</a>
+        </article>
+    </div>
+    <div>
+        {% if user.is_authenticated == False %}
+        {% include "blocks/dropdowns/register.html" %}
+        {% include "blocks/dropdowns/login.html" %}
+        {% include "blocks/dropdowns/forgot-pw.html" %}
+        {% else %}
+        {% include "blocks/popups/email-activation.html" %}
+        {% include "blocks/popups/confirmation.html" %}
+        {% endif %}
+        <aside class="page__dropdown dropdown dropdown--user-menu js-user-menu-target">
+            <div class="dropdown__inner">
+                <header class="dropdown__header"><button class="dropdown__close" onclick="userMenu.close()" type="button"></button></header>
+                <ul class="dropdown__list">
+                    <li class="dropdown__mobile-list">
+                        <ul>
+                            <li class="dropdown__menu-item"><a class="dropdown__link" href="/index">Home</a></li>
+                            <li class="dropdown__menu-item"><a class="dropdown__link" href="/buy">I’m a Buyer</a></li>
+                            <li class="dropdown__menu-item"><a class="dropdown__link" href="/sell-details">I’m a Seller</a></li>
+                            <li class="dropdown__menu-item"><a class="dropdown__link" href="/blog">Our Blog</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown__menu-item"><a class="dropdown__link" href="/overview">Dashboard</a></li>
+                    <li class="dropdown__menu-item"><a class="dropdown__link" href="#">All Offers</a></li>
+                    <li class="dropdown__menu-item"><span class="dropdown__counter">3</span><a class="dropdown__link" href="/offers">Received Offers</a></li>
+                    <li class="dropdown__menu-item"><a class="dropdown__link" href="#">Transactions</a></li>
+                    <li class="dropdown__menu-item"><span class="dropdown__counter">2</span><a class="dropdown__link" href="/messages">Messages</a></li>
+                    <li class="dropdown__menu-item"><a class="dropdown__link" href="/fund">Funding</a></li>
+                    <li class="dropdown__menu-item"><a class="dropdown__link" href="#">Trade History</a></li>
+                    <li class="dropdown__menu-item"><a class="dropdown__link" href="/affiliates">Affiliates</a></li>
+                    <li class="dropdown__menu-item"><a class="dropdown__link" href="/index">Logout</a></li>
+                </ul>
+            </div>
+        </aside>
+        <aside class="page__dropdown dropdown support-dropdown js-support-target">
+            <div class="dropdown__inner support-dropdown__inner">
+                <header class="dropdown__header">
+                    <h3 class="dropdown__heading">Support</h3><button class="dropdown__close" onclick="support.close()" type="button"></button>
+                </header>
+                <div class="support-dropdown__dispute">
+                    <p class="support-dropdown__desc">Complex question? Dispute? Submit a ticket instead by using our support system.</p><a class="support-dropdown__link btn" href="/support-center">SUPPORT CENTER</a>
+                </div>
+                <div class="support-dropdown__messages">
+                    <div class="support-dropdown__message support-dropdown__message--incoming">
+                        <h3 class="support-dropdown__message-heading">AmeriBTC Support</h3>
+                        <p class="support-dropdown__message-text">Suspendisse ac risus et erat hendrerit gravida ac et lorem. Suspendisse tincidunt in turpis eget mollis. Ut suscipit urna in mi lobortis, vitae lacinia lectus dignissim. S</p>
+                    </div>
+                    <div class="support-dropdown__message support-dropdown__message--outgoing">
+                        <h3 class="support-dropdown__message-heading">George Gonzalez</h3>
+                        <p class="support-dropdown__message-text">Suspendisse ac risus et erat hendrerit gravida ac et lorem. Suspendisse tincidunt in turpis eget mollis. Ut suscipit urna in mi lobortis, vitae lacinia lectus dignissim. S</p>
+                    </div>
+                    <div class="support-dropdown__message support-dropdown__message--incoming">
+                        <h3 class="support-dropdown__message-heading">AmeriBTC Support</h3>
+                        <p class="support-dropdown__message-text">Suspendisse ac risus et erat hendrerit gravida ac et lorem. Suspendisse tincidunt in turpis eget mollis. Ut suscipit urna in mi lobortis, vitae lacinia lectus dignissim. S</p>
+                    </div>
+                    <div class="support-dropdown__message support-dropdown__message--outgoing">
+                        <h3 class="support-dropdown__message-heading">George Gonzalez</h3>
+                        <p class="support-dropdown__message-text">Suspendisse ac risus et erat hendrerit gravida ac et lorem. Suspendisse tincidunt in turpis eget mollis. Ut suscipit urna in mi lobortis, vitae lacinia lectus dignissim. S</p>
+                    </div>
+                </div><textarea class="support-dropdown__textarea" rows="1" placeholder="Type your message here"></textarea><button class="support-dropdown__send btn btn--light" type="submit">SEND MESSAGE </button>
+            </div>
+        </aside>
+    </div>
+    <footer class="footer">
+        <div class="page__container footer__container">
+            <nav class="footer__navigation"><a class="footer__logo-wrapper" href="#"><img class="footer__logo" src="/images/logos/logo-white.png" alt=""></a>
+                <div class="footer__columns">
+                    <div class="footer__column">
+                        <h4 class="footer__heading">About </h4>
+                        <ul class="footer__list">
+                            <li class="footer__item"><a class="footer__link" href="/support">Support</a></li>
+                            <li class="footer__item"><a class="footer__link" href="#">About us</a></li>
+                            <li class="footer__item"><a class="footer__link" href="/blog">Blog</a></li>
+                            <li class="footer__item"><a class="footer__link" href="#">Fees</a></li>
+                            <li class="footer__item"><a class="footer__link" href="#">Privacy Policy</a></li>
+                            <li class="footer__item"><a class="footer__link" href="/faq">FAQ</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer__column">
+                        <h4 class="footer__heading">Useful</h4>
+                        <ul class="footer__list">
+                            <li class="footer__item"><a class="footer__link" href="/contact">Contact Us</a></li>
+                            <li class="footer__item"><a class="footer__link" href="#">API documentation</a></li>
+                            <li class="footer__item"><a class="footer__link" href="#">Ameribtc ATM</a></li>
+                            <li class="footer__item"><a class="footer__link" href="/affiliates">Affiliate</a></li>
+                            <li class="footer__item"><a class="footer__link" href="#">Block Explorer</a></li>
+                            <li class="footer__item"><a class="footer__link" href="#">Marketing</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <div class="footer__bottom">
+                <div class="footer__trademarks">
+                    <div class="footer__trademarks-inner">
+                        <p class="footer__text">Ameribtc has no relation to MoneyGram, Western Union, Payoneer, Paxum, Paypal, Amazon, OkPay, Payza, Walmart, Reloadit, Perfect Money, WebMoney, Google Wallet, BlueBird, Serve, Square Cash, NetSpend, Chase QuickPay, Skrill, Vanilla, MyVanilla, OneVanilla, Neteller, Venmo, Apple, ChimpChange or any other payment method. We make no claims about being supported by or supporting these services. Their respective wordmarks and trademarks belong to them alone.</p>
+                    </div>
+                </div>
+                <p class="footer__copyright">Copyright © 2019 All Rights Reserved by Ameribtc.com</p>
+                <ul class="social">
+                    <li class="social__item"><a class="social__link" href="#"></a></li>
+                    <li class="social__item"><a class="social__link" href="#"></a></li>
+                    <li class="social__item"><a class="social__link" href="#"></a></li>
+                    <li class="social__item"><a class="social__link" href="#"></a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script src="/js/global.min.js"></script>{% if user.is_authenticated and user.is_confirmed == False %}<script>
+        document.addEventListener("DOMContentLoaded", () => emailActivation.open());
+    </script> {% endif %}<script>
+        var archive = new Archive();
+        archive.loadArticles();
+    </script>
+    {% if registration_form %}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => register.open());
+    </script>
+    {% endif %}
+    {% if login_errors %}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => login.open());
+    </script>
+    {% endif %}
+</body>
+
+</html>

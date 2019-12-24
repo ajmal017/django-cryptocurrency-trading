@@ -1,0 +1,11 @@
+<aside class="page__dropdown dropdown dropdown--register js-register-target">
+    <div class="dropdown__inner">
+        <header class="dropdown__header">
+            <h3 class="dropdown__heading">Register</h3><button class="dropdown__close" onclick="register.close()" type="button"></button>
+        </header>
+        <form id="register_form" action="/accounts/register" method="post">{{ registration_form.non_field_errors }}
+            {% csrf_token %}<input class="dropdown__field" name="email" type="email" placeholder="Email Address" />{{ registration_form.email.errors }}<input class="dropdown__field" name="full_name" type="text" placeholder="Full Name" />{{ registration_form.full_name.errors }}<input class="dropdown__field" name="password1" type="password" placeholder="Password" />{{ registration_form.password1.errors }}<input class="dropdown__field" name="password2" type="password" placeholder="Password again" />{{ registration_form.password2.errors }}
+            {{ registration_form.errors }}</form>
+        <footer class="dropdown__buttons"><button class="dropdown__btn dropdown__btn--sell btn" id="sell_registration" type="submit" name="registration_reason" value="SELL" form="register_form">I want to sell</button><button class="dropdown__btn btn btn--light" id="buy_registration" type="submit" name="registration_reason" value="BUY" form="register_form">I want to buy</button><button class="dropdown__text-btn js-login-trigger" onclick="switchToLogin()" type="button">I already have an account</button></footer>
+    </div>
+</aside>

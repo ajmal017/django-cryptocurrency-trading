@@ -1,0 +1,13 @@
+<div class="dashboard__user">
+    <div class="dashboard__picture">{% if profile_photo %}<img src="{{ MEDIA_URL }}/{{ profile_photo }}" />{% endif %}</div>
+    <h2 class="dashboard__name">{{ user.full_name }}</h2>
+    <p class="dashboard__user-data"><span class="dashboard__data-text">1.554 BTC in Wallet</span><span class="dashboard__data-text">You can send up to 1.200 BTC</span></p>
+    <ul class="dashboard__data-list">
+        <li class="dashboard__data-item"><span class="dashboard__caption">Trade Partners</span><span class="dashboard__value">{{ user.trade_partners }}</span></li>
+        <li class="dashboard__data-item"><span class="dashboard__caption">Trades</span><span class="dashboard__value">{{ trades_count }}</span></li>
+        <li class="dashboard__data-item"><span class="dashboard__caption">Trades Volume</span><span class="dashboard__value">4.554 Coins</span></li>
+        <li class="dashboard__data-item"><span class="dashboard__caption">Trusted by</span><span class="dashboard__value">{{ trusted_by }} People</span></li>
+        <li class="dashboard__data-item"><span class="dashboard__caption">Blocked by</span><span class="dashboard__value">{{ blocked_by }} People</span></li>
+        <li class="dashboard__data-item"><span class="dashboard__caption">Joined</span><span class="dashboard__value">{{ user.registration_date }}</span></li>
+    </ul>
+</div>
