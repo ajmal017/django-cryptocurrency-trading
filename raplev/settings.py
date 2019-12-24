@@ -27,12 +27,13 @@ SECRET_KEY = '-ftl$49mojhozrjk)ue7$1uq!-td)hn+qvrrp(6nod7#d**q*u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['unstable-v.raplev.com']
+ALLOWED_HOSTS = ['unstable-v.raplev.com', 'localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'cadmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -74,7 +75,8 @@ TEMPLATES = [
                'django.contrib.auth.context_processors.auth',
                'django.contrib.messages.context_processors.messages',
                'django.template.context_processors.media',
-               'commento_sso.context_processors.commento_host'
+               'commento_sso.context_processors.commento_host',
+               'cadmin.context_processors.cadmin_user'
            ],
        },
    },
