@@ -139,7 +139,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/opt/raplev-v/static'
+STATIC_ROOT = '/opt/v-raplev/static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/www/media'
@@ -153,7 +153,7 @@ EMAIL_CONFIRMATION_PERIOD_DAYS = 3
 SIMPLE_EMAIL_CONFIRMATION_PERIOD = timedelta(days=EMAIL_CONFIRMATION_PERIOD_DAYS)
 SIMPLE_EMAIL_CONFIRMATION_KEY_LENGTH = 16
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = '/opt/raplev-v/test_emails.txt'
+EMAIL_FILE_PATH = '/opt/v-raplev/test_emails.txt'
 
 TAGGIT_CASE_INSENSITIVE = True
 
