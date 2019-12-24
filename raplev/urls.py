@@ -21,6 +21,7 @@ from commento_sso.views import SingleSignOnView
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('cadmin/', include('cadmin.urls')),
     path('admin/', admin.site.urls),
     path('', wallet_views.IndexView.as_view()),
     path('affiliates', wallet_views.AffiliatesView.as_view()),

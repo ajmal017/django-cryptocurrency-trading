@@ -1,0 +1,384 @@
+{% extends 'cadmin/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<div class="page__container js-nav-target-primary">
+    <header class="page__header header">
+        <div class="header__container">
+            <div class="nav-toggle js-nav-toggle">
+                <div class="nav-toggle__container">
+                    <div class="nav-toggle__bar"></div>
+                    <div class="nav-toggle__bar"></div>
+                    <div class="nav-toggle__bar"></div>
+                </div>
+            </div><button class="header__messages" type="button"><svg class="header__icon" width="30">
+                    <use xlink:href="{% static 'cadmin/images/icons.svg#comment-dots' %}"></use>
+                </svg></button><button class="header__bell" type="button"><svg class="header__icon" width="30">
+                    <use xlink:href="{% static 'cadmin/images/icons.svg#bell' %}"></use>
+                </svg></button>
+            <div class="user-menu">
+                <div class="user-menu__main">
+                    <div class="user-menu__text"><span class="user-menu__greeting">Welcome back, </span><span class="user-menu__name">{{ cadmin_user.fullname }}</span></div>
+                    <div class="user-menu__pic" onclick="user_dropdown.classList.toggle('is-active')">
+                        <div class="user-menu__default-icon"><svg class="user-menu__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#user' %}"></use>
+                            </svg></div><img class="user-menu__img" src="{% static 'cadmin/images/draft/user.jpg' %}" alt="User">
+                    </div>
+                </div>
+                <div class="user-menu__dropdown" id="user_dropdown">
+                    <div class="user-menu__dropdown-top">
+                        <div class="user-menu__pic">
+                            <div class="user-menu__default-icon"><svg class="user-menu__icon" width="30">
+                                    <use xlink:href="{% static 'cadmin/images/icons.svg#user' %}"></use>
+                                </svg></div><img class="user-menu__img" src="{% static 'cadmin/images/draft/user.jpg' %}" alt="User">
+                        </div>
+                        <div class="user-menu__dropdown-control">
+                            <p class="user-menu__name">{{ cadmin_user.fullname }}</p>
+                            <p class="user-menu__dropdown-control-options"><a href="/cadmin/profile">Edit profile </a><span>| </span><a href="/cadmin/profile#change_password">Change PW</a></p>
+                        </div>
+                    </div>
+                    <ul class="user-menu__dropdown-bottom">
+                        <li class="user-menu__dropdown-item"><svg class="user-menu__dropdown-item-icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#user' %}"></use>
+                            </svg><a href="/cadmin/profile">View profile</a></li>
+                        <li class="user-menu__dropdown-item"><svg class="user-menu__dropdown-item-icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#sign-out-alt' %}"></use>
+                            </svg>
+                            {% if user.is_superuser %}
+                            <a href="/admin/logout">Log out</a></li>
+                            {% else %}
+                            <a href="/cadmin/logout">Log out</a></li>
+                            {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% block page-inner %}{% endblock %}
+</div>
+<nav class="page__nav nav js-nav-target-secondary">
+    <header class="nav__header"><a class="nav__logo" href="index"><img class="nav__logo-img" src="{% static 'cadmin/images/raplev-logo.png' %}" alt="Raplev logo"></a></header>
+    <div class="nav__container">
+        <div class="nav__group">
+            <h3 class="nav__heading"><a href="/cadmin/revenue">REVENUE</a></h3>
+            <ul>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#chart-line' ' %}"></use>
+                        </svg><a href="/cadmin/rev-stats">Status & Chart</a></div>
+                </li>
+            </ul>
+        </div>
+        <div class="nav__group">
+            <ul>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#percent' %}"></use>
+                        </svg><a href="/cadmin/offers">Offers</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#user' %}"></use>
+                        </svg><a href="/cadmin/customers">Customers</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#coins' %}"></use>
+                        </svg><a href="/cadmin/trades">Trades</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#file-invoice' %}"></use>
+                        </svg><a href="/cadmin/transactions">Transactions</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#hand-holding-usd' %}"></use>
+                        </svg><a href="/cadmin/escrows">Escrows</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#headset' %}"></use>
+                        </svg><a href="/cadmin/support-center">Support Center</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#id-badge' %}"></use>
+                        </svg><a href="/cadmin/id-verify-app">ID Verify App</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#envelope-open-text' %}"></use>
+                        </svg><a href="/cadmin/contact-form">Contact form</a></div>
+                </li><!-- Placeholder menu-->
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#sitemap' %}"></use>
+                        </svg><a href="/cadmin/additional-pages">Additional Pages</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-pages-list"><span class="nav__triangle"></span></button></div>
+                    <ul class="nav__nested-list js-nav-pages-list">
+                        <li class="nav__item"> <a href="/cadmin/#">Page 1</a></li>
+                        <li class="nav__item"> <a href="/cadmin/#">Page 2</a></li>
+                        <li class="nav__item"> <a href="/cadmin/#">Page 3</a></li>
+                        <li class="nav__item"> <a href="/cadmin/#">Page 4</a></li>
+                        <li class="nav__item"> <a href="/cadmin/#">Page 5</a></li>
+                    </ul>
+                </li><!-- Placeholder menu-->
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#align-left' %}"></use>
+                        </svg><a href="/cadmin/blog">Blog</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-blog-list"><span class="nav__toggle-icon"></span></button></div>
+                    <ul class="nav__nested-list js-nav-blog-list">
+                        <li class="nav__item"> <a href="/cadmin/#">Add new</a></li>
+                        <li class="nav__item"> <a href="/cadmin/#">Tags</a></li>
+                    </ul>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#play-circle' %}"></use>
+                        </svg><a href="/cadmin/media-library">Media Files</a></div>
+                </li><!-- Placeholder menu-->
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#plane-arrival' %}"></use>
+                        </svg><a href="/cadmin/#">Landing Pages</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-landings-list"><span class="nav__toggle-icon"></span></button></div>
+                    <ul class="nav__nested-list js-nav-landings-list">
+                        <li class="nav__item"> <a href="/cadmin/#">Page 1</a></li>
+                        <li class="nav__item"> <a href="/cadmin/#">Page 2</a></li>
+                        <li class="nav__item"> <a href="/cadmin/#">Page 3</a></li>
+                    </ul>
+                </li><!-- Placeholder menu-->
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#users' %}"></use>
+                        </svg><a href="/cadmin/users">Users</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-user-list"><span class="nav__toggle-icon"></span></button></div>
+                    <ul class="nav__nested-list js-nav-user-list">
+                        <li class="nav__item"> <a href="/cadmin/add-user">Add User</a></li>
+                        <li class="nav__item"> <a href="/cadmin/#">User 2</a></li>
+                    </ul>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#searchengin' %}"></use>
+                        </svg><a href="/cadmin/seo">SEO</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#lock' %}"></use>
+                        </svg><a href="/cadmin/security-status">Security status</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#cogs' %}"></use>
+                        </svg><a href="/cadmin/options">Options</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#book' %}"></use>
+                        </svg><a href="/cadmin/documentations">Documentations</a></div>
+                </li>
+            </ul>
+        </div>
+        <div class="nav__group">
+            <h3 class="nav__heading">COMMUNITY</h3>
+            <ul>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#copy' %}"></use>
+                        </svg><a href="/cadmin/community-posts">All Posts</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#font-awesome-flag' %}"></use>
+                        </svg><a href="/cadmin/flagged-content">Flagged Content</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#cogs' %}"></use>
+                        </svg><a href="/cadmin/#">Options</a></div>
+                </li>
+            </ul>
+        </div>
+        <div class="nav__group">
+            <h3 class="nav__heading">AFFILIATES</h3>
+            <ul>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#chess' %}"></use>
+                        </svg><a href="/cadmin/#">Campaigns</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#flag' %}"></use>
+                        </svg><a href="/cadmin/#">Report</a></div>
+                </li>
+                <li class="nav__item">
+                    <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg#comment-dots' %}"></use>
+                        </svg><a href="/cadmin/#">Messages</a></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<aside class="modal popup popup--medium js-customer-popup-target"><button class="modal__close-outer" type="button" onclick="customerPopup.close()"></button>
+    <form class="popup__container modal__container" action="#"><button class="popup__close-inner" type="button" onclick="customerPopup.close()"><svg class="popup__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg#times' ' %}"></use>
+            </svg></button>
+        <h1 class="popup__heading">If customer thomas.cooper need to be suspended, please type SUSPEND in the field below.</h1>
+        <div class="form-group">
+            <div class="form-group__field-group"><input class="form-group__field" name="unfilled" type="text" pattern="SUSPEND" required></div>
+        </div>
+        <div class="popup__buttons"><button class="btn btn--red" type="submit">Confirm</button></div><strong class="popup__warning">Be careful to not suspend a user by accident</strong>
+    </form>
+</aside>
+<aside class="modal popup popup--small js-escrow-cancel-popup-target"><button class="modal__close-outer" type="button" onclick="escrowCancelPopup.close()"></button>
+    <form class="popup__container modal__container" action="#"><button class="popup__close-inner" type="button" onclick="escrowCancelPopup.close()"><svg class="popup__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg#times' ' %}"></use>
+            </svg></button>
+        <h1 class="popup__heading">Are you sure you want to cancel this escrow?</h1>
+        <div class="popup__buttons">
+            <div class="popup__buttons-top"><button class="popup__true-btn" type="submit">YES</button><button class="popup__false-btn" type="submit">NO</button></div><button class="btn btn--red" type="submit">Confirm</button>
+        </div>
+    </form>
+</aside>
+<aside class="modal popup popup--small js-escrow-release-popup-target"><button class="modal__close-outer" type="button" onclick="escrowReleasePopup.close()"></button>
+    <form class="popup__container modal__container" action="#"><button class="popup__close-inner" type="button" onclick="escrowReleasePopup.close()"><svg class="popup__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg#times' ' %}"></use>
+            </svg></button>
+        <h1 class="popup__heading">Are you sure you want to escrow this amount?</h1>
+        <div class="popup__buttons">
+            <div class="popup__buttons-top"><button class="popup__true-btn" type="submit">YES</button><button class="popup__false-btn" type="submit">NO</button></div><button class="btn btn--red" type="submit">Confirm</button>
+        </div>
+    </form>
+</aside>
+<aside class="modal file-details js-file-details-popup-target"><button class="modal__close-outer" type="button" onclick="fileDetailsPopup.close()"></button>
+    <div class="modal__container file-details__container"><button class="file-details__close-inner" type="button" onclick="fileDetailsPopup.close()"><svg class="file-details__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg#times' ' %}"></use>
+            </svg></button>
+        <div class="file-details">
+            <div class="file-details__wrapper"><img class="file-details__image" src="{% static 'cadmin/images/draft/plane.jpg' %}" alt=""></div>
+            <div class="file-details__wrapper">
+                <h3 class="file-details__url-heading">File URL</h3>
+                <div class="file-details__url-field form-group">
+                    <div class="form-group__field-group"><input class="form-group__field" name="unfilled" placeholder="https://raplev.com/uploads/medialibrary/jetprobe.jpg' %}"></div>
+                </div>
+                <h3 class="file-details__size-heading">Size</h3>
+                <p class="file-details__size-value">1280x720px</p><button class="file-details__delete-btn btn btn--red" type="button">Delete file</button>
+            </div>
+        </div>
+    </div>
+</aside>
+<aside class="modal popup popup--small js-id-verify-app-popup-target"><button class="modal__close-outer" type="button" onclick="IDVerifyAppPopup.close()"></button>
+    <form class="popup__container modal__container" action="#"><button class="popup__close-inner" type="button" onclick="IDVerifyAppPopup.close()"><svg class="popup__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg#times' ' %}"></use>
+            </svg></button>
+        <h1 class="popup__heading">Do you want to reject this ID?</h1>
+        <div class="popup__buttons">
+            <div class="popup__buttons-top"><button class="popup__true-btn" type="submit">YES</button><button class="popup__false-btn" type="submit">NO</button></div><button class="btn btn--red" type="submit">Confirm</button>
+        </div>
+    </form>
+</aside>
+<aside class="modal upload-popup js-upload-popup-target"><button class="modal__close-outer" type="button" onclick="uploadPopup.close()"></button>
+    <div class="modal__container upload-popup__container"><button class="upload-popup__close-inner" type="button" onclick="uploadPopup.close()"><svg class="upload-popup__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg#times' ' %}"></use>
+            </svg></button>
+        <div class="js-tablist-toggle">
+            <div class="upload-popup__buttons js-tablist-triggers"><button class="upload-popup__button" type="button">Upload file(s)</button><button class="upload-popup__button is-active" type="button">Select file(s)</button></div>
+            <div class="upload-popup__tabs js-tablist-tabs">
+                <ul class="upload-popup__tab">
+                    <div class="upload-popup__drag-n-drop drag-n-drop">
+                        <div class="drag-n-drop__container">
+                            <h2 class="drag-n-drop__heading">Drag and drop files anywhere to upload</h2>
+                            <p class="drag-n-drop__subheading">or</p><label class="btn btn--accent btn--large">Select files<input type="file" hidden></label>
+                        </div>
+                        <div class="drag-n-drop__uploading-file upload-bar"><span class="upload-bar__file-name">375_carddetails.jpg</span>
+                            <div class="upload-bar__bar">
+                                <div class="upload-bar__background"></div>
+                                <div class="upload-bar__progress"></div><button class="upload-bar__close-btn" type="button" onclick="this.parentElement.parentElement.remove()"><svg class="upload-bar__close-icon" width="30">
+                                        <use xlink:href="{% static 'cadmin/images/icons.svg#times' ' %}"></use>
+                                    </svg></button>
+                            </div>
+                        </div>
+                        <div class="drag-n-drop__uploading-file upload-bar"><span class="upload-bar__file-name">a77.pdf</span>
+                            <div class="upload-bar__bar">
+                                <div class="upload-bar__background"></div>
+                                <div class="upload-bar__progress"></div><button class="upload-bar__close-btn" type="button" onclick="this.parentElement.parentElement.remove()"><svg class="upload-bar__close-icon" width="30">
+                                        <use xlink:href="{% static 'cadmin/images/icons.svg#times' ' %}"></use>
+                                    </svg></button>
+                            </div>
+                        </div>
+                    </div>
+                </ul>
+                <ul class="upload-popup__tab upload-popup__tab--has-scroll is-active">
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div><span class="file__caption">MOV</span>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div><span class="file__caption">PDF</span>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                    <li class="file js-file-toggle upload-popup__file">
+                        <div class="file__circle"><svg class="file__icon" width="30">
+                                <use xlink:href="{% static 'cadmin/images/icons.svg#check' %}"></use>
+                            </svg></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</aside>
+{% endblock %}
