@@ -8,12 +8,12 @@
 
 {% block content %}
 <main class="dialog__container"><a class="dialog__logo" href="/cadmin"><img class="dialog__logo-img" src="{% static 'cadmin/images/raplev-logo-alt.png' %}" alt="Raplev logo"></a>
-    <div class="dialog__inner"><span class="dialog__notification has-important-theme">Invalid Login details</span>
+    <div class="dialog__inner">
+        {% if error %}
+        <span class="dialog__notification has-important-theme">{{ error }}</span>
+        {% endif %}
         <form class="dialog__wrapper" action="" method="POST">
             {% csrf_token %}
-            {% if error %}
-            <h5>{{ error }}</h5>
-            {% endif %}
             <div class="dialog__field form-group">
                 <div class="form-group__field-group"><input class="form-group__field" name="email" placeholder="Email or Username" required></div>
             </div>

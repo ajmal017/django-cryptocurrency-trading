@@ -12,6 +12,16 @@
             <header class="section__header">
                 <h1 class="section__heading">Add new user</h1>
             </header>
+            {% if success %}
+            <aside class="alert alert--success"><span>{{ success }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
+            </svg></button></aside>
+            {% endif %}
+            {% if error %}
+            <aside class="alert alert--warning"><span>{{ error }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
+            </svg></button></aside>
+            {% endif %}
             <div class="section__inner">
                 <div class="section__field form-group">
                     <div class="form-group__field-group">
@@ -26,9 +36,6 @@
                 <div class="section__field form-group">
                     <div class="form-group__field-group">
                         <input class="form-group__field" name="email" type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Email address" required>
-                        {% if error %}
-                        <p>{{ error }}</p>
-                        {% endif %}
                     </div>
                 </div>
                 <div class="section__field form-group">
@@ -51,7 +58,7 @@
                     <div class="form-group__field-group">
                         <button class="pw-generator__visibility" type="button">
                             <svg class="pw-generator__visibility-icon" width="30">
-                                <use xlink:href="{% static 'cadmin/images/icons.svg#eye' %}"></use>
+                                <use xlink:href="{% static 'cadmin/images/icons.svg' %}#eye"></use>
                             </svg>
                         </button>
                         <button class="pw-generator__generate" type="button">
