@@ -16,12 +16,13 @@
 
   {% if form.non_field_errors %}
   {% for error in form.non_field_errors %}
-  <p class="errornote">
-      {{ error }}
-  </p>
+  <span class="dialog__notification has-important-theme">
+    {{ error }}
+  </span>
   {% endfor %}
   {% endif %}
-  <div class="dialog__inner"><span class="dialog__notification has-important-theme">Invalid Login details</span>
+  <div class="dialog__inner">
+    
     {% if user.is_authenticated %}
     <p class="errornote">
     {% blocktrans trimmed %}

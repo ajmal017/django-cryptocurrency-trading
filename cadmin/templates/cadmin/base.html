@@ -24,6 +24,23 @@
     </head>
 
     <body class="page {% block body %}{% endblock %}">
+        <section class="alert-wrapper" style="position: fixed; top: 50px; right: 50px;">
+            {% if 'success' in global_alert %}
+            <aside class="alert alert--success"><span>{{ global_alert.success }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
+            </svg></button></aside>
+            {% endif %}
+            {% if 'neutral' in global_alert %}
+            <aside class="alert alert--neutral"><span>{{ global_alert.neutral }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
+            </svg></button></aside>
+            {% endif %}
+            {% if 'warning' in global_alert %}
+            <aside class="alert alert--warning"><span>{{ global_alert.warning }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
+                <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
+            </svg></button></aside>
+            {% endif %}
+        </section>
         <main>
             {% block content %}
             {% endblock %}

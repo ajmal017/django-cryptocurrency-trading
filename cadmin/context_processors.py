@@ -15,4 +15,8 @@ def cadmin_user(request):
     except:
         cadmin_user = None
 
-    return { 'cadmin_user': cadmin_user, }
+    global_alert = []
+    if 'global_alert' in request.session:
+        global_alert = request.session['global_alert']
+
+    return { 'cadmin_user': cadmin_user, 'global_alert': global_alert}
