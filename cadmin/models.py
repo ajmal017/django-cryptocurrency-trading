@@ -94,6 +94,17 @@ PENDING_TYPES = (
     (False, 'Pending'),
 )
 
+ACCEPTIVE_TYPES = (
+    (True, 'Accepted'),
+    (False, 'Rejected'),
+)
+
+PAGESTATUS_TYPES = (
+    ('Published', 'Published'),
+    ('Draft', 'Draft'),
+    ('Trash', 'Trash'),
+)
+
 
 class MyModelBase( models.base.ModelBase ):
     def __new__( cls, name, bases, attrs, **kwargs ):
@@ -196,3 +207,58 @@ class Escrows(MyModel):
     held_from = models.CharField(max_length=255)
     status = models.BooleanField(choices=PENDING_TYPES)
     amount = models.FloatField()
+
+
+class Tickets(MyModel):
+    transaction = models.ForeignKey(Transactions, on_delete=models.PROTECT)
+    topic = models.CharField(max_length=255)
+    is_dispute = models.BooleanField(choices=BOOLEAN_TYPES)
+    ticket_manager = models.CharField(max_length=255)
+    ticket_priority = models.CharField(max_length=10)
+
+
+class Messages(MyModel):
+    ticket = models.ForeignKey(Tickets, on_delete=models.PROTECT)
+    writer = models.CharField(max_length=255)
+    content = models.TextField()
+    # attach_file = models.CharField(max_length=255)
+    created_at = models.DateTimeField()
+
+
+class Idcards(MyModel):
+    user = models.ForeignKey(Users, on_delete=models.PROTECT)
+    document_type = models.CharField(max_length=100)
+    document_file = models.CharField(max_length=255)
+    status = models.BooleanField(choices=ACCEPTIVE_TYPES)
+
+
+class Contacts(MyModel):
+    email_address = models.CharField(max_length=255)
+    subject = models.TextField()
+    content = models.TextField()
+    ip_address = models.CharField(max_length=100)
+    readed = models.BooleanField(default=False, choices=BOOLEAN_TYPES)
+
+
+class Pages(MyModel):
+    title = models.CharField(max_length=255)
+    posted_by = models.CharField(max_length=255)
+    status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
+    context = models.TextField()
+    updated_on = models.DateTimeField()
+    created_at = models.DateTimeField()
+
+
+class Posts(MyModel):
+    title = models.CharField(max_length=255)
+    posted_by = models.CharField(max_length=255)
+    status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
+    context = models.TextField()
+    tags = models.TextField()
+    featured_images = models.TextField()
+    disallow_comments = models.BooleanField(choices=BOOLEAN_TYPES)
+    updated_on = models.DateTimeField()
+    created_at = models.DateTimeField()
+
+
+# ----------------- From here for dw920  ----------------

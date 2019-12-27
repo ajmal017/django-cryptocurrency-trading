@@ -24,6 +24,7 @@ from django.core.mail import send_mail
 
 from . import models
 from .decorators import cadmin_user_login_required, cadmin_user_is_logged_in
+from .context_processors import cadmin_user
 
 logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
@@ -42,7 +43,7 @@ class LoginView(View):
         try:
             user = models.Users.objects.get(Q(username=email_or_username) | Q(email=email_or_username))
             if user and check_password(password, user.password):
-                token = user.token if user.token is not None else get_random_string(length=100)
+                token = user.token if user.token else get_random_string(length=100)
                 user.token = token
                 user.save()
                 request.session['cadmin_user'] = token
@@ -357,7 +358,6 @@ class EscrowDetailsView(View):
         return render(request, 'cadmin/escrow-details.html', {'item': item, })
 
 
-
 @method_decorator(cadmin_user_login_required, name='dispatch')
 class EscrowRelease(View):
 
@@ -378,3 +378,257 @@ class EscrowCancel(View):
         item.status = False
         item.save()
         return render(request, 'cadmin/escrow-details.html', {'item': item, })
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class SupportCenterView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        items = models.Tickets.objects.filter(id__icontains=search)
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/support-center/?search=' + search + "&"
+        return render(request, 'cadmin/support-center.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class TicketDetailsDisputeView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Tickets.objects.get(id=item_id)
+        messages = models.Messages.objects.filter(ticket=item_id).order_by('-created_at')
+        return render(request, 'cadmin/ticket-details-dispute.html', {'item': item, 'messages': messages})
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        content = request.POST.get('content', '').strip()
+        # attach_file = request.POST.attach_file
+        item = models.Tickets.objects.get(id=item_id)
+        mes = models.Messages()
+        mes.ticket = item
+        mes.writer = cadmin_user(request)['cadmin_user'].username
+        mes.content = content
+        # mes.attach_file = attach_file
+        mes.created_at = datetime.now()
+        mes.save()
+        messages = models.Messages.objects.filter(ticket=item_id).order_by('-created_at')
+        return render(request, 'cadmin/ticket-details-dispute.html', {'item': item, 'messages': messages})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class TicketDetailsNoDisputeView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Tickets.objects.get(id=item_id)
+        messages = models.Messages.objects.filter(ticket=item_id).order_by('-created_at')
+        return render(request, 'cadmin/ticket-details-no-dispute.html', {'item': item, 'messages': messages})
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        content = request.POST.get('content', '').strip()
+        # attach_file = request.POST.attach_file
+        item = models.Tickets.objects.get(id=item_id)
+        mes = models.Messages()
+        mes.ticket = item
+        mes.writer = cadmin_user(request)['cadmin_user'].username
+        mes.content = content
+        # mes.attach_file = attach_file
+        mes.created_at = datetime.now()
+        mes.save()
+        messages = models.Messages.objects.filter(ticket=item_id).order_by('-created_at')
+        return render(request, 'cadmin/ticket-details-no-dispute.html', {'item': item, 'messages': messages})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class IdVerifyAppView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        items = models.Idcards.objects.filter(id__icontains=search)
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/id-verify-app/?search=' + search + "&"
+        return render(request, 'cadmin/id-verify-app.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class IdVerifyAppDetailsView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Idcards.objects.get(id=item_id)
+        return render(request, 'cadmin/id-verify-app-details.html', {'item': item, })
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class IdVerifyAppReject(View):
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        item = models.Idcards.objects.get(id=item_id)
+        item.status = False
+        item.save()
+        return render(request, 'cadmin/id-verify-app-details.html', {'item': item, })
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class IdVerifyAppAccept(View):
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        item = models.Idcards.objects.get(id=item_id)
+        item.status = True
+        item.save()
+        return render(request, 'cadmin/id-verify-app-details.html', {'item': item, })
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class ContactFormView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        items = models.Contacts.objects.filter(email_address__icontains=search)
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/contact-form/?search=' + search + "&"
+        return render(request, 'cadmin/contact-form.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class ContactFormDetailsView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Contacts.objects.get(id=item_id)
+        item.readed = True
+        item.save()
+        return render(request, 'cadmin/contact-form-details.html', {'item': item, })
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AdditionalPagesView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        search_status = request.GET.get('search_status', '').strip()
+        items = models.Pages.objects.filter(title__icontains=search, status__icontains=search_status)
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/additional-pages/?search=' + search + "&search_status=" + search_status + "&"
+        return render(request, 'cadmin/additional-pages.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'search_status': search_status})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AdditionalPagePreviewView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Pages.objects.get(id=item_id)
+        return render(request, 'cadmin/custom-page.html', {'item': item, })
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AddNewPageView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Pages()
+        try:
+            item = models.Pages.objects.get(id=item_id)
+            title = 'Edit page'
+        except:
+            title = 'Add new page'
+        return render(request, 'cadmin/add-new-page.html', {'item': item, 'title': title})
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        action = request.POST.get('action', '').strip()
+        title = request.POST.get('title', '').strip()
+        context = request.POST.get('context', '').strip()
+        try:
+            item = models.Pages.objects.get(id=item_id)
+        except:
+            item = models.Pages()
+            item.created_at = datetime.now()
+        
+        item.posted_by = cadmin_user(request)['cadmin_user'].username
+        item.status = action
+        item.title = title
+        item.context = context
+        item.updated_on = datetime.now()
+        item.save()
+        title = 'Edit page'
+        return render(request, 'cadmin/add-new-page.html', {'item': item, 'title': title})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class BlogView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        search_status = request.GET.get('search_status', '').strip()
+        items = models.Posts.objects.filter(title__icontains=search, status__icontains=search_status)
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/blog/?search=' + search + "&search_status=" + search_status + "&"
+        return render(request, 'cadmin/blog.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'search_status': search_status})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class PostPreviewView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Posts.objects.get(id=item_id)
+        return render(request, 'cadmin/custom-post.html', {'item': item, })
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AddNewPostView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Posts()
+        try:
+            item = models.Posts.objects.get(id=item_id)
+            title = 'Edit post'
+        except:
+            title = 'Add new post'
+        return render(request, 'cadmin/add-new-post.html', {'item': item, 'title': title})
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        action = request.POST.get('action', '').strip()
+        title = request.POST.get('title', '').strip()
+        context = request.POST.get('context', '').strip()
+        disallow_comments = request.POST.get('disallow_comments', False)
+        featured_images = request.POST.get('featured_images', '').strip()
+        tags = request.POST.get('tags', '').strip()
+        try:
+            item = models.Posts.objects.get(id=item_id)
+        except:
+            item = models.Posts()
+            item.created_at = datetime.now()
+        
+        item.posted_by = cadmin_user(request)['cadmin_user'].username
+        item.status = action
+        item.title = title
+        item.context = context
+        item.disallow_comments = disallow_comments
+        item.featured_images = featured_images
+        item.tags = tags
+        item.updated_on = datetime.now()
+        item.save()
+        title = 'Edit post'
+        return render(request, 'cadmin/add-new-post.html', {'item': item, 'title': title})
+
+
+# ----------------- From here for dw920  ----------------

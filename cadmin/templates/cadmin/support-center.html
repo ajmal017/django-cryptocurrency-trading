@@ -2,42 +2,48 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}Escrows{% endblock %}
+{% block title %}Support Center{% endblock %}
 
 {% block page-inner %}
 <main class="page__inner js-nav-close-trigger">
     <section class="section">
         <header class="section__header">
-            <h1 class="section__heading">Escrows</h1>
+            <div>
+                <h1 class="section__heading">Support Center</h1>
+                <nav class="section__nav page-nav"><span class="page-nav__item is-active">All (42)</span><a class="page-nav__item" href="#">General (3)</a><a class="page-nav__item" href="#">Disputes (0)</a></nav>
+            </div>
             <form class="section__search form-group search" action="" method="GET">
                 <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Customers" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
             </form>
         </header>
         <div class="section__inner">
-            <table class="section__table table">
+            <table class="section__table table table--large">
                 <thead>
                     <tr>
-                        <th>Escrow ID</th>
-                        <th>Held for</th>
-                        <th>Held from</th>
-                        <th>Amount</th>
-                        <th>Currency type</th>
-                        <th>Offer ID</th>
-                        <th>Status</th>
+                        <th>Ticket number</th>
+                        <th>Created by</th>
+                        <th>Created on</th>
+                        <th>Topic</th>
+                        <th>Is dispute?</th>
+                        <th>Ticket manager</th>
+                        <th>Ticket priority</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td><span class="table__mobile-heading">Escrow ID</span><span>{{ item.id }}</span></td>
-                        <td><span class="table__mobile-heading">Held for</span><a href="#">{{ item.held_for }}</a></td>
-                        <td><span class="table__mobile-heading">Held from</span><a href="#">{{ item.held_from }}</a></td>
-                        <td><span class="table__mobile-heading">Amount</span><span>{{ item.amount }}</span></td>
-                        <td><span class="table__mobile-heading">Currency type</span><span>{{ item.offer.what_crypto }}</span></td>
-                        <td><span class="table__mobile-heading">Offer ID</span><a href="/cadmin/offer-details?item_id={{ item.offer.id }}">{{ item.offer.id }}</a></td>
-                        <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/cadmin/escrow-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Ticket number</span><a href="#">{{ item.id }}</a></td>
+                        <td><span class="table__mobile-heading">Created by</span><a href="#">{{ item.transaction.trade_initiator }}</a></td>
+                        <td><span class="table__mobile-heading">Created on</span><span>{{ item.transaction.offer.created_at }}</span></td>
+                        <td><span class="table__mobile-heading">Topic</span><span>{{ item.topic }}</span></td>
+                        <td><span class="table__mobile-heading">Is dispute?</span><span>{{ item.get_is_dispute_display }}</span></td>
+                        <td><span class="table__mobile-heading">Ticket manager</span><a href="#">{{ item.ticket_manager }}</a></td>
+                        <td><span class="table__mobile-heading">Ticket priority</span>
+                            <div class="table__priority-{{ item.ticket_priority|lower }}">{{ item.ticket_priority }}</div>
+                        </td>
+                        <td><span class="table__mobile-heading">Actions</span>
+                            <a href="/cadmin/ticket-details-{{ item.is_dispute|yesno:'dispute,no-dispute' }}?item_id={{ item.id }}">Details</a>
                         </td>
                     </tr>
                     {% endfor %}

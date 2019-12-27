@@ -20,18 +20,18 @@
                 <div class="date-filter__inputs">
                     <div class="date-filter__field form-group">
                         <div class="form-group__field-group"><svg class="form-group__calendar" width="30">
-                                <use xlink:href="images/icons.svg' %}#calendar-alt"></use>
+                                <use xlink:href="{% static 'cadmin/images/icons.svg' %}' %}#calendar-alt"></use>
                             </svg><input class="form-group__field js-datepicker-toggle" name="start_date" placeholder="7 Nov 2019" value="{{ start_date }}" readonly required></div>
                     </div>
                     <div class="date-filter__divider">to</div>
                     <div class="date-filter__field form-group">
                         <div class="form-group__field-group"><svg class="form-group__calendar" width="30">
-                                <use xlink:href="images/icons.svg' %}#calendar-alt"></use>
+                                <use xlink:href="{% static 'cadmin/images/icons.svg' %}' %}#calendar-alt"></use>
                             </svg><input class="form-group__field js-datepicker-toggle" name="end_date" placeholder="12 Nov 2019" value="{{ end_date }}" readonly required></div>
                     </div><button class="date-filter__apply btn btn--red" type="submit">Apply filter</button>
                 </div>
                 <div class="section__search form-group search">
-                    <div class="form-group__field-group"><input class="form-group__field" name="search" value="{{ search }}" placeholder="Search in Revenue"><button class="search__btn" type="submit">Search</button></div>
+                    <div class="form-group__field-group"><input class="form-group__field" name="search" value="{{ search }}" placeholder="Search in Trades"><button class="search__btn" type="submit">Search</button></div>
                 </div>
             </form>
             <table class="section__table table table--large">
