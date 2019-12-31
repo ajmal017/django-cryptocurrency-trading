@@ -81,7 +81,7 @@ BOOLEAN_TYPES = (
 
 STATUS_TYPES = (
     (True, 'Active'),
-    (False, 'InActive'),
+    (False, 'Suspend'),
 )
 
 VERIFIED_TYPES = (
@@ -261,4 +261,103 @@ class Posts(MyModel):
     created_at = models.DateTimeField()
 
 
-# ----------------- From here for dw920  ----------------
+class Tags(MyModel):
+    name = models.CharField(max_length=255)
+    ongoing = models.BooleanField(default=False, choices=BOOLEAN_TYPES)
+    created_by = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class Medias(MyModel):
+    original_name = models.CharField(max_length=255)
+    file_type = models.CharField(max_length=10)
+    file_size = models.FloatField()
+    name = models.CharField(max_length=255)
+    path = models.CharField(max_length=255)
+    created_by = models.CharField(max_length=255)
+    created_at = models.DateTimeField()
+
+
+class LoginLogs(MyModel):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    ip_address = models.CharField(max_length=255)
+    destination = models.CharField(default='raplev', max_length=255)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class FlaggedPosts(MyModel):
+    post = models.ForeignKey(Posts, on_delete=models.CASCADE)
+    flagged_by = models.CharField(max_length=255)
+    flag_reason = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField()
+
+
+class LandingPages(MyModel):
+    template_page = models.ForeignKey(Pages, on_delete=models.PROTECT)
+    personalized_link = models.CharField(max_length=255)
+    redirection_type = models.CharField(max_length=255)
+
+
+class PersLinks(MyModel):
+    landing_page = models.ForeignKey(LandingPages, on_delete=models.PROTECT)
+    personalized_link = models.CharField(max_length=255)
+    assigned_to_user = models.CharField(max_length=255)
+    leads = models.IntegerField()
+
+
+class RedirectionLinks(MyModel):
+    old_link = models.CharField(max_length=255)
+    new_link = models.CharField(max_length=255)
+    redirection_type = models.CharField(max_length=255)
+
+
+class Options(MyModel):
+    option_type = models.CharField(max_length=255)
+    option_param1 = models.CharField(default=None, max_length=255, null=True)
+    option_param2 = models.CharField(default=None, max_length=255, null=True)
+    option_param3 = models.CharField(default=None, max_length=255, null=True)
+    option_field = models.CharField(max_length=255)
+    option_value = models.TextField()
+
+
+class SecurityStatus(MyModel):
+    ip_address = models.CharField(max_length=255)
+    user = models.ForeignKey(Users, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class Campaigns(MyModel):
+    campaign_name = models.CharField(max_length=255)
+    campaign_url = models.CharField(max_length=255)
+    overview = models.TextField()
+    payout = models.IntegerField()
+    campaign_type = models.CharField(max_length=100)
+    target_location = models.TextField()
+    creative_materials = models.TextField()
+    clicks = models.IntegerField(default=0)
+    conversions = models.IntegerField(default=0)
+    updated_on = models.DateTimeField()
+    created_at = models.DateTimeField()
+
+
+class Affiliates(MyModel):
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    organization = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    postcode = models.IntegerField()
+    country = models.CharField(max_length=255)
+    email_address = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+    status = models.BooleanField(default=False, choices=STATUS_TYPES)
+    created_at = models.DateTimeField()
+
+    def send_info_email(self):
+        send_mail(
+            subject='Welcome to Raplev',
+            message='Your Info: \n - First Name: {}\n - Last Name: {}\n - Email: {}\n - Organization: {}\n - Address: {}\n - Postcode: {}\n - Country: {}\n - Created_at: {}\n'.format(
+                self.first_name, self.last_name, self.email, self.organization, self.address, self.postcode, self.country, self.created_at),
+            from_email='admin@raplev.com',
+            recipient_list=[self.email]
+        )

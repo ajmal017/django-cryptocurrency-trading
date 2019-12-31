@@ -5,11 +5,13 @@ import logging
 import re
 import uuid
 import sys
+import string
 from datetime import datetime, timedelta
 
 from django.views import View
 from django.shortcuts import render, redirect
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
+from django.db.models.functions import Extract
 # from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponseBadRequest
 # from django.contrib.auth import logout, authenticate, login
@@ -21,6 +23,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.decorators import method_decorator   
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
+from django.template.defaulttags import register
 
 from . import models
 from .decorators import cadmin_user_login_required, cadmin_user_is_logged_in
@@ -29,6 +32,20 @@ from .context_processors import cadmin_user
 logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
 
+@register.filter
+def keyvalue(dict, key):    
+    try:
+        return dict[key]
+    except:
+        return ''
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 @method_decorator(cadmin_user_is_logged_in, name='dispatch')
 class LoginView(View):
@@ -46,9 +63,20 @@ class LoginView(View):
                 token = user.token if user.token else get_random_string(length=100)
                 user.token = token
                 user.save()
+                models.LoginLogs(
+                    user=user,
+                    ip_address=get_client_ip(request)
+                ).save()
                 request.session['cadmin_user'] = token
                 del request.session['global_alert']
             else:
+                try:
+                    models.SecurityStatus(
+                        user=user,
+                        ip_address=get_client_ip(request)
+                    ).save()
+                except:
+                    log = 'here it need to sys log for error user login.'
                 return render(request, 'cadmin/login.html', {'error': 'Incorrect Password'})
         except:
             return render(request, 'cadmin/login.html', {'error': 'Incorrect User'})
@@ -124,6 +152,7 @@ def do_paginate(data_list, page_number):
     except PageNotAnInteger:
         ret_data_list = paginator.page(1)
     return ret_data_list, paginator
+
 
 def get_weekdate(day):
     dt = datetime.strptime(day, '%Y-%m-%d')
@@ -612,6 +641,7 @@ class AddNewPostView(View):
         disallow_comments = request.POST.get('disallow_comments', False)
         featured_images = request.POST.get('featured_images', '').strip()
         tags = request.POST.get('tags', '').strip()
+        add_tags(tags, cadmin_user(request)['cadmin_user'].username)
         try:
             item = models.Posts.objects.get(id=item_id)
         except:
@@ -631,4 +661,458 @@ class AddNewPostView(View):
         return render(request, 'cadmin/add-new-post.html', {'item': item, 'title': title})
 
 
-# ----------------- From here for dw920  ----------------
+def add_tags(tags, username):
+    for tag in tags.split(','):
+        tag = tag.strip()
+        if not models.Tags.objects.filter(name=tag).exists():
+            models.Tags(name=tag, created_by=username).save()
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class TagsView(View):
+
+    def get(self, request):
+        alpha = request.GET.get('alpha', '').strip()
+        ongoing = request.GET.get('ongoing', True)
+        strings = string.ascii_uppercase
+        if alpha == '~A':
+            items = models.Tags.objects.filter(~Q(name__range=('a', 'zzz')) & ~Q(name__range=('A', 'ZZZ')) & Q(ongoing=ongoing))
+        else:
+            items = models.Tags.objects.filter(name__istartswith=alpha, ongoing=ongoing)
+        return render(request, 'cadmin/tags.html', {'items': items, 'alpha': alpha, 'ongoing': ongoing, 'strings':strings})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class MediaLibraryView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        years = sorted(set(models.Medias.objects.annotate(year=Extract('created_at', 'year')).values_list('year', flat=True)), reverse=True)
+        year = request.GET.get('year', datetime.now().strftime("%Y")).strip()
+        months = sorted(set(models.Medias.objects.filter(created_at__year=year).annotate(month=Extract('created_at', 'month')).values_list('month', flat=True)), reverse=True)
+        month = request.GET.get('month', datetime.now().strftime("%m")).strip()
+        if int(month) not in months:
+            month = str(months[0])
+        items = models.Medias.objects.filter(id__icontains=search, created_at__year=year, created_at__month=month)
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/media-library/?search=' + search + "&year=" + year + "&month=" + month + "&"
+        return render(request, 'cadmin/media-library.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
+                      'years': years, 'months': months, 'year': year, 'month': month})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class UploadView(View):
+
+    def get(self, request):
+        return render(request, 'cadmin/upload.html', {})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class LastLoginView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        items = models.LoginLogs.objects.filter(ip_address__icontains=search).order_by('-created_at')
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/last-login/?search=' + search + "&"
+        return render(request, 'cadmin/last-login.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class FlaggedPostsView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        items = models.FlaggedPosts.objects.filter(Q(id__icontains=search) | Q(post__id__icontains=search))
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/flagged-posts/?search=' + search + "&"
+        return render(request, 'cadmin/flagged-posts.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class FlaggedPostDetailsView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.FlaggedPosts.objects.get(id=item_id)
+        return render(request, 'cadmin/flagged-post-details.html', {'item': item, })
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AddLandingPageView(View):
+
+    def get(self, request, success='', error=''):
+        item_id = request.GET.get('item_id', '').strip()
+        delete_id = request.GET.get('delete_id', '').strip()
+        if delete_id:
+            models.LandingPages.objects.get(id=delete_id).delete()
+            success = 'Landing page deleted.'
+        try:
+            item = models.LandingPages.objects.get(id=item_id)
+        except:
+            item = models.LandingPages()
+        items = models.LandingPages.objects.all()
+        exist_links = [i.template_page.id for i in items]
+        templates = models.Pages.objects.filter(~Q(id__in=exist_links))
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/add-landing-page/?item_id=' + item_id + '&'
+        return render(request, 'cadmin/add-landing-page.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
+                      'templates': templates, 'success': success, 'error': error })
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        template_page_id = request.POST.get('template_page_id', '').strip()
+        personalized_link = request.POST.get('personalized_link', '').strip()
+        redirection_type = request.POST.get('redirection_type', '302 Temporary').strip()
+        template_page = models.Pages.objects.get(id=template_page_id)
+        try:
+            item = models.LandingPages.objects.get(id=item_id)
+            success = 'Landing page updated.'
+        except:
+            item = models.LandingPages()
+            success = 'Landing page added.'
+        item.template_page = template_page
+        item.personalized_link = personalized_link
+        item.redirection_type = redirection_type
+        item.created_at = datetime.now()
+        item.save()
+        error = ''
+        return self.get(request, success, error)
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AddPersLinkView(View):
+
+    def get(self, request, success='', error=''):
+        item_id = request.GET.get('item_id', '').strip()
+        delete_id = request.GET.get('delete_id', '').strip()
+        if delete_id:
+            models.PersLinks.objects.get(id=delete_id).delete()
+            success = 'Personalized deleted.'
+        try:
+            item = models.PersLinks.objects.get(id=item_id)
+        except:
+            item = models.PersLinks()
+        items = models.PersLinks.objects.all()
+        exist_links = [i.landing_page.id for i in items]
+        landings = models.LandingPages.objects.filter(~Q(id__in=exist_links))
+        users = models.Users.objects.all()
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/add-pers-link/?item_id=' + item_id + '&'
+        return render(request, 'cadmin/add-pers-link.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
+                      'landings': landings, 'users': users, 'success': success, 'error': error })
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        landing_page_id = request.POST.get('landing_page_id', '').strip()
+        personalized_link = request.POST.get('personalized_link', '').strip()
+        assigned_to_user_id = request.POST.get('assigned_to_user_id', '').strip()
+        landing_page = models.LandingPages.objects.get(id=landing_page_id)
+        # assigned_to_user = models.Users.objects.get(username=assigned_to_user_id)
+        try:
+            item = models.PersLinks.objects.get(id=item_id)
+            success = 'Personalized link updated.'
+        except:
+            item = models.PersLinks()
+            item.created_at = datetime.now()
+            item.leads = 0
+            success = 'Personalized link added.'
+        item.landing_page = landing_page
+        item.personalized_link = personalized_link
+        item.assigned_to_user = assigned_to_user_id
+        item.leads = item.leads
+        item.save()
+        error = ''
+        return self.get(request, success, error)
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AddRedirectionLinkView(View):
+
+    def get(self, request, success='', error=''):
+        item_id = request.GET.get('item_id', '').strip()
+        delete_id = request.GET.get('delete_id', '').strip()
+        if delete_id:
+            models.RedirectionLinks.objects.get(id=delete_id).delete()
+            success = 'Redirection link deleted.'
+        try:
+            item = models.RedirectionLinks.objects.get(id=item_id)
+        except:
+            item = models.RedirectionLinks()
+        items = models.RedirectionLinks.objects.all()
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/add-redirection-link/?item_id=' + item_id + '&'
+        return render(request, 'cadmin/add-redirection-link.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
+                        'success': success, 'error': error })
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        old_link = request.POST.get('old_link', '').strip()
+        new_link = request.POST.get('new_link', '').strip()
+        redirection_type = request.POST.get('redirection_type', '302 Temporary').strip()
+        try:
+            item = models.RedirectionLinks.objects.get(id=item_id)
+            success = 'Redirection link updated.'
+        except:
+            item = models.RedirectionLinks()
+            item.created_at = datetime.now()
+            success = 'Redirection link added.'
+        item.old_link = old_link
+        item.new_link = new_link
+        item.redirection_type = redirection_type
+        item.save()
+        error = ''
+        return self.get(request, success, error)
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class DocumentationsView(View):
+
+    def get(self, request):
+        return render(request, 'cadmin/documentations.html', {})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class SeoView(View):
+
+    def get(self, request, success='', error=''):
+        page_id = request.GET.get('page_id', '').strip()
+        items = models.Options.objects.filter(Q(option_type='seo') | Q(option_type='robots_txt'), option_param1=page_id)
+        items = query_set_to_array_option(items)
+        pages = models.Pages.objects.all()
+        return render(request, 'cadmin/seo.html', {'items': items, 'pages': pages, 'page_id': page_id, 'success': success, 'error': error})
+
+    def post(self, request):
+        if not update_or_create_option(request):
+            return self.get(request, error='Not saved')
+        return self.get(request, success='Saved')
+
+
+def query_set_to_array_option(items):
+    values = {}
+    for item in items:
+        if item.option_type not in values:
+            values[item.option_type] = {}
+        if item.option_param1:
+            if item.option_field not in values[item.option_type]:
+                values[item.option_type][item.option_field] = {}
+            if item.option_param2:
+                if item.option_param1 not in values[item.option_type][item.option_field]:
+                    values[item.option_type][item.option_field][item.option_param1] = {}
+                if item.option_param3:
+                    if item.option_param2 not in values[item.option_type][item.option_field][item.option_param1]:
+                        values[item.option_type][item.option_field][item.option_param1][item.option_param2] = {}
+                    values[item.option_type][item.option_field][item.option_param1][item.option_param2][item.option_param3] = item.option_value
+                else: 
+                    values[item.option_type][item.option_field][item.option_param1][item.option_param2] = item.option_value
+            else: 
+                values[item.option_type][item.option_field][item.option_param1] = item.option_value
+        else: 
+            values[item.option_type][item.option_field] = item.option_value
+    return values
+
+
+def update_or_create_option(request):
+    forms = request.POST.items()
+    success = True
+    for form in forms:
+        if len(form[0].split('.')) < 2:
+            continue
+        option_type = (form[0]).split('.')[0]
+        option_field = (form[0]).split('.')[1]
+        option_value = (form[1])
+        option_param1 = (form[0]).split('.')[2] if len((form[0]).split('.')) > 2 else None
+        option_param2 = (form[0]).split('.')[3] if len((form[0]).split('.')) > 3 else None
+        option_param3 = (form[0]).split('.')[4] if len((form[0]).split('.')) > 4 else None
+        obj, created = models.Options.objects.update_or_create(
+            option_type=option_type, option_field=option_field, option_param1=option_param1,
+            option_param2=option_param2, option_param3=option_param3, defaults={ "option_value": option_value, })
+        # if not created:
+        #     success = False
+    return success
+
+
+def get_last_nth_date(day, nth):
+    dt = datetime.strptime(day, '%Y-%m-%d')
+    start = dt - timedelta(days=nth)
+    end = dt
+    return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class SecurityStatusView(View):
+
+    def get(self, request):
+        server_status = True
+        startweek, endweek = get_last_nth_date(datetime.now().date().strftime("%Y-%m-%d"), 7)
+        start_date = request.GET.get('start_date', startweek).strip()
+        end_date = request.GET.get('end_date', endweek).strip()
+        items = models.SecurityStatus.objects.values('ip_address', 'user__username').annotate(number_of_attempts=Count('id')).filter(created_at__date__range=(start_date, end_date))
+        return render(request, 'cadmin/security-status.html', {'items': items, 'server_status': server_status})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class OptionsView(View):
+
+    def get(self, request, nav='', success='', error=''):
+        items = models.Options.objects.filter(~Q(option_type__in=['seo','robots_txt']))
+        items = query_set_to_array_option(items)
+        pages = models.Pages.objects.all()
+        return render(request, 'cadmin/options.html', {'items': items, 'success': success, 'error': error, 'nav': nav})
+
+    def post(self, request, nav='', success='Saved', error=''):
+        if not update_or_create_option(request):
+            error={'normal': 'Not saved'}
+            success = ''
+            return self.get(request, nav, success, error)
+        return self.get(request, nav, success, error)
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class OptionsRouterBlogView(View):
+
+    def post(self, request):
+        if not update_or_create_option(request):
+            return OptionsView.as_view()(request, 'router', '', {'blog': 'Not blog saved'})
+        return OptionsView.as_view()(request, 'router', 'Saved')
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class OptionsRouterForgotPasswordView(View):
+
+    def post(self, request):
+        if not update_or_create_option(request):
+            return OptionsView.as_view()(request, 'router', '', {'forgot_password': 'Not forgot_password saved'})
+        return OptionsView.as_view()(request, 'router', 'Saved')
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class CampaignsView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
+        start_date = request.GET.get('start_date', startweek).strip()
+        end_date = request.GET.get('end_date', endweek).strip()
+        items = models.Campaigns.objects.filter(campaign_name__icontains=search, updated_on__range=(start_date, end_date))
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/campaigns/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        return render(request, 'cadmin/campaigns.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
+                      'start_date': start_date, 'end_date': end_date})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class CampaignUpdatedView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Campaigns()
+        try:
+            item = models.Campaigns.objects.get(id=item_id)
+            title = 'Edit campaign'
+        except:
+            title = 'Add new campaign'
+        return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title})
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        campaign_name = request.POST.get('campaign_name', '').strip()
+        campaign_url = request.POST.get('campaign_url', '').strip()
+        overview = request.POST.get('overview', '').strip()
+        payout = request.POST.get('payout', '')
+        campaign_type = request.POST.get('campaign_type', '').strip()
+        target_location = request.POST.getlist('target_location[]')
+        creative_materials = request.POST.get('creative_materials', '').strip()
+        try:
+            item = models.Campaigns.objects.get(id=item_id)
+        except:
+            item = models.Campaigns()
+            item.created_at = datetime.now()
+        
+        item.campaign_name = campaign_name
+        item.campaign_url = campaign_url
+        item.overview = overview
+        item.payout = payout
+        item.campaign_type = campaign_type
+        item.target_location = target_location
+        item.creative_materials = creative_materials
+        item.updated_on = datetime.now()
+        item.save()
+        title = 'Edit Camaign'
+        return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AffiliatesView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
+        start_date = request.GET.get('start_date', startweek).strip()
+        end_date = request.GET.get('end_date', endweek).strip()
+        items = models.Affiliates.objects.filter(email_address__icontains=search, created_at__range=(start_date, end_date))
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/affiliates/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        return render(request, 'cadmin/affiliates.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
+                      'start_date': start_date, 'end_date': end_date})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class AddNewAffiliateView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Affiliates()
+        try:
+            item = models.Affiliates.objects.get(id=item_id)
+            title = 'Edit affiliate'
+        except:
+            title = 'Add new affiliate'
+        return render(request, 'cadmin/add-new-affiliate.html', {'item': item, 'title': title})
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        organization = request.POST.get('organization', '').strip()
+        address = request.POST.get('address', '').strip()
+        postcode = request.POST.get('postcode', '')
+        country = request.POST.get('country', '').strip()
+        email_address = request.POST.get('email_address', '').strip()
+        password = request.POST.get('password', '').strip()
+        try:
+            item = models.Affiliates.objects.get(id=item_id)
+        except:
+            item = models.Affiliates()
+            item.created_at = datetime.now()
+            item.password = make_password(password)
+        
+        item.first_name = first_name
+        item.last_name = last_name
+        item.organization = organization
+        item.address = address
+        item.postcode = postcode
+        item.country = country
+        item.email_address = email_address
+        item.save()
+        title = 'Edit Affiliate'
+        if 'send_email' in data:
+            # logger.info("Send user detail email to {}".format(temp_user.username))
+            item.send_info_email()
+
+        return render(request, 'cadmin/add-new-affiliate.html', {'item': item, 'title': title, 'success': 'This issue has been posted'})
