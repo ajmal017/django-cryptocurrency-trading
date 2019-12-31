@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.urls import path, include
 from django.contrib import admin
-# from wallet import views as wallet_views
-# from blog import views as blog_views
+from wallet import views as wallet_views
+from blog import views as blog_views
 from commento_sso.views import SingleSignOnView
 from django.contrib.auth import views as auth_views
 
