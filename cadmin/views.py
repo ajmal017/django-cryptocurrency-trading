@@ -143,7 +143,7 @@ class UsersView(View):
 
 def do_paginate(data_list, page_number):
     ret_data_list = data_list
-    result_per_page = 1
+    result_per_page = 10
     paginator = Paginator(data_list, result_per_page)
     try:
         ret_data_list = paginator.page(page_number)
@@ -885,6 +885,30 @@ class DocumentationsView(View):
 
 
 @method_decorator(cadmin_user_login_required, name='dispatch')
+class PostIssueView(View):
+
+    def get(self, request):
+        return render(request, 'cadmin/post-issue.html', {})
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '').strip()
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        attached_files = request.POST.get('attached_files', '').strip()
+        try:
+            item = models.Issues.objects.get(id=item_id)
+        except:
+            item = models.Issues()
+            item.created_at = datetime.now()
+        
+        item.title = title
+        item.description = description
+        item.attached_files = attached_files
+        item.save()
+        return render(request, 'cadmin/post-issue.html', {'item': item, 'success': 'Campaign Updated'})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
 class SeoView(View):
 
     def get(self, request, success='', error=''):
@@ -1052,7 +1076,7 @@ class CampaignUpdatedView(View):
         item.updated_on = datetime.now()
         item.save()
         title = 'Edit Camaign'
-        return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title})
+        return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title, 'success': 'Campaign Updated'})
 
 
 @method_decorator(cadmin_user_login_required, name='dispatch')
@@ -1095,6 +1119,7 @@ class AddNewAffiliateView(View):
         country = request.POST.get('country', '').strip()
         email_address = request.POST.get('email_address', '').strip()
         password = request.POST.get('password', '').strip()
+        send_login_details = request.POST.get('send_login_details', '').strip()
         try:
             item = models.Affiliates.objects.get(id=item_id)
         except:
@@ -1111,8 +1136,64 @@ class AddNewAffiliateView(View):
         item.email_address = email_address
         item.save()
         title = 'Edit Affiliate'
-        if 'send_email' in data:
+        if send_login_details:
             # logger.info("Send user detail email to {}".format(temp_user.username))
             item.send_info_email()
 
         return render(request, 'cadmin/add-new-affiliate.html', {'item': item, 'title': title, 'success': 'This issue has been posted'})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class ReportsView(View):
+
+    def get(self, request):
+        report_field = request.GET.get('report_field', '').strip()
+        startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
+        start_date = request.GET.get('start_date', startweek).strip()
+        end_date = request.GET.get('end_date', endweek).strip()
+        items = models.Reports.objects.filter(report_field__icontains=report_field, created_at__range=(start_date, end_date))
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/reports/?report_field=' + report_field + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        return render(request, 'cadmin/reports.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'report_field': report_field, 
+                      'start_date': start_date, 'end_date': end_date})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class CommunityPostsView(View):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
+        start_date = request.GET.get('start_date', startweek).strip()
+        end_date = request.GET.get('end_date', endweek).strip()
+        items = models.Posts.objects.filter(title__icontains=search, created_at__range=(start_date, end_date))
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = '/cadmin/community-posts/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        return render(request, 'cadmin/community-posts.html',
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
+                      'start_date': start_date, 'end_date': end_date})
+
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class CommunityPostDetailsView(View):
+
+    def get(self, request):
+        item_id = request.GET.get('item_id', '').strip()
+        item = models.Posts.objects.get(id=item_id)
+        return render(request, 'cadmin/community-post-details.html', {'item': item, })
+
+@method_decorator(cadmin_user_login_required, name='dispatch')
+class CommunityPostRulesView(View):
+
+    def get(self, request, success='', error=''):
+        items = models.Options.objects.filter(option_type='community')
+        items = query_set_to_array_option(items)
+        return render(request, 'cadmin/community-post-rules.html', {'items': items, 'success': success, 'error': error})
+
+    def post(self, request):
+        if not update_or_create_option(request):
+            return self.get(request, '', 'Not saved')
+        return self.get(request, 'Saved')

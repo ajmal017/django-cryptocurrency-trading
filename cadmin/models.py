@@ -312,6 +312,13 @@ class RedirectionLinks(MyModel):
     redirection_type = models.CharField(max_length=255)
 
 
+class Issues(MyModel):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    attached_files = models.TextField()
+    created_at = models.DateTimeField()
+
+
 class Options(MyModel):
     option_type = models.CharField(max_length=255)
     option_param1 = models.CharField(default=None, max_length=255, null=True)
@@ -361,3 +368,11 @@ class Affiliates(MyModel):
             from_email='admin@raplev.com',
             recipient_list=[self.email]
         )
+
+class Reports(MyModel):
+    user_joined = models.CharField(max_length=255)
+    affiliate = models.ForeignKey(Affiliates, on_delete=models.PROTECT)
+    lead_status = models.BooleanField(default=False)
+    campaign = models.ForeignKey(Campaigns, on_delete=models.PROTECT)
+    created_at = models.DateTimeField()
+    report_field = models.CharField(max_length=100)
