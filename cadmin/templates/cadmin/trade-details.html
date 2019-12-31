@@ -27,7 +27,7 @@
                     <dd class="data-panel__value"><a href="#">{{ item.vendor }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Payment method</dt>
-                    <dd class="data-panel__value">{{ item.payment_method }}</dd>
+                    <dd class="data-panel__value">{{ item.get_payment_method_display }}</dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Amount</dt>
                     <dd class="data-panel__value">{{ item.amount }} {{ item.offer.what_crypto }}</dd>

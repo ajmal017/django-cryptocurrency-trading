@@ -27,7 +27,7 @@ SECRET_KEY = '-ftl$49mojhozrjk)ue7$1uq!-td)hn+qvrrp(6nod7#d**q*u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['unstable-v.raplev.com', 'localhost']
+ALLOWED_HOSTS = ['unstable-v.raplev.com']
 
 
 # Application definition
@@ -42,13 +42,13 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'django.contrib.staticfiles',
     'simple_email_confirmation',
-    # 'wallet',
-    # 'taggit',
-    # 'blog',
-    # 'tinymce',
-    # 'commento_sso',
-    # 'django_countries',
-    # 'phonenumber_field',
+    'wallet',
+    'taggit',
+    'blog',
+    'tinymce',
+    'commento_sso',
+    'django_countries',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [
@@ -118,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# AUTH_USER_MODEL = 'wallet.User'
+AUTH_USER_MODEL = 'wallet.User'
 
 
 # Internationalization
@@ -179,52 +179,52 @@ TWILIO_AUTH_TOKEN = '3af418ebdd13244d2aff1dbbf225c30b'
 TWILIO_VERIFICATION_SID = 'VA84385cf2852605f474a448127cba2488'
 TWILIO_PHONE_NUMBER = '+15005550006'
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'filters': {
-#         'require_debug_false': {
-#             '()': 'django.utils.log.RequireDebugFalse',
-#         },
-#         'require_debug_true': {
-#             '()': 'django.utils.log.RequireDebugTrue',
-#         },
-#     },
-#     'formatters': {
-#         'verbose': {
-#             'format': '%(process)-5d %(thread)d %(name)-50s %(levelname)-8s %(message)s'
-#         },
-#         'simple': {
-#             'format': '[%(asctime)s] %(name)s %(levelname)s %(message)s',
-#             'datefmt': '%d/%b/%Y %H:%M:%S'
-#         },
-#     },
-#     'handlers': {
-#         'console': {
-#             'level': 'DEBUG',
-#             'filters': ['require_debug_true'],
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'simple'
-#         },
-#         'syslog': {
-#          'level': 'INFO',
-#          'class': 'logging.handlers.SysLogHandler',
-#          'facility': 'local7',
-#          'address': '/dev/log',
-#          'formatter': 'verbose'
-#        },
-#     },
-#     'loggers': {
-#         # root logger
-#         '':{
-#             'handlers': ['console', 'syslog'],
-#             'level': 'INFO',
-#             'disabled': False
-#         },
-#         'thingsforwork': {
-#             'handlers': ['console', 'syslog'],
-#             'level': 'DEBUG',
-#             'propagate': False,
-#         },
-#     },
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(process)-5d %(thread)d %(name)-50s %(levelname)-8s %(message)s'
+        },
+        'simple': {
+            'format': '[%(asctime)s] %(name)s %(levelname)s %(message)s',
+            'datefmt': '%d/%b/%Y %H:%M:%S'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'syslog': {
+         'level': 'INFO',
+         'class': 'logging.handlers.SysLogHandler',
+         'facility': 'local7',
+         'address': '/dev/log',
+         'formatter': 'verbose'
+       },
+    },
+    'loggers': {
+        # root logger
+        '':{
+            'handlers': ['console', 'syslog'],
+            'level': 'INFO',
+            'disabled': False
+        },
+        'thingsforwork': {
+            'handlers': ['console', 'syslog'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
