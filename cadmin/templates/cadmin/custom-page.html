@@ -1,0 +1,11 @@
+{% extends 'cadmin/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ item.title }}{% endblock %}
+
+{% block content %}
+<main class="dialog__container">
+    {{ item.context|safe }}
+</main>
+{% endblock %}

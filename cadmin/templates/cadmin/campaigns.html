@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}Revenue{% endblock %}
+{% block title %}Campaigns{% endblock %}
 
 {% block page-inner %}
 <main class="page__inner js-nav-close-trigger">
@@ -22,7 +22,7 @@
                 </div><button class="date-filter__apply btn btn--red" type="submit">Apply filter</button>
             </div>
             <div class="section__search form-group search">
-                <div class="form-group__field-group"><input class="form-group__field" name="search" value="{{ search }}" placeholder="Search in Revenue"><button class="search__btn" type="submit">Search</button></div>
+                <div class="form-group__field-group"><input class="form-group__field" name="search" value="{{ search }}" placeholder="Search in Campaigns"><button class="search__btn" type="submit">Search</button></div>
             </div>
         </form>
         <div class="section__inner">
@@ -30,23 +30,25 @@
             <table class="section__table table">
                 <thead>
                     <tr>
-                        <th>Date and time</th>
-                        <th>Revenue type</th>
-                        <th>Amount</th>
-                        <th>Source</th>
-                        <th>Refund</th>
-                        <th>Actions</th>
+                        <th>Campaign ID</th>
+                        <th>Campaigns name</th>
+                        <th>Clicks</th>
+                        <th>Conversions</th>
+                        <th>Affiliate payout</th>
+                        <th>Created on</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td><span class="table__mobile-heading">Date and time</span><span>{{ item.date }}</span></td>
-                        <td><span class="table__mobile-heading">Revenue type</span>{{ item.revenue_type }}</td>
-                        <td><span class="table__mobile-heading">Amount</span><span>${{ item.amount }}</span></td>
-                        <td><span class="table__mobile-heading">Source</span><span>{{ item.source }}</span></td>
-                        <td><span class="table__mobile-heading">Refund</span>${{ item.refund }}</td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/cadmin/revenue-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Campaign ID</span><a href="#">{{ item.id }}</a></td>
+                        <td><span class="table__mobile-heading">Campaigns name</span><a href="#">{{ item.campaign_name }}</a></td>
+                        <td><span class="table__mobile-heading">Clicks</span><span>{{ item.clicks }}</span></td>
+                        <td><span class="table__mobile-heading">Conversions</span><span>{{ item.conversions }}</span></td>
+                        <td><span class="table__mobile-heading">Affiliate payout</span><span>${{ item.payout }}</span></td>
+                        <td><span class="table__mobile-heading">Created on</span><span>{{ item.created_at }}</span></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="/cadmin/campaign-updated?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
