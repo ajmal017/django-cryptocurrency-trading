@@ -11,7 +11,7 @@
             <nav class="section__nav page-nav"><span class="page-nav__item is-active" href="#">Published (20)</span><a class="page-nav__item" href="#">Paused (7)</a></nav>
             <form class="section__search form-group search" id="form1" action="" method="GET">
                 <div class="section__search form-group search">
-                    <div class="form-group__field-group"><input class="form-group__field" name="search" value="{{ search }}" placeholder="Search in Revenue"><button class="search__btn" type="submit">Search</button></div>
+                    <div class="form-group__field-group"><input class="form-group__field" name="search" value="{{ search }}" placeholder="Search in Posts"><button class="search__btn" type="submit">Search</button></div>
                 </div>
             </form>
         </header>
@@ -56,7 +56,7 @@
                         <td><span class="table__mobile-heading">Upvoted</span><span>{{ item.upvoted }}</span></td>
                         <td><span class="table__mobile-heading">Comments</span><span>{{ item.comments }}</span></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/cadmin/community-post-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/community-post-details?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

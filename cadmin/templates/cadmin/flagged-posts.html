@@ -10,7 +10,7 @@
         <header class="section__header">
             <div class="section__heading">Flagged content</div>
             <form class="section__search form-group search" action="" method="GET">
-                <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Customers" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
+                <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Flagged Posts" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
             </form>
         </header>
         <div class="section__inner">
@@ -32,8 +32,8 @@
                         <td><span class="table__mobile-heading">Flagged By</span><a href="#">{{ item.flagged_by }}</a></td>
                         <td><span class="table__mobile-heading">Flagged on</span><span>{{ item.created_at }}</span></td>
                         <td><span class="table__mobile-heading">Flag reason</span><span>{{ item.flag_reason }}</span></td>
-                        <td><span class="table__mobile-heading">Post ID</span><a href="/cadmin/post-preview?item_id={{ item.post.id }}">{{ item.post.id }}</a></td>
-                        <td><span class="table__mobile-heading">Action</span><a href="/cadmin/flagged-post-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Post ID</span><a href="/{{ app_url }}/post-preview?item_id={{ item.post.id }}">{{ item.post.id }}</a></td>
+                        <td><span class="table__mobile-heading">Action</span><a href="/{{ app_url }}/flagged-post-details?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

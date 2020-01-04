@@ -22,7 +22,7 @@
                             <div class="seo__select form-group">
                                 <div class="form-group__field-group">
                                     <span class="form-group__triangle"></span>
-                                    <select class="form-group__field" name="page_id" onchange="location.href='/cadmin/seo?page_id='+this.value" required>
+                                    <select class="form-group__field" name="page_id" onchange="location.href='/{{ app_url }}/seo?page_id='+this.value" required>
                                         <option value="">Select</option>
                                         {% for page in pages %}
                                         <option value="{{ page.id }}" {% if page_id == page.id|stringformat:"i" %}selected{% endif %}>{{ page.title }}</option>
@@ -58,7 +58,7 @@
                                 <div class="seo__select form-group">
                                     <div class="form-group__field-group">
                                         <span class="form-group__triangle"></span>
-                                        <select class="form-group__field" onchange="location.href='/cadmin/seo?page_id='+this.value">
+                                        <select class="form-group__field" onchange="location.href='/{{ app_url }}/seo?page_id='+this.value">
                                             <option value="">Select </option>
                                             {% for page in pages %}
                                             <option value="{{ page.id }}" {% if page_id == page.id|stringformat:"i" %}selected{% endif %}>{{ page.title }}</option>

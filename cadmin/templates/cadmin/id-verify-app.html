@@ -10,7 +10,7 @@
         <header class="section__header">
             <h1 class="section__heading">ID Verify Application</h1>
             <form class="section__search form-group search" action="" method="GET">
-                <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Customers" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
+                <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Id verifications" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
             </form>
         </header>
         <div class="section__inner">
@@ -34,7 +34,7 @@
                         <td><span class="table__mobile-heading">Document type</span><span>{{ item.document_type }}</span></td>
                         <td><span class="table__mobile-heading">Document</span><a href="#">{{ item.document_file }}</a></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/cadmin/id-verify-app-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/id-verify-app-details?item_id={{ item.id }}">Details</a></td>
                         </td>
                     </tr>
                     {% endfor %}

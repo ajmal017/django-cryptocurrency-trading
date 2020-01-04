@@ -7,7 +7,7 @@
 {% block body %}dialog dialog--recover{% endblock %}
 
 {% block content %}
-<main class="dialog__container"><a class="dialog__logo" href="/cadmin"><img class="dialog__logo-img" src="{% static 'cadmin/images/raplev-logo-alt.png' %}" alt="Raplev logo"></a>
+<main class="dialog__container"><a class="dialog__logo" href="/{{ app_url }}"><img class="dialog__logo-img" src="{% static 'cadmin/images/raplev-logo-alt.png' %}" alt="Raplev logo"></a>
     <div class="dialog__inner">
         <!-- {% if error %}
         <span class="dialog__notification has-important-theme">{{ error }}</span>

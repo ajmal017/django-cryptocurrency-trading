@@ -58,7 +58,7 @@
                     <input type="checkbox" name="send_login_details" hidden><span class="checkbox__field"></span><span class="checkbox__text">Send login details to affiliate’s email address.</span></label>
             </div>
         </section>
-        <div class="page__control"><button class="page__control-item btn btn--large btn--red" type="submit">Create</button></div>
+        <div class="page__control"><button class="page__control-item btn btn--large btn--red" type="submit">{% if item.pk %}Edit{% else %}Create{% endif %}</button></div>
     </form>
 </main>
 {% endblock %}

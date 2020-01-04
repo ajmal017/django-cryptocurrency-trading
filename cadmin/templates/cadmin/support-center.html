@@ -10,10 +10,14 @@
         <header class="section__header">
             <div>
                 <h1 class="section__heading">Support Center</h1>
-                <nav class="section__nav page-nav"><span class="page-nav__item is-active">All (42)</span><a class="page-nav__item" href="#">General (3)</a><a class="page-nav__item" href="#">Disputes (0)</a></nav>
+                <nav class="section__nav page-nav">
+                    <a class="page-nav__item {% if is_dispute == '' %}is-active{% endif %}" href="/{{ app_url }}/support-center?search={{ search }}">All ({{ count|keyvalue:"All" }})</a>
+                    <a class="page-nav__item {% if is_dispute == 'False' %}is-active{% endif %}" href="/{{ app_url }}/support-center?search={{ search }}&is_dispute=False">General ({{ count|keyvalue:"General" }})</a>
+                    <a class="page-nav__item {% if is_dispute == 'True' %}is-active{% endif %}" href="/{{ app_url }}/support-center?search={{ search }}&is_dispute=True">Disputes ({{ count|keyvalue:"Disputes" }})</a>
+                </nav>
             </div>
             <form class="section__search form-group search" action="" method="GET">
-                <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Customers" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
+                <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Tickets" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
             </form>
         </header>
         <div class="section__inner">
@@ -43,7 +47,7 @@
                             <div class="table__priority-{{ item.ticket_priority|lower }}">{{ item.ticket_priority }}</div>
                         </td>
                         <td><span class="table__mobile-heading">Actions</span>
-                            <a href="/cadmin/ticket-details-{{ item.is_dispute|yesno:'dispute,no-dispute' }}?item_id={{ item.id }}">Details</a>
+                            <a href="/{{ app_url }}/ticket-details-{{ item.is_dispute|yesno:'dispute,no-dispute' }}?item_id={{ item.id }}">Details</a>
                         </td>
                     </tr>
                     {% endfor %}
