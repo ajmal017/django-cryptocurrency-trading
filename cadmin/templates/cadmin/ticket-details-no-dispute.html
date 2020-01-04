@@ -8,7 +8,7 @@
 <main class="page__inner js-nav-close-trigger details">
     <section class="details__section section">
         <header class="section__header">
-            <h1 class="section__heading"><a class="details__heading-text" href="/cadmin/support-center">Ticket details</a><span> / </span><span>{{ item.id }}</span></h1>
+            <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/support-center">Ticket details</a><span> / </span><span>{{ item.id }}</span></h1>
         </header>
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
@@ -19,7 +19,7 @@
                     <dd class="data-panel__value">{{ item.transaction.offer.created_at }}</dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Email</dt>
-                    <dd class="data-panel__value">{{ item.transaction.trade_initator }}[email?]</dd>
+                    <dd class="data-panel__value">{{ item.transaction.trade_initiator.email }}</dd>
                 </div>
             </dl>
             <dl class="data-panel__list">
@@ -30,7 +30,7 @@
                     <dd class="data-panel__value"><a href="#">{{ item.ticket_manager }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Ticket priority</dt>
-                    <dd class="data-panel__value">{{ item.ticket_priority }}<a class="data-panel__change-btn" href="#">Change</a></dd>
+                    <dd class="data-panel__value"><span class="ticket_priority">{{ item.ticket_priority }}</span><a class="data-panel__change-btn" href="#" onclick="postAction({'item_id': '{{ item.id }}'}, 'Do you want to change?', '/{{ app_url }}/ticket-priority-change/', function(message) {$('.ticket_priority').text(message)})">Change</a></dd>
                 </div>
             </dl>
         </div>

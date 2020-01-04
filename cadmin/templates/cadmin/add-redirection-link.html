@@ -21,7 +21,7 @@
                 </aside>
                 {% endif %}
             </div>
-            <form action="" method="POST">
+            <form action="/{{ app_url }}/add-redirection-link/" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <div class="add-header__bottom">
@@ -68,12 +68,12 @@
                         </div>
                     </div>
                 </div>
-                {% if error %}
+                {% if error.new_link %}
                 <div class="add-field__message">
                     <svg class="add-field__message-icon" width="30">
                         <use xlink:href="{% static 'cadmin/images/icons.svg' %}#exclamation-circle"></use>
                     </svg>
-                    <span class="add-field__message-text">{{ error }}</span>
+                    <span class="add-field__message-text">{{ error.new_link }}</span>
                 </div>
                 {% endif %}
             </form>
@@ -96,8 +96,8 @@
                         <td><span class="table__mobile-heading">Redirection type</span><span>{{ item.redirection_type }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span>
                             <div class="table-actions">
-                                <a class="table-actions__item table-actions__edit" href="/cadmin/add-redirection-link/?item_id={{ item.id }}">Edit</a>
-                                <a class="table-actions__item" href="/cadmin/add-redirection-link?delete_id={{ item.id }}">Delete</a>
+                                <a class="table-actions__item table-actions__edit" href="/{{ app_url }}/add-redirection-link/?item_id={{ item.id }}">Edit</a>
+                                <a class="table-actions__item" href="/{{ app_url }}/add-redirection-link?delete_id={{ item.id }}">Delete</a>
                             </div>
                         </td>
                     </tr>

@@ -8,7 +8,7 @@
 <main class="page__inner js-nav-close-trigger details">
     <section class="details__section section">
         <header class="section__header section__header--has-button">
-            <h1 class="section__heading"><a class="details__heading-text" href="/cadmin/flagged-posts">Flagged content</a><span> / </span><span>{{ item.id }}</span></h1><a class="btn btn--red" href="/cadmin/post-preview?item_id={{ item.post.id }}">View public link</a>
+            <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/flagged-posts">Flagged content</a><span> / </span><span>{{ item.id }}</span></h1><a class="btn btn--red" href="/{{ app_url }}/post-preview?item_id={{ item.post.id }}">View public link</a>
         </header>
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
@@ -24,7 +24,7 @@
             </dl>
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Community post ID</dt>
-                    <dd class="data-panel__value"><a href="/cadmin/post-preview?item_id={{ item.post.id }}">{{ item.post.id }}</a></dd>
+                    <dd class="data-panel__value"><a href="/{{ app_url }}/post-preview?item_id={{ item.post.id }}">{{ item.post.id }}</a></dd>
                 </div>
             </dl>
         </div>

@@ -138,6 +138,22 @@ class Users(MyModel):
             recipient_list=[self.email]
         )
 
+    def __str__(self):
+        return self.username
+
+
+class Customers(MyModel):
+    username = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    email_verified = models.BooleanField(choices=BOOLEAN_TYPES)
+    phone_verified = models.BooleanField(choices=BOOLEAN_TYPES)
+    id_verified = models.BooleanField(choices=BOOLEAN_TYPES)
+    seller_level = models.IntegerField()
+    created_at = models.DateTimeField()
+    suspended = models.BooleanField(default=False, choices=BOOLEAN_TYPES)
+
+    def __str__(self):
+        return self.username
 
 class Revenue(MyModel):
     source = models.CharField(max_length=255)
@@ -150,7 +166,7 @@ class Revenue(MyModel):
 class Offers(MyModel):
     address = models.CharField(max_length=255)
     flat = models.CharField(max_length=10, choices=FLAT_CHOICES)
-    created_by = models.CharField(max_length=255)
+    created_by = models.ForeignKey(Customers, on_delete=models.PROTECT)
     show_postcode = models.BooleanField(choices=BOOLEAN_TYPES)
     minimum_transaction_limit = models.IntegerField()
     trade_type = models.CharField(max_length=10, choices=TRADE_TYPES)
@@ -170,8 +186,8 @@ class Offers(MyModel):
 
 class Trades(MyModel):
     offer = models.ForeignKey(Offers, on_delete=models.PROTECT)
-    trade_initiator = models.CharField(max_length=255)
-    vendor = models.CharField(max_length=255)
+    trade_initiator = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='trade_trade_initiator')
+    vendor = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='trade_vendor')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
     amount = models.FloatField()
     status = models.CharField(max_length=255)
@@ -181,21 +197,10 @@ class Trades(MyModel):
     created_at = models.DateTimeField()
 
 
-class Customers(MyModel):
-    username = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
-    email_verified = models.BooleanField(choices=BOOLEAN_TYPES)
-    phone_verified = models.BooleanField(choices=BOOLEAN_TYPES)
-    id_verified = models.BooleanField(choices=BOOLEAN_TYPES)
-    seller_level = models.IntegerField()
-    created_at = models.DateTimeField()
-    suspended = models.BooleanField(default=False, choices=BOOLEAN_TYPES)
-
-
 class Transactions(MyModel):
     offer = models.ForeignKey(Offers, on_delete=models.PROTECT)
-    trade_initiator = models.CharField(max_length=255)
-    vendor = models.CharField(max_length=255)
+    trade_initiator = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='transactions_trade_initiator')
+    vendor = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='transactions_vendor')
     txn = models.CharField(max_length=255)
     amount = models.FloatField()
     status = models.BooleanField(choices=STATUS_TYPES)
@@ -203,8 +208,8 @@ class Transactions(MyModel):
 
 class Escrows(MyModel):
     offer = models.ForeignKey(Offers, on_delete=models.PROTECT)
-    held_for = models.CharField(max_length=255)
-    held_from = models.CharField(max_length=255)
+    held_for = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='escrows_held_for')
+    held_from = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='escrows_held_from')
     status = models.BooleanField(choices=PENDING_TYPES)
     amount = models.FloatField()
 
@@ -213,7 +218,7 @@ class Tickets(MyModel):
     transaction = models.ForeignKey(Transactions, on_delete=models.PROTECT)
     topic = models.CharField(max_length=255)
     is_dispute = models.BooleanField(choices=BOOLEAN_TYPES)
-    ticket_manager = models.CharField(max_length=255)
+    ticket_manager = models.ForeignKey(Users, on_delete=models.PROTECT)
     ticket_priority = models.CharField(max_length=10)
 
 
@@ -226,9 +231,9 @@ class Messages(MyModel):
 
 
 class Idcards(MyModel):
-    user = models.ForeignKey(Users, on_delete=models.PROTECT)
+    user = models.ForeignKey(Customers, on_delete=models.PROTECT)
     document_type = models.CharField(max_length=100)
-    document_file = models.CharField(max_length=255)
+    document_file = models.CharField(max_length=255)#need to update with media files.
     status = models.BooleanField(choices=ACCEPTIVE_TYPES)
 
 
@@ -242,7 +247,7 @@ class Contacts(MyModel):
 
 class Pages(MyModel):
     title = models.CharField(max_length=255)
-    posted_by = models.CharField(max_length=255)
+    posted_by = models.ForeignKey(Users, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
     context = models.TextField()
     updated_on = models.DateTimeField()
@@ -251,7 +256,7 @@ class Pages(MyModel):
 
 class Posts(MyModel):
     title = models.CharField(max_length=255)
-    posted_by = models.CharField(max_length=255)
+    posted_by = models.ForeignKey(Users, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
     context = models.TextField()
     tags = models.TextField()

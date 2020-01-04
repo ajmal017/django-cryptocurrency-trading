@@ -22,7 +22,7 @@
                 </div><button class="date-filter__apply btn btn--red" type="submit">Apply filter</button>
             </div>
             <div class="section__search form-group search">
-                <div class="form-group__field-group"><input class="form-group__field" name="search" value="{{ search }}" placeholder="Search in Revenue"><button class="search__btn" type="submit">Search</button></div>
+                <div class="form-group__field-group"><input class="form-group__field" name="search" value="{{ search }}" placeholder="Search in Affiliates"><button class="search__btn" type="submit">Search</button></div>
             </div>
         </form>
         <div class="section__inner">
@@ -41,16 +41,15 @@
                 </thead>
                 <tbody>
                     {% for item in items %}
-                    <tr>
+                    <tr id="{{ item.id }}">
                         <td><span class="table__mobile-heading">Affiliate ID</span><a href="#">{{ item.id }}</a></td>
                         <td><span class="table__mobile-heading">First name</span><span>{{ item.first_name }}</span></td>
                         <td><span class="table__mobile-heading">Last name</span><span>{{ item.last_name }}</span></td>
                         <td><span class="table__mobile-heading">Email address</span><span>{{ item.email_address }}</span></td>
                         <td><span class="table__mobile-heading">Total earned</span><span>${{ item.total_earned }}</span></td>
-                        <td><span class="table__mobile-heading">Status</span><span>{{ item.status }}</span></td>
+                        <td><span class="table__mobile-heading">Status</span><span class="user_status">{{ item.status }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span>
-                            <a href="/cadmin/add-new-affiliate?item_id={{ item.id }}">Details</a>
-                            <a class="table-actions__item" href="#">Suspend</a>
+                            <a href="/{{ app_url }}/add-new-affiliate?item_id={{ item.id }}">Details</a> | <a class="table-actions__item" href="#" onclick="postAction({'item_id': '{{item.id}}'}, 'Are you sure to suspend this affiliate?', '/{{ app_url }}/affiliates/', function(message) {$('#{{ item.id }}').find('.user_status').text(message)});">Suspend</a>
                         </td>
                     </tr>
                     {% endfor %}

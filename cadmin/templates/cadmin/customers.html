@@ -46,7 +46,8 @@
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}{{ item.id_verified|yesno:'#check,#times' }}"></use>
                             </svg></td>
                         <td><span class="table__mobile-heading">Actions</span>
-                            <div class="table-actions"><a class="table-actions__item" href="/cadmin/customer-details?item_id={{ item.id }}">Details</a><a class="table-actions__item" href="#">Suspend</a></div>
+                            <div class="table-actions"><a class="table-actions__item" href="/{{ app_url }}/customer-details?item_id={{ item.id }}">Details</a><a class="table-actions__item" href="#" onclick="postAction({'item_id': '{{ item.id }}', 'mode': 'suspend' }, 'Are you sure to suspend this customer?');">Suspend</a>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

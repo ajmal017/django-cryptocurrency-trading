@@ -8,7 +8,7 @@
 <main class="page__inner js-nav-close-trigger details">
     <section class="details__section section">
         <header class="section__header">
-            <h1 class="section__heading"><a class="details__heading-text" href="/cadmin/support-center">Ticket details</a><span> / </span><span>{{ item.id }}</span></h1>
+            <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/support-center">Ticket details</a><span> / </span><span>{{ item.id }}</span></h1>
         </header>
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
@@ -19,12 +19,12 @@
                     <dd class="data-panel__value"><a href="#">{{ item.transaction.vendor }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Offer ID</dt>
-                    <dd class="data-panel__value"><a href="/cadmin/offer-details?item_id={{ item.transaction.offer.id }}">{{ item.transaction.offer.id }}</a></dd>
+                    <dd class="data-panel__value"><a href="/{{ app_url }}/offer-details?item_id={{ item.transaction.offer.id }}">{{ item.transaction.offer.id }}</a></dd>
                 </div>
             </dl>
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Transaction ID</dt>
-                    <dd class="data-panel__value"><a href="/cadmin/transaction-details?item_id={{ item.transaction.id }}">{{ item.transaction.id }}</a></dd>
+                    <dd class="data-panel__value"><a href="/{{ app_url }}/transaction-details?item_id={{ item.transaction.id }}">{{ item.transaction.id }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Status</dt>
                     <dd class="data-panel__value">{{ item.transaction.status }}</dd>

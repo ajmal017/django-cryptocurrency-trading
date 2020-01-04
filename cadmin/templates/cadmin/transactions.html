@@ -10,7 +10,7 @@
         <header class="section__header">
             <h1 class="section__heading">Transactions</h1>
             <form class="section__search form-group search" action="" method="GET">
-                <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Customers" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
+                <div class="form-group__field-group"><input class="form-group__field" name="search" placeholder="Search in Transactions" value="{{ search }}"><button class="search__btn" type="submit">Search</button></div>
             </form>
         </header>
         <div class="section__inner">
@@ -36,10 +36,10 @@
                         <td><span class="table__mobile-heading">Currency</span><span>{{ item.offer.what_crypto }}</span></td>
                         <td><span class="table__mobile-heading">Trade Initiator</span><a href="#">{{ item.trade_initiator }}</a></td>
                         <td><span class="table__mobile-heading">Vendor</span><a href="#">{{ item.vendor }}</a></td>
-                        <td><span class="table__mobile-heading">Offer ID</span><a href="/cadmin/offer-details?item_id={{ item.offer.id }}">{{ item.offer.id }}</a></td>
+                        <td><span class="table__mobile-heading">Offer ID</span><a href="/{{ app_url }}/offer-details?item_id={{ item.offer.id }}">{{ item.offer.id }}</a></td>
                         <td><span class="table__mobile-heading">txn ID</span><span>{{ item.txn }}</span></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/cadmin/transaction-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/transaction-details?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

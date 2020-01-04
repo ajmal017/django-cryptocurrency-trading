@@ -20,8 +20,18 @@
                     </button>
                 </aside>
                 {% endif %}
+                {% if error.delete_item %}
+                <aside class="add-header__alert alert alert--warning">
+                    <span>{{ error.delete_item }}</span>
+                    <button class="alert__close-btn" type="button" onclick="alertNote.close(this)">
+                        <svg class="alert__close-icon" width="30">
+                            <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
+                        </svg>
+                    </button>
+                </aside>
+                {% endif %}
             </div>
-            <form action="" method="POST">
+            <form action="/{{ app_url }}/add-pers-link/" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <div class="add-header__bottom">
@@ -42,14 +52,6 @@
                                         </select>
                                     </div>
                                 </div>
-                                {% if error %}
-                                <div class="add-field__message">
-                                    <svg class="add-field__message-icon" width="30">
-                                        <use xlink:href="{% static 'cadmin/images/icons.svg' %}#exclamation-circle"></use>
-                                    </svg>
-                                    <span class="add-field__message-text">{{ error }}</span>
-                                </div>
-                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -61,6 +63,14 @@
                                     <div class="add-field__field-group">
                                         <input class="add-field__input" name="personalized_link" placeholder="Link" value="{{ item.personalized_link }}" required></div>
                                 </div>
+                                {% if error.personalized_link %}
+                                <div class="add-field__message">
+                                    <svg class="add-field__message-icon" width="30">
+                                        <use xlink:href="{% static 'cadmin/images/icons.svg' %}#exclamation-circle"></use>
+                                    </svg>
+                                    <span class="add-field__message-text">{{ error.personalized_link }}</span>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -80,14 +90,6 @@
                                         <button class="add-field__btn btn btn--accent" type="submit">{% if item.id %}Edit{% else %}Add{% endif %}</button>
                                     </div>
                                 </div>
-                                {% if error %}
-                                <div class="add-field__message">
-                                    <svg class="add-field__message-icon" width="30">
-                                        <use xlink:href="{% static 'cadmin/images/icons.svg' %}#exclamation-circle"></use>
-                                    </svg>
-                                    <span class="add-field__message-text">{{ error }}</span>
-                                </div>
-                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -114,8 +116,8 @@
                         <td><span class="table__mobile-heading">Leads</span><span>{{ item.leads }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span>
                             <div class="table-actions">
-                                <a class="table-actions__item table-actions__edit" href="/cadmin/add-pers-link/?item_id={{ item.id }}">Edit</a>
-                                <a class="table-actions__item" href="/cadmin/add-pers-link?delete_id={{ item.id }}">Delete</a>
+                                <a class="table-actions__item table-actions__edit" href="/{{ app_url }}/add-pers-link/?item_id={{ item.id }}">Edit</a>
+                                <a class="table-actions__item" href="/{{ app_url }}/add-pers-link?delete_id={{ item.id }}">Delete</a>
                             </div>
                         </td>
                     </tr>
