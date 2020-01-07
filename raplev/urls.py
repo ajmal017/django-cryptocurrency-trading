@@ -22,7 +22,7 @@ from django.contrib.auth import views as auth_views
 from cadmin import views as cadmin_views
 
 urlpatterns = [
-    path('admin/', include('cadmin.urls')),
+    path('cadmin/', include('cadmin.urls')),
     path('super-admin/', admin.site.urls),
     path('', wallet_views.IndexView.as_view()),
     path('affiliates', wallet_views.AffiliatesView.as_view()),
@@ -87,3 +87,8 @@ urlpatterns = [
     path('trade/<int:trade_id>', wallet_views.SingleTradeDetailsView.as_view()),
     path('<slug:link>/', cadmin_views.go_page),
 ]
+
+from django.conf import settings
+# if settings.DEBUG:
+from django.conf.urls.static import static
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
