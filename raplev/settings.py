@@ -27,7 +27,7 @@ SECRET_KEY = '-ftl$49mojhozrjk)ue7$1uq!-td)hn+qvrrp(6nod7#d**q*u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['unstable-v.raplev.com']
+ALLOWED_HOSTS = ['unstable-v.raplev.com', 'localhost']
 
 
 # Application definition
@@ -143,6 +143,7 @@ STATIC_ROOT = '/opt/v-raplev/static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/www/media'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DATE_INPUT_FORMATS = ('%d-%m-%Y', '%Y-%m-%d', '%a %B %m %Y')
 TIME_INPUT_FORMATS = ('%I:%M %p', '%H:%M:%S', '%H:%M')
