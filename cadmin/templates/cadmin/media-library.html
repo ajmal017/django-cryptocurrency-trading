@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}Trades{% endblock %}
+{% block title %}Media Library{% endblock %}
 
 {% block page-inner %}
 <main class="page__inner js-nav-close-trigger library">
@@ -43,13 +43,13 @@
             <div class="library__content">
                 <ul class="library__items">
                     {% for item in items %}
-                    <li class="file js-file-toggle library__file">
+                    <li class="file js-file-toggle library__file" file_id="{{ item.id }}" style="background-image: url('{{ item.file.url }}'); background-size: cover; border: 1px #ea565682 solid;">
                         <div class="file__circle">
                             <svg class="file__icon" width="30">
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#check"></use>
                             </svg>
                         </div>
-                        <span class="file__caption">{{ item.name }}</span>
+                        <span class="file__caption" style="height: 50px; line-height: normal; word-break: break-all; padding: 5px;">{{ item.file.name }}</span>
                     </li>
                     {% endfor %}
                 </ul>

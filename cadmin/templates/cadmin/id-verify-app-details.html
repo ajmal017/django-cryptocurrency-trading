@@ -24,7 +24,7 @@
             </dl>
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Document file</dt>
-                    <dd class="data-panel__value"><a class="data-panel__file-link" href="#">{{ item.document_file }}</a></dd>
+                    <dd class="data-panel__value"><a class="data-panel__file-link" href="{{ item.document_file.file.url }}">{{ item.document_file.file.name }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Status</dt>
                     <dd class="data-panel__value">{{ item.get_status_display }}</dd>

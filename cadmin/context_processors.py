@@ -9,7 +9,7 @@ def cadmin_user(request):
     if request.user.is_superuser:
         cadmin_user = request.user
         cadmin_user.fullname = 'SuperUser'
-        return { 'cadmin_user': cadmin_user, 'global_alert': global_alert, 'app_url': 'admin' }
+        return { 'cadmin_user': cadmin_user, 'global_alert': global_alert, 'app_url': 'cadmin' }
 
     if 'cadmin_user' in request.session:
         user_token = request.session['cadmin_user']
@@ -20,4 +20,4 @@ def cadmin_user(request):
     except:
         cadmin_user = None
 
-    return { 'cadmin_user': cadmin_user, 'global_alert': global_alert, 'app_url': 'admin' }
+    return { 'cadmin_user': cadmin_user, 'global_alert': global_alert, 'app_url': 'cadmin' }

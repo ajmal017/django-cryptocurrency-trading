@@ -26,12 +26,14 @@ from django.core.mail import send_mail
 from django.template.defaulttags import register
 
 from . import models
+from .models import COUNTRY_CODE
+from .form import MediasForm
 from .decorators import cadmin_user_login_required, cadmin_user_is_logged_in
 from .context_processors import cadmin_user
 
 logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
-app_url = 'admin'
+app_url = 'cadmin'
 
 @register.filter
 def keyvalue(dict, key):    
@@ -473,7 +475,7 @@ class TicketDetailsDisputeView(View):
         item = models.Tickets.objects.get(id=item_id)
         mes = models.Messages()
         mes.ticket = item
-        mes.writer = cadmin_user(request)['cadmin_user'].username
+        mes.writer = cadmin_user(request)['cadmin_user']
         mes.content = content
         # mes.attach_file = attach_file
         mes.created_at = datetime.now()
@@ -498,7 +500,7 @@ class TicketDetailsNoDisputeView(View):
         item = models.Tickets.objects.get(id=item_id)
         mes = models.Messages()
         mes.ticket = item
-        mes.writer = cadmin_user(request)['cadmin_user'].username
+        mes.writer = cadmin_user(request)['cadmin_user']
         mes.content = content
         # mes.attach_file = attach_file
         mes.created_at = datetime.now()
@@ -696,15 +698,16 @@ class AddNewPostView(View):
         context = request.POST.get('context', '').strip()
         disallow_comments = request.POST.get('disallow_comments', False)
         featured_images = request.POST.get('featured_images', '').strip()
+        featured_images = ','.join(featured_images.split(','))
         tags = request.POST.get('tags', '').strip()
-        add_tags(tags, cadmin_user(request)['cadmin_user'].username)
+        add_tags(tags, cadmin_user(request)['cadmin_user'])
         try:
             item = models.Posts.objects.get(id=item_id)
         except:
             item = models.Posts()
             item.created_at = datetime.now()
         
-        item.posted_by = cadmin_user(request)['cadmin_user'].username
+        item.posted_by = cadmin_user(request)['cadmin_user']
         item.status = action
         item.title = title
         item.context = context
@@ -791,6 +794,17 @@ class UploadView(View):
 
     def get(self, request):
         return render(request, 'cadmin/upload.html', {})
+
+    def post(self, request):
+        form = MediasForm(self.request.POST, self.request.FILES)
+        if form.is_valid():
+            media = form.save()
+            media.created_by = cadmin_user(request)['cadmin_user']
+            media.save()
+            data = {'is_valid': True, 'name': media.file.name, 'url': media.file.url, 'id': media.pk}
+        else:
+            data = {'is_valid': False}
+        return JsonResponse(data)
 
 
 @method_decorator(cadmin_user_login_required, name='dispatch')
@@ -1052,7 +1066,7 @@ class PostIssueView(View):
         item.description = description
         item.attached_files = attached_files
         item.save()
-        return render(request, 'cadmin/post-issue.html', {'item': item, 'success': 'Campaign Updated'})
+        return render(request, 'cadmin/post-issue.html', {'item': item, 'success': 'Issue Posted'})
 
 
 @method_decorator(cadmin_user_login_required, name='dispatch')
@@ -1196,7 +1210,7 @@ class CampaignUpdatedView(View):
             title = 'Edit campaign'
         except:
             title = 'Add new campaign'
-        return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title})
+        return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title, 'country_code': COUNTRY_CODE})
 
     def post(self, request):
         item_id = request.POST.get('item_id', '').strip()
@@ -1207,6 +1221,7 @@ class CampaignUpdatedView(View):
         campaign_type = request.POST.get('campaign_type', '').strip()
         target_location = request.POST.getlist('target_location[]')
         creative_materials = request.POST.get('creative_materials', '').strip()
+        creative_materials = ','.join(creative_materials.split(','))
         try:
             item = models.Campaigns.objects.get(id=item_id)
         except:
@@ -1223,7 +1238,7 @@ class CampaignUpdatedView(View):
         item.updated_on = datetime.now()
         item.save()
         title = 'Edit Camaign'
-        return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title, 'success': 'Campaign Updated'})
+        return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title, 'success': 'Campaign Updated', 'country_code': COUNTRY_CODE})
 
 
 @method_decorator(cadmin_user_login_required, name='dispatch')

@@ -33,15 +33,33 @@
             </div>
             <div class="editor__control-uploading">
                 <div class="editor__control-uploading-inner">
-                    <button class="editor__control-uploading-btn" type="button" onclick="uploadPopup.open()">
+                    <label class="editor__control-uploading-btn">
                         <svg class="editor__control-uploading-icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#plus"></use>
                         </svg>
-                    </button>
-                    <input type="hidden" name="featured_images" value="{{ item.featured_images }}">
-                    <span>Add featured image</span>
+                        <input id="fileupload" type="file" name="file" multiple
+                            style="display: none;"
+                            data-url="/{{app_url}}/upload/"
+                            data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+                        <!-- <span>Add featured image</span> -->
+                    </label>
+                    <input type="hidden" name="featured_images" class="instead_of_file" value="{{ item.featured_images }}">
                 </div>
             </div>
+            <div id="uploadlist">
+                {% for media in item.featured_images_as_file_list %}
+                <div class="drag-n-drop__uploading-file upload-bar" file_id="{{ media.id }}">
+                    <div class="upload-bar__file-name" style="width: 80%; word-break: break-all;">{{ media.file.name }}</div>
+                    <div class="upload-bar__bar">
+                        <a class="upload-bar__close-btn" href="javascript:void(0)" onclick="removeFileList('{{ media.id }}')">
+                            <svg class="upload-bar__close-icon" width="30">
+                                <use xlink:href="{% static '/cadmin/images/icons.svg' %}#times"></use>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div> 
             <div class="editor__control-input">
                 <input class="editor__control-input-tag" name="tags" placeholder="Enter tags" value="{{ item.tags }}">
                 <svg class="editor__control-input-icon" width="30">
@@ -53,7 +71,7 @@
         </section>
     </form>
 </main>
-<aside class="modal upload-popup js-upload-popup-target"><button class="modal__close-outer" type="button" onclick="uploadPopup.close()"></button>
+<!-- <aside class="modal upload-popup js-upload-popup-target"><button class="modal__close-outer" type="button" onclick="uploadPopup.close()"></button>
     <div class="modal__container upload-popup__container"><button class="upload-popup__close-inner" type="button" onclick="uploadPopup.close()"><svg class="upload-popup__close-icon" width="30">
                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
             </svg></button>
@@ -154,5 +172,16 @@
             </div>
         </div>
     </div>
-</aside>
+</aside> -->
+{% endblock %}
+
+{% block bottom-script %}
+{{ block.super }}
+<script defer src="{% static 'cadmin/js/jquery.ui.widget.js' %}"></script>
+<script defer src="{% static 'cadmin/js/jquery.iframe-transport.js' %}"></script>
+<script defer src="{% static 'cadmin/js/jquery.fileupload.js' %}"></script>
+<script defer src="{% static 'cadmin/js/upload.js' %}"></script>
+<script>
+var ICON_TIMES = '{% static "cadmin/images/icons.svg" %}#times';
+</script>
 {% endblock %}
