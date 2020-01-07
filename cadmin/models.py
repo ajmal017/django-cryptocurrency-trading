@@ -464,13 +464,13 @@ class Tickets(MyModel):
     transaction = models.ForeignKey(Transactions, on_delete=models.CASCADE)
     topic = models.CharField(max_length=255)
     is_dispute = models.BooleanField(choices=BOOLEAN_TYPES)
-    ticket_manager = models.ForeignKey(Users, on_delete=models.CASCADE)
+    ticket_manager = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
     ticket_priority = models.CharField(max_length=10)
 
 
 class Messages(MyModel):
     ticket = models.ForeignKey(Tickets, on_delete=models.CASCADE)
-    writer = models.ForeignKey(Users, on_delete=models.CASCADE)
+    writer = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
     content = models.TextField()
     # attach_file = models.CharField(max_length=255)
     created_at = models.DateTimeField()
@@ -486,7 +486,7 @@ class Contacts(MyModel):
 
 class Pages(MyModel):
     title = models.CharField(max_length=255)
-    posted_by = models.ForeignKey(Users, on_delete=models.CASCADE)
+    posted_by = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
     context = models.TextField()
     updated_on = models.DateTimeField()
@@ -495,7 +495,7 @@ class Pages(MyModel):
 
 class Posts(MyModel):
     title = models.CharField(max_length=255)
-    posted_by = models.ForeignKey(Users, on_delete=models.CASCADE)
+    posted_by = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
     context = models.TextField()
     tags = models.TextField()
@@ -530,7 +530,7 @@ class Idcards(MyModel):
 
 
 class LoginLogs(MyModel):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
     ip_address = models.CharField(max_length=255)
     destination = models.CharField(default='raplev', max_length=255)
     created_at = models.DateTimeField(auto_now=True)
@@ -581,7 +581,7 @@ class Options(MyModel):
 
 class SecurityStatus(MyModel):
     ip_address = models.CharField(max_length=255)
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
 
 
