@@ -30,7 +30,7 @@ $(function () {
         },
         done: function (e, data) {
             if (data.result.is_valid) {
-                var values = $('.instead_of_file').val().split(',')
+                var values = $('.instead_of_file').val() ? $('.instead_of_file').val().split(',') : [];
                 values = values.filter(function(el) {
                     return el != ''
                 })
@@ -47,11 +47,11 @@ $(function () {
 });
 
 function removeFileList(id) {
-    values = $('.instead_of_file').val().split(',')
+    values = $('.instead_of_file').val() ? $('.instead_of_file').val().split(',') : [];
     values = values.filter(function(el) {
         return el != id
     })
     $('.instead_of_file').val(values.join(','))
-    console.log(values)
+    // console.log(values)
     $('[file_id='+id+']').remove()
 }
