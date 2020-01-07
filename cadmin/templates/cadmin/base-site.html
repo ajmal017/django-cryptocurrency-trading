@@ -46,7 +46,7 @@
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#sign-out-alt"></use>
                             </svg>
                             {% if user.is_superuser %}
-                            <a href="/admin/logout">Log out</a></li>
+                            <a href="/super-admin/logout">Log out</a></li>
                             {% else %}
                             <a href="/{{ app_url }}/logout">Log out</a></li>
                             {% endif %}
