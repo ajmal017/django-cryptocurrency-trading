@@ -17,6 +17,7 @@ def cadmin_user(request):
         user_token = ''
     try:
         cadmin_user = Users.objects.get(token=user_token)
+        cadmin_user.is_superuser = False
     except:
         cadmin_user = None
 
