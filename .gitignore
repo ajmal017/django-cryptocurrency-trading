@@ -3,3 +3,4 @@ __src__
 __pycache__
 .vscode
 migrations
+media

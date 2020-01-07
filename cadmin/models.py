@@ -106,6 +106,252 @@ PAGESTATUS_TYPES = (
 )
 
 
+COUNTRY_CODE = (
+    ('AF', 'Afghanistan'),
+    ('AL', 'Albania'),
+    ('DZ', 'Algeria'),
+    ('AS', 'American Samoa'),
+    ('AD', 'Andorra'),
+    ('AO', 'Angola'),
+    ('AI', 'Anguilla'),
+    ('AG', 'Antigua and Barbuda'),
+    ('AR', 'Argentina'),
+    ('AM', 'Armenia'),
+    ('AW', 'Aruba'),
+    ('AU', 'Australia'),
+    ('AT', 'Austria'),
+    ('AZ', 'Azerbaijan'),
+    ('BS', 'Bahamas'),
+    ('BH', 'Bahrain'),
+    ('BD', 'Bangladesh'),
+    ('BB', 'Barbados'),
+    ('BY', 'Belarus'),
+    ('BE', 'Belgium'),
+    ('BZ', 'Belize'),
+    ('BJ', 'Benin'),
+    ('BM', 'Bermuda'),
+    ('BT', 'Bhutan'),
+    ('BO', 'Bolivia, Plurinational State of'),
+    ('BA', 'Bosnia and Herzegovina'),
+    ('BW', 'Botswana'),
+    ('BV', 'Bouvet Island'),
+    ('BR', 'Brazil'),
+    ('IO', 'British Indian Ocean Territory'),
+    ('BN', 'Brunei Darussalam'),
+    ('BG', 'Bulgaria'),
+    ('BF', 'Burkina Faso'),
+    ('BI', 'Burundi'),
+    ('KH', 'Cambodia'),
+    ('CM', 'Cameroon'),
+    ('CA', 'Canada'),
+    ('CV', 'Cape Verde'),
+    ('KY', 'Cayman Islands'),
+    ('CF', 'Central African Republic'),
+    ('TD', 'Chad'),
+    ('CL', 'Chile'),
+    ('CN', 'China'),
+    ('CO', 'Colombia'),
+    ('KM', 'Comoros'),
+    ('CG', 'Congo'),
+    ('CD', 'Congo, the Democratic Republic of the'),
+    ('CK', 'Cook Islands'),
+    ('CR', 'Costa Rica'),
+    ('CI', 'CÃ´te d\'Ivoire'),
+    ('HR', 'Croatia'),
+    ('CU', 'Cuba'),
+    ('CW', 'CuraÃ§ao'),
+    ('CY', 'Cyprus'),
+    ('CZ', 'Czech Republic'),
+    ('DK', 'Denmark'),
+    ('DJ', 'Djibouti'),
+    ('DM', 'Dominica'),
+    ('DO', 'Dominican Republic'),
+    ('EC', 'Ecuador'),
+    ('EG', 'Egypt'),
+    ('SV', 'El Salvador'),
+    ('GQ', 'Equatorial Guinea'),
+    ('ER', 'Eritrea'),
+    ('EE', 'Estonia'),
+    ('ET', 'Ethiopia'),
+    ('FK', 'Falkland Islands (Malvinas)'),
+    ('FO', 'Faroe Islands'),
+    ('FJ', 'Fiji'),
+    ('FI', 'Finland'),
+    ('FR', 'France'),
+    ('GF', 'French Guiana'),
+    ('PF', 'French Polynesia'),
+    ('TF', 'French Southern Territories'),
+    ('GA', 'Gabon'),
+    ('GM', 'Gambia'),
+    ('GE', 'Georgia'),
+    ('DE', 'Germany'),
+    ('GH', 'Ghana'),
+    ('GI', 'Gibraltar'),
+    ('GR', 'Greece'),
+    ('GL', 'Greenland'),
+    ('GD', 'Grenada'),
+    ('GP', 'Guadeloupe'),
+    ('GU', 'Guam'),
+    ('GT', 'Guatemala'),
+    ('GG', 'Guernsey'),
+    ('GN', 'Guinea'),
+    ('GW', 'Guinea-Bissau'),
+    ('GY', 'Guyana'),
+    ('HT', 'Haiti'),
+    ('HM', 'Heard Island and McDonald Islands'),
+    ('VA', 'Holy See (Vatican City State)'),
+    ('HN', 'Honduras'),
+    ('HK', 'Hong Kong'),
+    ('HU', 'Hungary'),
+    ('IS', 'Iceland'),
+    ('IN', 'India'),
+    ('ID', 'Indonesia'),
+    ('IR', 'Iran, Islamic Republic of'),
+    ('IQ', 'Iraq'),
+    ('IE', 'Ireland'),
+    ('IM', 'Isle of Man'),
+    ('IL', 'Israel'),
+    ('IT', 'Italy'),
+    ('JM', 'Jamaica'),
+    ('JP', 'Japan'),
+    ('JE', 'Jersey'),
+    ('JO', 'Jordan'),
+    ('KZ', 'Kazakhstan'),
+    ('KE', 'Kenya'),
+    ('KI', 'Kiribati'),
+    ('KP', 'Korea, Democratic People\'s Republic of'),
+    ('KR', 'Korea, Republic of'),
+    ('KW', 'Kuwait'),
+    ('KG', 'Kyrgyzstan'),
+    ('LA', 'Lao People\'s Democratic Republic'),
+    ('LV', 'Latvia'),
+    ('LB', 'Lebanon'),
+    ('LS', 'Lesotho'),
+    ('LR', 'Liberia'),
+    ('LY', 'Libya'),
+    ('LI', 'Liechtenstein'),
+    ('LT', 'Lithuania'),
+    ('LU', 'Luxembourg'),
+    ('MO', 'Macao'),
+    ('MK', 'Macedonia, the former Yugoslav Republic of'),
+    ('MG', 'Madagascar'),
+    ('MW', 'Malawi'),
+    ('MY', 'Malaysia'),
+    ('MV', 'Maldives'),
+    ('ML', 'Mali'),
+    ('MT', 'Malta'),
+    ('MH', 'Marshall Islands'),
+    ('MQ', 'Martinique'),
+    ('MR', 'Mauritania'),
+    ('MU', 'Mauritius'),
+    ('YT', 'Mayotte'),
+    ('MX', 'Mexico'),
+    ('FM', 'Micronesia, Federated States of'),
+    ('MD', 'Moldova, Republic of'),
+    ('MC', 'Monaco'),
+    ('MN', 'Mongolia'),
+    ('ME', 'Montenegro'),
+    ('MS', 'Montserrat'),
+    ('MA', 'Morocco'),
+    ('MZ', 'Mozambique'),
+    ('MM', 'Myanmar'),
+    ('NA', 'Namibia'),
+    ('NR', 'Nauru'),
+    ('NP', 'Nepal'),
+    ('NL', 'Netherlands'),
+    ('NC', 'New Caledonia'),
+    ('NZ', 'New Zealand'),
+    ('NI', 'Nicaragua'),
+    ('NE', 'Niger'),
+    ('NG', 'Nigeria'),
+    ('NU', 'Niue'),
+    ('NF', 'Norfolk Island'),
+    ('MP', 'Northern Mariana Islands'),
+    ('NO', 'Norway'),
+    ('OM', 'Oman'),
+    ('PK', 'Pakistan'),
+    ('PW', 'Palau'),
+    ('PS', 'Palestinian Territory, Occupied'),
+    ('PA', 'Panama'),
+    ('PG', 'Papua New Guinea'),
+    ('PY', 'Paraguay'),
+    ('PE', 'Peru'),
+    ('PH', 'Philippines'),
+    ('PN', 'Pitcairn'),
+    ('PL', 'Poland'),
+    ('PT', 'Portugal'),
+    ('PR', 'Puerto Rico'),
+    ('QA', 'Qatar'),
+    ('RE', 'RÃ©union'),
+    ('RO', 'Romania'),
+    ('RU', 'Russian Federation'),
+    ('RW', 'Rwanda'),
+    ('SH', 'Saint Helena, Ascension and Tristan da Cunha'),
+    ('KN', 'Saint Kitts and Nevis'),
+    ('LC', 'Saint Lucia'),
+    ('MF', 'Saint Martin (French part)'),
+    ('PM', 'Saint Pierre and Miquelon'),
+    ('VC', 'Saint Vincent and the Grenadines'),
+    ('WS', 'Samoa'),
+    ('SM', 'San Marino'),
+    ('ST', 'Sao Tome and Principe'),
+    ('SA', 'Saudi Arabia'),
+    ('SN', 'Senegal'),
+    ('RS', 'Serbia'),
+    ('SC', 'Seychelles'),
+    ('SL', 'Sierra Leone'),
+    ('SG', 'Singapore'),
+    ('SX', 'Sint Maarten (Dutch part)'),
+    ('SK', 'Slovakia'),
+    ('SI', 'Slovenia'),
+    ('SB', 'Solomon Islands'),
+    ('SO', 'Somalia'),
+    ('ZA', 'South Africa'),
+    ('GS', 'South Georgia and the South Sandwich Islands'),
+    ('SS', 'South Sudan'),
+    ('ES', 'Spain'),
+    ('LK', 'Sri Lanka'),
+    ('SD', 'Sudan'),
+    ('SR', 'Suriname'),
+    ('SZ', 'Swaziland'),
+    ('SE', 'Sweden'),
+    ('CH', 'Switzerland'),
+    ('SY', 'Syrian Arab Republic'),
+    ('TW', 'Taiwan, Province of China'),
+    ('TJ', 'Tajikistan'),
+    ('TZ', 'Tanzania, United Republic of'),
+    ('TH', 'Thailand'),
+    ('TL', 'Timor-Leste'),
+    ('TG', 'Togo'),
+    ('TK', 'Tokelau'),
+    ('TO', 'Tonga'),
+    ('TT', 'Trinidad and Tobago'),
+    ('TN', 'Tunisia'),
+    ('TR', 'Turkey'),
+    ('TM', 'Turkmenistan'),
+    ('TC', 'Turks and Caicos Islands'),
+    ('TV', 'Tuvalu'),
+    ('UG', 'Uganda'),
+    ('UA', 'Ukraine'),
+    ('AE', 'United Arab Emirates'),
+    ('GB', 'United Kingdom'),
+    ('US', 'United States'),
+    ('UM', 'United States Minor Outlying Islands'),
+    ('UY', 'Uruguay'),
+    ('UZ', 'Uzbekistan'),
+    ('VU', 'Vanuatu'),
+    ('VE', 'Venezuela, Bolivarian Republic of'),
+    ('VN', 'Viet Nam'),
+    ('VG', 'Virgin Islands, British'),
+    ('VI', 'Virgin Islands, U.S.'),
+    ('WF', 'Wallis and Futuna'),
+    ('EH', 'Western Sahara'),
+    ('YE', 'Yemen'),
+    ('ZM', 'Zambia'),
+    ('ZW', 'Zimbabwe')
+)
+
+
 class MyModelBase( models.base.ModelBase ):
     def __new__( cls, name, bases, attrs, **kwargs ):
         if name != "MyModel":
@@ -166,7 +412,7 @@ class Revenue(MyModel):
 class Offers(MyModel):
     address = models.CharField(max_length=255)
     flat = models.CharField(max_length=10, choices=FLAT_CHOICES)
-    created_by = models.ForeignKey(Customers, on_delete=models.PROTECT)
+    created_by = models.ForeignKey(Customers, on_delete=models.CASCADE)
     show_postcode = models.BooleanField(choices=BOOLEAN_TYPES)
     minimum_transaction_limit = models.IntegerField()
     trade_type = models.CharField(max_length=10, choices=TRADE_TYPES)
@@ -185,9 +431,9 @@ class Offers(MyModel):
 
 
 class Trades(MyModel):
-    offer = models.ForeignKey(Offers, on_delete=models.PROTECT)
-    trade_initiator = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='trade_trade_initiator')
-    vendor = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='trade_vendor')
+    offer = models.ForeignKey(Offers, on_delete=models.CASCADE)
+    trade_initiator = models.ForeignKey(Customers, on_delete=models.CASCADE, related_name='trade_trade_initiator')
+    vendor = models.ForeignKey(Customers, on_delete=models.CASCADE, related_name='trade_vendor')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
     amount = models.FloatField()
     status = models.CharField(max_length=255)
@@ -198,43 +444,36 @@ class Trades(MyModel):
 
 
 class Transactions(MyModel):
-    offer = models.ForeignKey(Offers, on_delete=models.PROTECT)
-    trade_initiator = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='transactions_trade_initiator')
-    vendor = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='transactions_vendor')
+    offer = models.ForeignKey(Offers, on_delete=models.CASCADE)
+    trade_initiator = models.ForeignKey(Customers, on_delete=models.CASCADE, related_name='transactions_trade_initiator')
+    vendor = models.ForeignKey(Customers, on_delete=models.CASCADE, related_name='transactions_vendor')
     txn = models.CharField(max_length=255)
     amount = models.FloatField()
     status = models.BooleanField(choices=STATUS_TYPES)
 
 
 class Escrows(MyModel):
-    offer = models.ForeignKey(Offers, on_delete=models.PROTECT)
-    held_for = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='escrows_held_for')
-    held_from = models.ForeignKey(Customers, on_delete=models.PROTECT, related_name='escrows_held_from')
+    offer = models.ForeignKey(Offers, on_delete=models.CASCADE)
+    held_for = models.ForeignKey(Customers, on_delete=models.CASCADE, related_name='escrows_held_for')
+    held_from = models.ForeignKey(Customers, on_delete=models.CASCADE, related_name='escrows_held_from')
     status = models.BooleanField(choices=PENDING_TYPES)
     amount = models.FloatField()
 
 
 class Tickets(MyModel):
-    transaction = models.ForeignKey(Transactions, on_delete=models.PROTECT)
+    transaction = models.ForeignKey(Transactions, on_delete=models.CASCADE)
     topic = models.CharField(max_length=255)
     is_dispute = models.BooleanField(choices=BOOLEAN_TYPES)
-    ticket_manager = models.ForeignKey(Users, on_delete=models.PROTECT)
+    ticket_manager = models.ForeignKey(Users, on_delete=models.CASCADE)
     ticket_priority = models.CharField(max_length=10)
 
 
 class Messages(MyModel):
-    ticket = models.ForeignKey(Tickets, on_delete=models.PROTECT)
-    writer = models.CharField(max_length=255)
+    ticket = models.ForeignKey(Tickets, on_delete=models.CASCADE)
+    writer = models.ForeignKey(Users, on_delete=models.CASCADE)
     content = models.TextField()
     # attach_file = models.CharField(max_length=255)
     created_at = models.DateTimeField()
-
-
-class Idcards(MyModel):
-    user = models.ForeignKey(Customers, on_delete=models.PROTECT)
-    document_type = models.CharField(max_length=100)
-    document_file = models.CharField(max_length=255)#need to update with media files.
-    status = models.BooleanField(choices=ACCEPTIVE_TYPES)
 
 
 class Contacts(MyModel):
@@ -247,7 +486,7 @@ class Contacts(MyModel):
 
 class Pages(MyModel):
     title = models.CharField(max_length=255)
-    posted_by = models.ForeignKey(Users, on_delete=models.PROTECT)
+    posted_by = models.ForeignKey(Users, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
     context = models.TextField()
     updated_on = models.DateTimeField()
@@ -256,7 +495,7 @@ class Pages(MyModel):
 
 class Posts(MyModel):
     title = models.CharField(max_length=255)
-    posted_by = models.ForeignKey(Users, on_delete=models.PROTECT)
+    posted_by = models.ForeignKey(Users, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
     context = models.TextField()
     tags = models.TextField()
@@ -264,6 +503,10 @@ class Posts(MyModel):
     disallow_comments = models.BooleanField(choices=BOOLEAN_TYPES)
     updated_on = models.DateTimeField()
     created_at = models.DateTimeField()
+
+    def featured_images_as_file_list(self):
+        lists = self.featured_images.split(',') if self.featured_images else []
+        return Medias.objects.filter(id__in=lists)
 
 
 class Tags(MyModel):
@@ -274,13 +517,16 @@ class Tags(MyModel):
 
 
 class Medias(MyModel):
-    original_name = models.CharField(max_length=255)
-    file_type = models.CharField(max_length=10)
-    file_size = models.FloatField()
-    name = models.CharField(max_length=255)
-    path = models.CharField(max_length=255)
-    created_by = models.CharField(max_length=255)
-    created_at = models.DateTimeField()
+    file = models.FileField(upload_to='', null=True)
+    created_by = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class Idcards(MyModel):
+    user = models.ForeignKey(Customers, on_delete=models.CASCADE)
+    document_type = models.CharField(max_length=100)
+    document_file = models.ForeignKey(Medias, on_delete=models.CASCADE)
+    status = models.BooleanField(choices=ACCEPTIVE_TYPES)
 
 
 class LoginLogs(MyModel):
@@ -299,13 +545,13 @@ class FlaggedPosts(MyModel):
 
 
 class LandingPages(MyModel):
-    template_page = models.ForeignKey(Pages, on_delete=models.PROTECT)
+    template_page = models.ForeignKey(Pages, on_delete=models.CASCADE)
     personalized_link = models.CharField(max_length=255)
     redirection_type = models.CharField(max_length=255)
 
 
 class PersLinks(MyModel):
-    landing_page = models.ForeignKey(LandingPages, on_delete=models.PROTECT)
+    landing_page = models.ForeignKey(LandingPages, on_delete=models.CASCADE)
     personalized_link = models.CharField(max_length=255)
     assigned_to_user = models.CharField(max_length=255)
     leads = models.IntegerField()
@@ -335,7 +581,7 @@ class Options(MyModel):
 
 class SecurityStatus(MyModel):
     ip_address = models.CharField(max_length=255)
-    user = models.ForeignKey(Users, on_delete=models.PROTECT)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
 
 
@@ -351,6 +597,10 @@ class Campaigns(MyModel):
     conversions = models.IntegerField(default=0)
     updated_on = models.DateTimeField()
     created_at = models.DateTimeField()
+
+    def creative_materials_as_file_list(self):
+        lists = self.creative_materials.split(',') if self.creative_materials else []
+        return Medias.objects.filter(id__in=lists)
 
 
 class Affiliates(MyModel):
@@ -376,8 +626,8 @@ class Affiliates(MyModel):
 
 class Reports(MyModel):
     user_joined = models.CharField(max_length=255)
-    affiliate = models.ForeignKey(Affiliates, on_delete=models.PROTECT)
+    affiliate = models.ForeignKey(Affiliates, on_delete=models.CASCADE)
     lead_status = models.BooleanField(default=False)
-    campaign = models.ForeignKey(Campaigns, on_delete=models.PROTECT)
+    campaign = models.ForeignKey(Campaigns, on_delete=models.CASCADE)
     created_at = models.DateTimeField()
     report_field = models.CharField(max_length=100)
