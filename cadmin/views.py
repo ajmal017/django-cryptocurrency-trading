@@ -475,7 +475,7 @@ class TicketDetailsDisputeView(View):
         item = models.Tickets.objects.get(id=item_id)
         mes = models.Messages()
         mes.ticket = item
-        mes.writer = cadmin_user(request)['cadmin_user']
+        mes.writer = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
         mes.content = content
         # mes.attach_file = attach_file
         mes.created_at = datetime.now()
@@ -500,7 +500,7 @@ class TicketDetailsNoDisputeView(View):
         item = models.Tickets.objects.get(id=item_id)
         mes = models.Messages()
         mes.ticket = item
-        mes.writer = cadmin_user(request)['cadmin_user']
+        mes.writer = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
         mes.content = content
         # mes.attach_file = attach_file
         mes.created_at = datetime.now()
@@ -634,7 +634,7 @@ class AddNewPageView(View):
             item = models.Pages()
             item.created_at = datetime.now()
         
-        item.posted_by = cadmin_user(request)['cadmin_user']
+        item.posted_by = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
         item.status = action
         item.title = title
         item.context = context
@@ -700,14 +700,14 @@ class AddNewPostView(View):
         featured_images = request.POST.get('featured_images', '').strip()
         featured_images = ','.join(featured_images.split(','))
         tags = request.POST.get('tags', '').strip()
-        add_tags(tags, cadmin_user(request)['cadmin_user'])
+        add_tags(tags, cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None)
         try:
             item = models.Posts.objects.get(id=item_id)
         except:
             item = models.Posts()
             item.created_at = datetime.now()
         
-        item.posted_by = cadmin_user(request)['cadmin_user']
+        item.posted_by = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
         item.status = action
         item.title = title
         item.context = context
@@ -799,7 +799,7 @@ class UploadView(View):
         form = MediasForm(self.request.POST, self.request.FILES)
         if form.is_valid():
             media = form.save()
-            media.created_by = cadmin_user(request)['cadmin_user']
+            media.created_by = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
             media.save()
             data = {'is_valid': True, 'name': media.file.name, 'url': media.file.url, 'id': media.pk}
         else:
