@@ -139,10 +139,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/opt/v-raplev/static'
+STATIC_ROOT = '/var/www/v-raplev/static'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'staic')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/media'
+MEDIA_ROOT = '/var/www/v-raplev/media'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DATE_INPUT_FORMATS = ('%d-%m-%Y', '%Y-%m-%d', '%a %B %m %Y')
