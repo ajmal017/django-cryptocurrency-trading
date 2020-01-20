@@ -12,12 +12,7 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.db.models import Q, Sum, Count, F
 from django.db.models.functions import Extract
-# from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponseBadRequest, HttpResponse
-# from django.contrib.auth import logout, authenticate, login
-# from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
-# from django.contrib.auth import views as auth_views
-# from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.decorators import method_decorator   
@@ -33,7 +28,7 @@ from .context_processors import cadmin_user
 
 logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
-app_url = 'cadmin'
+app_url = '/cadmin'
 
 @register.filter
 def keyvalue(dict, key):    
@@ -49,6 +44,14 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+
+def super_admin_view(request):
+    if 'cadmin_user' in request.session.keys() or request.user.is_superuser:
+        return redirect('/cadmin')
+    else:
+        return redirect('/super-admin/login')
+
 
 @method_decorator(cadmin_user_is_logged_in, name='dispatch')
 class LoginView(View):
@@ -71,8 +74,6 @@ class LoginView(View):
                     ip_address=get_client_ip(request)
                 ).save()
                 request.session['cadmin_user'] = token
-                if 'global_alert' in request.session:
-                    del request.session['global_alert']
             else:
                 try:
                     models.SecurityStatus(
@@ -85,21 +86,21 @@ class LoginView(View):
         except:
             return render(request, 'cadmin/login.html', {'error': 'Incorrect User'})
         
-        return redirect('/'+app_url+'')
+        return redirect(app_url+'')
 
 
 @cadmin_user_login_required
 def logout(request):
     del request.session['cadmin_user']
-    request.session['global_alert'] = {'success': "You are logged out."}
-    return redirect('/'+app_url+'')
+    # request.session['global_alert'] = {'success': "You are logged out."}
+    return redirect(app_url+'')
 
 
 @method_decorator(cadmin_user_login_required, name='dispatch')
 class IndexView(View):
     
     def get(self, request):
-        return redirect('/'+app_url+'/revenue')
+        return redirect(app_url+'/revenue')
 
 
 @method_decorator(cadmin_user_login_required, name='dispatch')
@@ -140,7 +141,7 @@ class UsersView(View):
         user_list = models.Users.objects.filter(username__icontains=username)
         page_number = request.GET.get('page', 1)
         user_list, paginator = do_paginate(user_list, page_number)
-        base_url = '/'+app_url+'/users/?username=' + username + "&"
+        base_url = app_url+'/users/?username=' + username + "&"
         return render(request, 'cadmin/users.html',
                       {'user_list': user_list, 'paginator' : paginator, 'base_url': base_url, 'search_user_name': username})
 
@@ -218,7 +219,7 @@ class SetPWView(View):
         except:
             return render(request, 'cadmin/set-pw.html', {'error': 'Sorry, Something wrong. Please try later.'})
         
-        return redirect('/'+app_url+'')
+        return redirect(app_url+'')
 
 
 @method_decorator(cadmin_user_login_required, name='dispatch')
@@ -232,7 +233,7 @@ class RevenueView(View):
         items = models.Revenue.objects.filter(source__icontains=search, date__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/revenue/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/revenue/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/revenue.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'start_date': start_date, 'end_date': end_date})
@@ -281,7 +282,7 @@ class OffersView(View):
         items = models.Offers.objects.filter(Q(id__icontains=search) | Q(address__icontains=search))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/offers/?search=' + search + "&"
+        base_url = app_url+'/offers/?search=' + search + "&"
         return render(request, 'cadmin/offers.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -320,7 +321,7 @@ class TradesView(View):
         count['Completed'] = models.Trades.objects.filter(id__icontains=search, status__icontains='Completed', created_at__range=(start_date, end_date)).count()
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/trades/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/trades/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/trades.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'status': status, 'count': count,
                       'start_date': start_date, 'end_date': end_date})
@@ -343,7 +344,7 @@ class CustomersView(View):
         items = models.Customers.objects.filter(Q(email__icontains=search) | Q(username__icontains=search))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/customers/?search=' + search + "&"
+        base_url = app_url+'/customers/?search=' + search + "&"
         return render(request, 'cadmin/customers.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -383,7 +384,7 @@ class TransactionsView(View):
         items = models.Transactions.objects.filter(id__icontains=search)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/transactions/?search=' + search + "&"
+        base_url = app_url+'/transactions/?search=' + search + "&"
         return render(request, 'cadmin/transactions.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -405,7 +406,7 @@ class EscrowsView(View):
         items = models.Escrows.objects.filter(id__icontains=search)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/escrows/?search=' + search + "&"
+        base_url = app_url+'/escrows/?search=' + search + "&"
         return render(request, 'cadmin/escrows.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -454,7 +455,7 @@ class SupportCenterView(View):
         count['General'] = models.Tickets.objects.filter(id__icontains=search, is_dispute=False).count()
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/support-center/?search=' + search + "&"
+        base_url = app_url+'/support-center/?search=' + search + "&"
         return render(request, 'cadmin/support-center.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'count': count})
 
@@ -527,7 +528,7 @@ class IdVerifyAppView(View):
         items = models.Idcards.objects.filter(id__icontains=search)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/id-verify-app/?search=' + search + "&"
+        base_url = app_url+'/id-verify-app/?search=' + search + "&"
         return render(request, 'cadmin/id-verify-app.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -571,7 +572,7 @@ class ContactFormView(View):
         items = models.Contacts.objects.filter(email_address__icontains=search)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/contact-form/?search=' + search + "&"
+        base_url = app_url+'/contact-form/?search=' + search + "&"
         return render(request, 'cadmin/contact-form.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -596,7 +597,7 @@ class AdditionalPagesView(View):
         items = models.Pages.objects.filter(title__icontains=search, status__icontains=search_status)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/additional-pages/?search=' + search + "&search_status=" + search_status + "&"
+        base_url = app_url+'/additional-pages/?search=' + search + "&search_status=" + search_status + "&"
         return render(request, 'cadmin/additional-pages.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'search_status': search_status})
 
@@ -664,7 +665,7 @@ class BlogView(View):
         items = models.Posts.objects.filter(title__icontains=search, status__icontains=search_status)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/blog/?search=' + search + "&search_status=" + search_status + "&"
+        base_url = app_url+'/blog/?search=' + search + "&search_status=" + search_status + "&"
         return render(request, 'cadmin/blog.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'search_status': search_status})
 
@@ -783,7 +784,7 @@ class MediaLibraryView(View):
         items = models.Medias.objects.filter(id__icontains=search, created_at__year=year, created_at__month=month)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/media-library/?search=' + search + "&year=" + year + "&month=" + month + "&"
+        base_url = app_url+'/media-library/?search=' + search + "&year=" + year + "&month=" + month + "&"
         return render(request, 'cadmin/media-library.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'years': years, 'months': months, 'year': year, 'month': month})
@@ -815,7 +816,7 @@ class LastLoginView(View):
         items = models.LoginLogs.objects.filter(ip_address__icontains=search).order_by('-created_at')
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/last-login/?search=' + search + "&"
+        base_url = app_url+'/last-login/?search=' + search + "&"
         return render(request, 'cadmin/last-login.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -828,7 +829,7 @@ class FlaggedPostsView(View):
         items = models.FlaggedPosts.objects.filter(Q(id__icontains=search) | Q(post__id__icontains=search))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/flagged-posts/?search=' + search + "&"
+        base_url = app_url+'/flagged-posts/?search=' + search + "&"
         return render(request, 'cadmin/flagged-posts.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -863,7 +864,7 @@ class AddLandingPageView(View):
         templates = models.Pages.objects.filter(~Q(id__in=exist_links))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/add-landing-page/?item_id=' + item_id + '&'
+        base_url = app_url+'/add-landing-page/?item_id=' + item_id + '&'
         return render(request, 'cadmin/add-landing-page.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
                       'templates': templates, 'success': success, 'error': error })
@@ -933,7 +934,7 @@ class AddPersLinkView(View):
         users = models.Users.objects.all()
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/add-pers-link/?item_id=' + item_id + '&'
+        base_url = app_url+'/add-pers-link/?item_id=' + item_id + '&'
         return render(request, 'cadmin/add-pers-link.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
                       'landings': landings, 'users': users, 'success': success, 'error': error })
@@ -982,7 +983,7 @@ class AddRedirectionLinkView(View):
         items = models.RedirectionLinks.objects.all()
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/add-redirection-link/?item_id=' + item_id + '&'
+        base_url = app_url+'/add-redirection-link/?item_id=' + item_id + '&'
         return render(request, 'cadmin/add-redirection-link.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
                         'success': success, 'error': error })
@@ -1025,7 +1026,7 @@ def go_page(request, link):
         try:
             page = models.LandingPages.objects.get(personalized_link=cur_link).template_page
         except:
-            return HttpResponse('<h1>Page was found</h1>')
+            return render(request, 'theme/404-error.html', {})
     
     return return_custom_page(request, page)
 
@@ -1193,7 +1194,7 @@ class CampaignsView(View):
         items = models.Campaigns.objects.filter(campaign_name__icontains=search, updated_on__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/campaigns/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/campaigns/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/campaigns.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'start_date': start_date, 'end_date': end_date})
@@ -1252,7 +1253,7 @@ class AffiliatesView(View):
         items = models.Affiliates.objects.filter(email_address__icontains=search, created_at__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/affiliates/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/affiliates/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/affiliates.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'start_date': start_date, 'end_date': end_date})
@@ -1323,7 +1324,7 @@ class ReportsView(View):
         items = models.Reports.objects.filter(report_field__icontains=report_field, created_at__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/reports/?report_field=' + report_field + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/reports/?report_field=' + report_field + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/reports.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'report_field': report_field, 
                       'start_date': start_date, 'end_date': end_date})
@@ -1347,7 +1348,7 @@ class CommunityPostsView(View):
         items = models.Posts.objects.filter(title__icontains=search, created_at__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/community-posts/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/community-posts/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/community-posts.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'start_date': start_date, 'end_date': end_date})

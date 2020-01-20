@@ -1,0 +1,37 @@
+{% extends 'theme/base-site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}My Wallet{% endblock %}
+
+{% block page-inner %}
+<div class="page__inner balance">
+    <header class="content-header">
+        <h1 class="content-header__heading">My Wallet</h1>
+        <div class="status">
+            <div class="status__data"><span class="status__text">1.554 BTC in Wallet</span><a class="status__text" href="#">View Full Wallet</a></div>
+            <div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+        </div>
+    </header>
+    <div class="balance__item">
+        <div class="balance__caption">1.2000 BTC</div>
+        <div class="balance__buttons"><a class="balance__btn" href="#">Fund</a>|<a class="balance__btn" href="#">Withdraw</a>|<a class="balance__btn" href="#">Convert</a></div>
+    </div>
+    <div class="balance__item">
+        <div class="balance__caption">24.6524 XRP</div>
+        <div class="balance__buttons"><a class="balance__btn" href="#">Fund</a>|<a class="balance__btn" href="#">Withdraw</a>|<a class="balance__btn" href="#">Convert</a></div>
+    </div>
+    <div class="balance__item">
+        <div class="balance__caption">400.00 EUR</div>
+        <div class="balance__buttons"><a class="balance__btn" href="#">Fund</a>|<a class="balance__btn" href="#">Withdraw</a>|<a class="balance__btn" href="#">Convert</a></div>
+    </div>
+    <div class="balance__item">
+        <div class="balance__caption">900.00 USD</div>
+        <div class="balance__buttons"><a class="balance__btn" href="#">Fund</a>|<a class="balance__btn" href="#">Withdraw</a>|<a class="balance__btn" href="#">Convert</a></div>
+    </div>
+    <div class="balance__item">
+        <div class="balance__caption">1278.74 INR</div>
+        <div class="balance__buttons"><a class="balance__btn" href="#">Fund</a>|<a class="balance__btn" href="#">Withdraw</a>|<a class="balance__btn" href="#">Convert</a></div>
+    </div>
+</div>
+{% endblock %}

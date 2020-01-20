@@ -36,7 +36,7 @@
                         <td><span class="table__mobile-heading">Trade type</span><span>{{ item.operating_hours_start }} - {{ item.operating_hours_end }}</span></td>
                         <td><span class="table__mobile-heading">ID verified</span><span>{{ item.get_trade_type_display }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span>
-                            <div class="actions"><a class="table-actions__item" href="/{{ app_url }}/offer-details?item_id={{ item.id }}">Details</a>
+                            <div class="actions"><a class="table-actions__item" href="{{ cadmin_url }}/offer-details?item_id={{ item.id }}">Details</a>
                                 <!-- <a class="table-actions__item" href="#" onclick="postAction({'item_id': '{{ item.id }}', 'mode': 'suspend' });">Suspend</a> -->
                             </div>
                         </td>

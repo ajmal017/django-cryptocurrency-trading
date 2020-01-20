@@ -31,7 +31,7 @@
                         <td><span class="table__mobile-heading">Subject</span><span>{{ item.subject }}</span></td>
                         <td><span class="table__mobile-heading">Message</span><span>{{ item.content }}</span></td>
                         <td><span class="table__mobile-heading">IP Address</span><span>{{ item.ip_address }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/contact-form-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/contact-form-details?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

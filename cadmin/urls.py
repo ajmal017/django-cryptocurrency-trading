@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 
 from . import views
 
+app_name = 'cadmin'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('index/', views.IndexView.as_view()),

@@ -39,7 +39,7 @@
                         </svg>
                         <input id="fileupload" type="file" name="file" multiple
                             style="display: none;"
-                            data-url="/{{app_url}}/upload/"
+                            data-url="/{{ cadmin_url }}/upload/"
                             data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
                         <!-- <span>Add featured image</span> -->
                     </label>
@@ -177,10 +177,10 @@
 
 {% block bottom-script %}
 {{ block.super }}
-<script defer src="{% static 'cadmin/js/jquery.ui.widget.js' %}"></script>
-<script defer src="{% static 'cadmin/js/jquery.iframe-transport.js' %}"></script>
-<script defer src="{% static 'cadmin/js/jquery.fileupload.js' %}"></script>
-<script defer src="{% static 'cadmin/js/upload.js' %}"></script>
+<script defer src="{% static 'js/jquery.ui.widget.js' %}"></script>
+<script defer src="{% static 'js/jquery.iframe-transport.js' %}"></script>
+<script defer src="{% static 'js/jquery.fileupload.js' %}"></script>
+<script defer src="{% static 'js/upload.js' %}"></script>
 <script>
 var ICON_TIMES = '{% static "cadmin/images/icons.svg" %}#times';
 </script>

@@ -1,0 +1,111 @@
+{% extends 'theme/base-site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Receive{% endblock %}
+
+{% block page-inner %}
+<div class="page__inner receive">
+    <header class="content-header content-header--has-list">
+        <ul class="content-header__list">
+            <li class="content-header__item"><a class="content-header__link" href="send.html">Send</a></li>
+            <li class="content-header__item is-active"><a class="content-header__link" href="receive.html">Receive</a></li>
+            <li class="content-header__item"><a class="content-header__link" href="#">Transaction History</a></li>
+            <li class="content-header__item"><a class="content-header__link">Saved Wallets</a></li>
+        </ul>
+        <div class="status">
+            <div class="status__data"><span class="status__text">1.554 BTC in Wallet</span><a class="status__text" href="#">View Full Wallet</a></div>
+            <div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+        </div>
+    </header>
+    <div class="tablist js-tablist-toggle">
+        <div class="tablist__buttons js-tablist-triggers"><button class="tablist__button is-active" type="button">BTC</button><button class="tablist__button" type="button">ETH</button><button class="tablist__button" type="button">XRP</button></div>
+        <div class="tablist__tabs js-tablist-tabs">
+            <div class="tablist__tab is-active">
+                <div class="receive__copy copy">
+                    <div class="copy__inner"><input class="copy__output js-copy-target" type="text" value="3AWqKkftVCjx4ZQBnhSSFgD3UJgMpwV31g" readonly><span class="copy__message js-copy-message">COPIED</span><button class="copy__btn js-copy-trigger" type="button"><svg class="copy__icon">
+                                <use xlink:href="{% static 'theme/images/icons.svg' %}#copy"></use>
+                            </svg></button></div>
+                    <p class="copy__caption">Give out the bitcoin address above to receive bitcoins. This address will expire in 2 months. A new one will be automatically generated. Check back here to ensure you do not give out an expired address.</p>
+                </div>
+                <div class="receive__collapse collapse">
+                    <header class="collapse__header js-collapse-trigger" data-target="#answer-1">
+                        <h3 class="collapse__heading">Incoming transactions and fees</h3><svg class="collapse__icon">
+                            <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
+                        </svg>
+                    </header>
+                    <div class="collapse__content" id="answer-1">
+                        <p class="collapse__text">Current deposit fee for incoming transactions: 0.00015 BTC. Receiving Bitcoin usually takes 30 minutes, however it can take up to 14 days or longer. An incoming transaction needs to receive 3 Bitcoin network confirmations to appear in your wallet. <a href="#">You can find out more in our FAQ.</a></p>
+                    </div>
+                </div>
+                <div class="receive__collapse collapse">
+                    <header class="collapse__header js-collapse-trigger" data-target="#answer-2">
+                        <h3 class="collapse__heading">Lorem ipsum dolor sit amet consectur adpiscing elit?</h3><svg class="collapse__icon">
+                            <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
+                        </svg>
+                    </header>
+                    <div class="collapse__content" id="answer-2">
+                        <p class="collapse__text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatum et accusamus tempore cumque numquam, rerum ipsam aliquid ea, maxime incidunt maiores quae, sint amet asperiores deserunt odio sit. <a href="#">A, eligendi?</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="tablist__tab">
+                <div class="receive__copy copy">
+                    <div class="copy__inner"><input class="copy__output js-copy-target" type="text" value="3AWqKkftVCjx4ZQBnhSSFgD3UJgMpwV31g" readonly><span class="copy__message js-copy-message">COPIED</span><button class="copy__btn js-copy-trigger" type="button"><svg class="copy__icon">
+                                <use xlink:href="{% static 'theme/images/icons.svg' %}#copy"></use>
+                            </svg></button></div>
+                    <p class="copy__caption">Give out the Ethereum address above to receive Ethereum. This address will expire in 2 months. A new one will be automatically generated. Check back here to ensure you do not give out an expired address.</p>
+                </div>
+                <div class="receive__collapse collapse">
+                    <header class="collapse__header js-collapse-trigger" data-target="#answer-3">
+                        <h3 class="collapse__heading">Incoming transactions and fees</h3><svg class="collapse__icon">
+                            <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
+                        </svg>
+                    </header>
+                    <div class="collapse__content" id="answer-3">
+                        <p class="collapse__text">Current deposit fee for incoming transactions: 0.00015 BTC. Receiving Bitcoin usually takes 30 minutes, however it can take up to 14 days or longer. An incoming transaction needs to receive 3 Bitcoin network confirmations to appear in your wallet. <a href="#">You can find out more in our FAQ.</a></p>
+                    </div>
+                </div>
+                <div class="receive__collapse collapse">
+                    <header class="collapse__header js-collapse-trigger" data-target="#answer-4">
+                        <h3 class="collapse__heading">Lorem ipsum dolor sit amet consectur adpiscing elit?</h3><svg class="collapse__icon">
+                            <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
+                        </svg>
+                    </header>
+                    <div class="collapse__content" id="answer-4">
+                        <p class="collapse__text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatum et accusamus tempore cumque numquam, rerum ipsam aliquid ea, maxime incidunt maiores quae, sint amet asperiores deserunt odio sit. <a href="#">A, eligendi?</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="tablist__tab">
+                <div class="receive__copy copy">
+                    <div class="copy__inner"><input class="copy__output js-copy-target" type="text" value="3AWqKkftVCjx4ZQBnhSSFgD3UJgMpwV31g" readonly><span class="copy__message js-copy-message">COPIED</span><button class="copy__btn js-copy-trigger" type="button"><svg class="copy__icon">
+                                <use xlink:href="{% static 'theme/images/icons.svg' %}#copy"></use>
+                            </svg></button></div>
+                    <p class="copy__caption">Give out the Ripple address above to receive Ripple. This address will expire in 2 months. A new one will be automatically generated. Check back here to ensure you do not give out an expired address.</p>
+                </div>
+                <div class="receive__collapse collapse">
+                    <header class="collapse__header js-collapse-trigger" data-target="#answer-5">
+                        <h3 class="collapse__heading">Incoming transactions and fees</h3><svg class="collapse__icon">
+                            <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
+                        </svg>
+                    </header>
+                    <div class="collapse__content" id="answer-5">
+                        <p class="collapse__text">Current deposit fee for incoming transactions: 0.00015 BTC. Receiving Bitcoin usually takes 30 minutes, however it can take up to 14 days or longer. An incoming transaction needs to receive 3 Bitcoin network confirmations to appear in your wallet. <a href="#">You can find out more in our FAQ.</a></p>
+                    </div>
+                </div>
+                <div class="receive__collapse collapse">
+                    <header class="collapse__header js-collapse-trigger" data-target="#answer-6">
+                        <h3 class="collapse__heading">Lorem ipsum dolor sit amet consectur adpiscing elit?</h3><svg class="collapse__icon">
+                            <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
+                        </svg>
+                    </header>
+                    <div class="collapse__content" id="answer-6">
+                        <p class="collapse__text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatum et accusamus tempore cumque numquam, rerum ipsam aliquid ea, maxime incidunt maiores quae, sint amet asperiores deserunt odio sit. <a href="#">A, eligendi?</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

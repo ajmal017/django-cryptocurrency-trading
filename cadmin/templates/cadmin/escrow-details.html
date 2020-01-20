@@ -8,7 +8,7 @@
 <main class="page__inner js-nav-close-trigger details">
     <section class="details__section section">
         <header class="section__header">
-            <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/escrows">Escrows</a><span> / </span><span>{{ item.id }}</span></h1>
+            <h1 class="section__heading"><a class="details__heading-text" href="{{ cadmin_url }}/escrows">Escrows</a><span> / </span><span>{{ item.id }}</span></h1>
         </header>
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
@@ -35,7 +35,7 @@
     <div class="page__control"><a class="page__control-item btn btn--dark btn--large" href="#" onclick="escrowReleasePopup.open()">Release</a><a class="page__control-item btn btn--red btn--large" href="#" onclick="escrowCancelPopup.open()">Cancel</a></div>
 </main>
 <aside class="modal popup popup--small js-escrow-cancel-popup-target"><button class="modal__close-outer" type="button" onclick="escrowCancelPopup.close()"></button>
-    <form class="popup__container modal__container" action="/{{ app_url }}/escrow-cancel/" method="POST">
+    <form class="popup__container modal__container" action="{{ cadmin_url }}/escrow-cancel/" method="POST">
         {% csrf_token %}
         <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}" />
         <button class="popup__close-inner" type="button" onclick="escrowCancelPopup.close()">
@@ -49,7 +49,7 @@
     </form>
 </aside>
 <aside class="modal popup popup--small js-escrow-release-popup-target"><button class="modal__close-outer" type="button" onclick="escrowReleasePopup.close()"></button>
-    <form class="popup__container modal__container" action="/{{ app_url }}/escrow-release/" method="POST">
+    <form class="popup__container modal__container" action="{{ cadmin_url }}/escrow-release/" method="POST">
         {% csrf_token %}
         <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}" />
         <button class="popup__close-inner" type="button" onclick="escrowReleasePopup.close()">

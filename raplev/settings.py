@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 from datetime import timedelta
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,7 +29,7 @@ SECRET_KEY = '-ftl$49mojhozrjk)ue7$1uq!-td)hn+qvrrp(6nod7#d**q*u'
 DEBUG = True
 
 ALLOWED_HOSTS = ['unstable-v.raplev.com', 'localhost']
-
+HOSTNAME = 'unstable-v.raplev.com'
 
 # Application definition
 
@@ -41,19 +42,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.postgres',
     'django.contrib.staticfiles',
-    'simple_email_confirmation',
-    'wallet',
-    'taggit',
-    'blog',
-    'tinymce',
-    'commento_sso',
-    'django_countries',
-    'phonenumber_field',
+    # 'simple_email_confirmation',
+    # 'wallet',
+    # 'taggit',
+    # 'blog',
+    # 'tinymce',
+    # 'commento_sso',
+    # 'django_countries',
+    # 'phonenumber_field',
+    'theme',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -75,8 +78,10 @@ TEMPLATES = [
                'django.contrib.auth.context_processors.auth',
                'django.contrib.messages.context_processors.messages',
                'django.template.context_processors.media',
-               'commento_sso.context_processors.commento_host',
-               'cadmin.context_processors.cadmin_user'
+               'raplev.context_processors.global_settings',
+            #    'commento_sso.context_processors.commento_host',
+               'cadmin.context_processors.cadmin_user',
+               'theme.context_processors.theme_decorators'
            ],
        },
    },
@@ -118,8 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'wallet.User'
-
+AUTH_USER_MODEL = 'cadmin.Users'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -134,6 +138,25 @@ USE_L10N = True
 
 USE_TZ = True
 
+LANGUAGES = [
+  ('en', _('English')),
+  ('ru', _('Русский')),
+  ('io', _('Nigeria')),
+  ('zh-hans', _('简体中文')),
+]
+
+
+# Add custom languages not provided by Django (io => ng)
+import django.conf.locale
+from django.conf import global_settings
+global_settings.LANGUAGES = [(x[0], x[1]) if x[0] != 'io' else ('io', 'Nigeria') for x in global_settings.LANGUAGES]
+django.conf.locale.LANG_INFO['io']['name'] = 'English'
+django.conf.locale.LANG_INFO['io']['name_local'] = u'Nigeria'
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -141,6 +164,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = '/var/www/v-raplev/static'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'staic')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/www/v-raplev/media'
@@ -180,6 +206,12 @@ TWILIO_ACCOUNT_SID = 'ACa7753e13018596d5193b423c8603f1c5'
 TWILIO_AUTH_TOKEN = '3af418ebdd13244d2aff1dbbf225c30b'
 TWILIO_VERIFICATION_SID = 'VA84385cf2852605f474a448127cba2488'
 TWILIO_PHONE_NUMBER = '+15005550006'
+
+FACEBOOK_LINK = 'https://www.facebook.com/'
+LIKEDIN_LINK = 'https://www.linkedin.com/'
+TWITTER_LINK = 'https://www.twitter.com/'
+YOUTUBE_LINK = 'https://www.youtube.com/'
+
 
 LOGGING = {
     'version': 1,

@@ -1,0 +1,72 @@
+{% extends 'theme/base-site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Transaction History{% endblock %}
+
+{% block page-inner %}
+<div class="page__inner history">
+    <header class="content-header content-header--has-list">
+        <ul class="content-header__list">
+            <li class="content-header__item"><a class="content-header__link" href="send.html">Send</a></li>
+            <li class="content-header__item"><a class="content-header__link" href="receive.html">Receive</a></li>
+            <li class="content-header__item is-active"><a class="content-header__link" href="#">Transaction History</a></li>
+            <li class="content-header__item"><a class="content-header__link">Saved Wallets</a></li>
+        </ul>
+        <div class="status">
+            <div class="status__data"><span class="status__text">1.554 BTC in Wallet</span><a class="status__text" href="#">View Full Wallet</a></div>
+            <div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+        </div>
+    </header>
+    <ul class="history__page-nav page-nav">
+        <li class="page-nav__item is-selected"><a class="page-nav__link" href="#">Sold</a></li>
+        <li class="page-nav__item"><a class="page-nav__link" href="#">Bought</a></li>
+        <li class="page-nav__item"><a class="page-nav__link" href="#">Sucessful</a></li>
+        <li class="page-nav__item"><a class="page-nav__link" href="#">Cancelled</a></li>
+    </ul>
+    <div class="table">
+        <header class="table__header">
+            <div class="table__col table__col-1">Date</div>
+            <div class="table__col table__col-2">Coins Sold</div>
+            <div class="table__col table__col-3">Payment</div>
+            <div class="table__col table__col-4">Description</div>
+            <div class="table__col table__col-5">Status</div>
+        </header>
+        <div class="table__row table__row--canceled">
+            <div class="table__col table__col-1">03 Oct 19 - 2:12pm</div>
+            <div class="table__col table__col-2">1.155 BTC</div>
+            <div class="table__col table__col-3">4,554 USD</div>
+            <div class="table__col table__col-4">Duis id imperdiet sapien. Suspendisse.</div>
+            <div class="table__col table__col-5">Canceled Trade</div>
+        </div>
+        <div class="table__row table__row--canceled">
+            <div class="table__col table__col-1">03 Oct 19 - 2:12pm</div>
+            <div class="table__col table__col-2">1.155 BTC</div>
+            <div class="table__col table__col-3">4,554 USD</div>
+            <div class="table__col table__col-4">Duis id imperdiet sapien. Suspendisse.</div>
+            <div class="table__col table__col-5">Canceled Trade</div>
+        </div>
+        <div class="table__row">
+            <div class="table__col table__col-1">03 Oct 19 - 2:12pm</div>
+            <div class="table__col table__col-2">1.155 BTC</div>
+            <div class="table__col table__col-3">4,554 USD</div>
+            <div class="table__col table__col-4">Duis id imperdiet sapien. Suspendisse.</div>
+            <div class="table__col table__col-5">Completed Trade</div>
+        </div>
+        <div class="table__row">
+            <div class="table__col table__col-1">03 Oct 19 - 2:12pm</div>
+            <div class="table__col table__col-2">1.155 BTC</div>
+            <div class="table__col table__col-3">4,554 USD</div>
+            <div class="table__col table__col-4">Duis id imperdiet sapien. Suspendisse.</div>
+            <div class="table__col table__col-5">Completed Trade</div>
+        </div>
+        <div class="table__row">
+            <div class="table__col table__col-1">03 Oct 19 - 2:12pm</div>
+            <div class="table__col table__col-2">1.155 BTC</div>
+            <div class="table__col table__col-3">4,554 USD</div>
+            <div class="table__col table__col-4">Duis id imperdiet sapien. Suspendisse.</div>
+            <div class="table__col table__col-5">Completed Trade</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

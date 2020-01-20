@@ -1,0 +1,38 @@
+{% extends 'theme/base-site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Saved wallets{% endblock %}
+
+{% block page-inner %}
+<div class="page__inner wallets">
+    <header class="content-header content-header--has-list">
+        <ul class="content-header__list">
+            <li class="content-header__item"><a class="content-header__link" href="send.html">Send</a></li>
+            <li class="content-header__item"><a class="content-header__link" href="receive.html">Receive</a></li>
+            <li class="content-header__item"><a class="content-header__link" href="#">Transaction History</a></li>
+            <li class="content-header__item is-active"><a class="content-header__link">Saved Wallets</a></li>
+        </ul>
+        <div class="status">
+            <div class="status__data"><span class="status__text">1.554 BTC in Wallet</span><a class="status__text" href="#">View Full Wallet</a></div>
+            <div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+        </div>
+    </header>
+    <div class="wallets__currency">
+        <h2 class="wallets__heading">Bitcoin</h2>
+        <div class="wallets__table listing">
+            <header class="listing__header-row"><span class="wallets__col listing__col">Wallet ID</span><span class="wallets__col listing__col">Description</span><span class="wallets__col listing__col">Added on</span><span class="wallets__col listing__col">Action</span></header>
+            <div class="listing__row"><span class="wallets__col listing__col listing__id"><span class="listing__mobile-caption">Wallet ID: </span><span>445786545</span></span><span class="wallets__col listing__col">Lorem ipsum dolor sit amet this is a dummy text but you will fill with a description yepp.</span><span class="wallets__col listing__col">02 Feb 19 8:14pm</span><button class="wallets__col wallets__remove listing__col" type="button">Remove</button></div>
+            <div class="listing__row"><span class="wallets__col listing__col listing__id"><span class="listing__mobile-caption">Wallet ID: </span><span>445786545</span></span><span class="wallets__col listing__col">Lorem ipsum dolor sit amet this is a dummy text but you will fill with a description yepp.</span><span class="wallets__col listing__col">02 Feb 19 8:14pm</span><button class="wallets__col wallets__remove listing__col" type="button">Remove</button></div>
+        </div>
+    </div>
+    <div class="wallets__currency">
+        <h2 class="wallets__heading">Ethereum</h2>
+        <div class="wallets__table listing">
+            <header class="listing__header-row"><span class="wallets__col listing__col">Wallet ID</span><span class="wallets__col listing__col">Description</span><span class="wallets__col listing__col">Added on</span><span class="wallets__col listing__col">Action</span></header>
+            <div class="listing__row"><span class="wallets__col listing__col listing__id"><span class="listing__mobile-caption">Wallet ID: </span><span>445786545</span></span><span class="wallets__col listing__col">Lorem ipsum dolor sit amet this is a dummy text but you will fill with a description yepp.</span><span class="wallets__col listing__col">02 Feb 19 8:14pm</span><button class="wallets__col wallets__remove listing__col" type="button">Remove</button></div>
+            <div class="listing__row"><span class="wallets__col listing__col listing__id"><span class="listing__mobile-caption">Wallet ID: </span><span>445786545</span></span><span class="wallets__col listing__col">Lorem ipsum dolor sit amet this is a dummy text but you will fill with a description yepp.</span><span class="wallets__col listing__col">02 Feb 19 8:14pm</span><button class="wallets__col wallets__remove listing__col" type="button">Remove</button></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
