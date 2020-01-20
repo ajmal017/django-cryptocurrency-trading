@@ -395,9 +395,9 @@ class Trades(MyModel):
             return False
 
     def trade_price(self):
-        if self.offer.counter:
+        try:
             return self.offer.counter().price
-        else:
+        except:
             return self.offer.get_trade_price
 
     def proof_documents_list(self):

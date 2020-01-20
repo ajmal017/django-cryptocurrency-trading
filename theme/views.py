@@ -432,7 +432,7 @@ class NewOffer(View):
             'minimum_successful_trades': request.POST.get('minimum_successful_trades'),
             'minimum_complete_trade_rate': request.POST.get('minimum_complete_trade_rate'),
             'admin_confirmed': False,
-            'created_by': current_user(request),
+            'created_by': current_user(request).customer(),
             'created_at': datetime.now(),
         }
 
