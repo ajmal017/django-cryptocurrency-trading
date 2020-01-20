@@ -34,7 +34,7 @@
                         <td><span class="table__mobile-heading">Document type</span><span>{{ item.document_type }}</span></td>
                         <td><span class="table__mobile-heading">Document</span><a href="#">{{ item.document_file }}</a></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/id-verify-app-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/id-verify-app-details?item_id={{ item.id }}">Details</a></td>
                         </td>
                     </tr>
                     {% endfor %}

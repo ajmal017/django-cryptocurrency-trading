@@ -11,7 +11,7 @@
         <input type="hidden" name="item_id" value="{{ item.pk }}" />
         <section class="section">
             <header class="section__header">
-                <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/campaigns">Campaigns</a><span> / </span><span>{{ item.id }}</span></h1>
+                <h1 class="section__heading"><a class="details__heading-text" href="{{ cadmin_url }}/campaigns">Campaigns</a><span> / </span><span>{{ item.id }}</span></h1>
             </header>
             <div class="section__inner">
                 <div class="section__fields">
@@ -48,7 +48,7 @@
                         <p class="attach__formats">*jpg, *png, *gif, *docx, *doc, *txt, *pdf accepted</p>
                     </div><label class="attach__btn">Browse<input id="fileupload" type="file" name="file" multiple
                         style="display: none;"
-                        data-url="/{{app_url}}/upload/"
+                        data-url="/{{ cadmin_url }}/upload/"
                         data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'></label>
                         <input type="hidden" name="creative_materials" class="instead_of_file" value="{{ item.creative_materials }}">
                 </div>
@@ -87,9 +87,9 @@
 
 {% block bottom-script %}
 {{ block.super }}
-<script defer src="{% static 'cadmin/js/jquery.ui.widget.js' %}"></script>
-<script defer src="{% static 'cadmin/js/jquery.iframe-transport.js' %}"></script>
-<script defer src="{% static 'cadmin/js/jquery.fileupload.js' %}"></script>
+<script defer src="{% static 'js/jquery.ui.widget.js' %}"></script>
+<script defer src="{% static 'js/jquery.iframe-transport.js' %}"></script>
+<script defer src="{% static 'js/jquery.fileupload.js' %}"></script>
 <script defer src="{% static 'cadmin/js/upload.js' %}"></script>
 <script>
 var ICON_TIMES = '{% static "cadmin/images/icons.svg" %}#times';

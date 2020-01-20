@@ -1,0 +1,170 @@
+{% extends 'theme/base-site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Seller directory{% endblock %}
+
+{% block page-inner %}
+<div class="page__inner seller-directory">
+    <div class="seller-directory__search">
+        <div class="seller-directory__search-inner js-search-results-wrapper"><input class="seller-directory__search-input js-search-results-trigger"><button class="seller-directory__search-btn btn btn--round btn--theme-4" type="button">Search</button></div>
+        <ul class="seller-directory__search-results js-search-results-target">
+            <li class="seller-directory__search-result">jonathan.diaz77</li>
+            <li class="seller-directory__search-result">jonathan_j</li>
+            <li class="seller-directory__search-result">draxjona1988</li>
+        </ul>
+    </div>
+    <div class="seller-directory__tabs"><a class="seller-directory__tab is-active" href="#">ACTIVE</a><a class="seller-directory__tab" href="#">NEW</a></div>
+    <table class="seller-directory__table table-new">
+        <thead class="table-new__thead">
+            <tr class="table-new__row">
+                <th class="table-new__th">Seller</th>
+                <th class="table-new__th">Total trades completed</th>
+                <th class="table-new__th">Feedback score</th>
+                <th class="table-new__th"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="table-new__row">
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Seller</span><a href="#">jonathan.diaz77</a></td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Total trades completed</span><span>77</span></td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Feedback score</span>
+                    <div class="table-new__rate">
+                        <div class="table-new__rate-wrapper"><span class="table-new__rate-sum">(73)</span>
+                            <div class="stars-fixed small"><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half is-selected">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg></div>
+                        </div>
+                    </div>
+                </td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading"></span><a class="table-new__link-btn" href="#">VIEW PROFILE</a></td>
+            </tr>
+            <tr class="table-new__row">
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Seller</span><a href="#">jonathan.diaz77</a></td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Total trades completed</span><span>77</span></td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Feedback score</span>
+                    <div class="table-new__rate">
+                        <div class="table-new__rate-wrapper"><span class="table-new__rate-sum">(73)</span>
+                            <div class="stars-fixed small"><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half is-selected">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg></div>
+                        </div>
+                    </div>
+                </td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading"></span><a class="table-new__link-btn" href="#">VIEW PROFILE</a></td>
+            </tr>
+            <tr class="table-new__row">
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Seller</span><a href="#">jonathan.diaz77</a></td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Total trades completed</span><span>77</span></td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Feedback score</span>
+                    <div class="table-new__rate">
+                        <div class="table-new__rate-wrapper"><span class="table-new__rate-sum">(73)</span>
+                            <div class="stars-fixed small"><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half is-selected">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg></div>
+                        </div>
+                    </div>
+                </td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading"></span><a class="table-new__link-btn" href="#">VIEW PROFILE</a></td>
+            </tr>
+            <tr class="table-new__row">
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Seller</span><a href="#">jonathan.diaz77</a></td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Total trades completed</span><span>77</span></td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading">Feedback score</span>
+                    <div class="table-new__rate">
+                        <div class="table-new__rate-wrapper"><span class="table-new__rate-sum">(73)</span>
+                            <div class="stars-fixed small"><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg><svg class="stars-fixed__icon stars-fixed__icon--half is-selected">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
+                                </svg><svg class="stars-fixed__icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
+                                </svg></div>
+                        </div>
+                    </div>
+                </td>
+                <td class="table-new__cell"><span class="table-new__mobile-heading"></span><a class="table-new__link-btn" href="#">VIEW PROFILE</a></td>
+            </tr>
+        </tbody>
+    </table>
+    <nav class="seller-directory__pagination pagination">
+        <ul class="pagination__list">
+            <li class="pagination__item"><a href="?page=1" rel="first">Prev</a></li>
+            <li class="pagination__item is-active"><span>1</span></li>
+            <li class="pagination__item"><a href="?page=2">2</a></li>
+            <li class="pagination__item"><a href="?page=3">3</a></li>
+            <li class="pagination__item">...</li>
+            <li class="pagination__item"><a href="?page=5">7</a></li>
+            <li class="pagination__item"><a href="?page=4" rel="next">Next</a></li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}

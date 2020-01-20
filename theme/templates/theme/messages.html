@@ -1,0 +1,174 @@
+{% extends 'theme/base-site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Homepage{% endblock %}
+{% block body %}home{% endblock %}
+
+{% block page-inner %}
+<div class="messenger">
+    <div class="messenger__container">
+        <header class="content-header">
+            <h1 class="content-header__heading">My messages</h1>
+            <div class="status">
+                <div class="status__data"><span class="status__text">1.554 BTC in Wallet</span><a class="status__text" href="#">View Full Wallet</a></div>
+                <div class="status__userpic js-status-trigger is-online"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                <div class="status__dropdown js-status-target">
+                    <ul class="status__list">
+                        <li class="status__item" onclick="userStatus.setOnline()">Online</li>
+                        <li class="status__item" onclick="userStatus.setAway()">Away</li>
+                        <li class="status__item" onclick="userStatus.setOffline()">Offline</li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+        <div class="messenger__inner">
+            <div class="userlist" data-toggle="userlist">
+                <div class="userlist__container">
+                    <ul class="userlist__list">
+                        <li class="userlist__item is-unread">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                        <li class="userlist__item is-unread">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                        <li class="userlist__item">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                        <li class="userlist__item">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                        <li class="userlist__item">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                        <li class="userlist__item">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                        <li class="userlist__item">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                        <li class="userlist__item">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                        <li class="userlist__item">
+                            <div class="userlist__userpic"><img class="userlist__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div>
+                                <h3 class="userlist__heading">Clifton Kelly</h3>
+                                <p class="userlist__caption">Quisque vel magna vel diam </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="messages">
+                <header class="messages__header">
+                    <h2 class="messages__heading">Conversation</h2>
+                    <div class="blocked"><svg class="blocked__icon">
+                            <use xlink:href="{% static 'theme/images/icons.svg' %}#ban"></use>
+                        </svg><span>Blocked</span></div>
+                    <div class="messages__block" onclick="this.children[0].classList.toggle('is-visible')">Block<div class="messages__block-dropdown"><button class="messages__block-dropdown-btn" type="button">Block this person</button><button class="messages__block-dropdown-btn" type="button">Unblock this person</button></div>
+                    </div>
+                </header>
+                <div class="messages__inner messages__items">
+                    <article class="messages__item message message--incoming">
+                        <div class="message__body">
+                            <div class="message__userpic"><img class="message__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div class="message__content">
+                                <p class="message__text">Donec interdum mauris commodo, tempus velit vel, aliquet felis. Cras sed mi leo. Praesent dolor neque, tempus a tincidunt non, sollicitudin vel quam. Sed et rutrum est. Pellentesque egestas, metus in feugiat feugiat, augue quam bibendum ex, quis lacinia est nibh a metus. Nunc magna lorem, fringilla non turpis in, varius aliquet neque. Sed sit amet rutrum ligula.</p><button class="message__reply" type="button">Reply to this message</button>
+                            </div>
+                        </div>
+                        <footer class="message__footer">
+                            <div class="message__data"><span>Sent on 03/10/2019 - 14:55 PM</span></div>
+                        </footer>
+                    </article>
+                    <article class="messages__item message message--outgoing js-message-toggle">
+                        <div class="message__edit js-message-dropdown"><button class="message__edit-btn js-message-dropdown-button" type="button" onclick="message.toggleDropdown(this)"><svg class="message__edit-icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#ellipsis-h"></use>
+                                </svg></button>
+                            <div class="message__edit-dropdown"><button class="message__edit-dropdown-btn" type="button" onclick="message.edit(this);">Edit</button><button class="message__edit-dropdown-btn" type="button" onclick="message.delete(this)">Delete</button></div>
+                        </div>
+                        <div class="message__body">
+                            <div class="message__userpic"><img class="message__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div class="message__content">
+                                <p class="message__text js-message-content">Donec interdum mauris commodo, tempus velit vel, aliquet felis. Cras sed mi leo. Praesent dolor neque, tempus a tincidunt non, sollicitudin vel quam. Sed et rutrum est. Pellentesque egestas, metus in feugiat feugiat, augue quam bibendum ex, quis lacinia est nibh a metus. Nunc magna lorem, fringilla non turpis in, varius aliquet neque. Sed sit amet rutrum ligula.</p><textarea class="message__text js-message-textarea" hidden></textarea>
+                            </div>
+                        </div>
+                        <footer class="message__footer">
+                            <div class="message__control-buttons js-message-edit-buttons"><button class="message__control-btn" type="button" onclick="message.save(this)">Save</button><button class="message__control-btn" type="button" onclick="message.cancel(this)">Cancel</button></div>
+                            <div class="message__data"><span>Sent on 03/10/2019 - 14:55 PM</span></div>
+                        </footer>
+                    </article>
+                    <article class="messages__item message message--outgoing js-message-toggle">
+                        <div class="message__edit js-message-dropdown"><button class="message__edit-btn js-message-dropdown-button" type="button" onclick="message.toggleDropdown(this)"><svg class="message__edit-icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#ellipsis-h"></use>
+                                </svg></button>
+                            <div class="message__edit-dropdown"><button class="message__edit-dropdown-btn" type="button" onclick="message.edit(this);">Edit</button><button class="message__edit-dropdown-btn" type="button" onclick="message.delete(this)">Delete</button></div>
+                        </div>
+                        <div class="message__body">
+                            <div class="message__userpic"><img class="message__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div class="message__content">
+                                <p class="message__text js-message-content">Donec interdum mauris commodo, tempus velit vel, aliquet felis. Cras sed mi leo. Praesent dolor neque, tempus a tincidunt non, sollicitudin vel quam. Sed et rutrum est. Pellentesque egestas, metus in feugiat feugiat, augue quam bibendum ex, quis lacinia est nibh a metus. Nunc magna lorem, fringilla non turpis in, varius aliquet neque. Sed sit amet rutrum ligula.</p><textarea class="message__text js-message-textarea" hidden></textarea>
+                            </div>
+                        </div>
+                        <footer class="message__footer">
+                            <div class="message__control-buttons js-message-edit-buttons"><button class="message__control-btn" type="button" onclick="message.save(this)">Save</button><button class="message__control-btn" type="button" onclick="message.cancel(this)">Cancel</button></div>
+                            <div class="message__data"><span>Sent on 03/10/2019 - 14:55 PM</span></div>
+                        </footer>
+                    </article>
+                    <article class="messages__item message message--invitation">
+                        <div class="message__body">
+                            <div class="message__userpic"><img class="message__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+                            <div class="message__content">
+                                <p class="message__text">skargard_kelly has been invited you to join to trade <a class="message__trade-id" href="#">No 44785541</a><span>. In hendrerit sollicitudin dignissim. Phasellus commodo vel massa eget pellentesque. Aenean non neque ac risus volutpat interdum in et turpis. Praesent pretium lobortis suscipit. Etiam nec orci erat. Proin vel efficitur dolor, in sollicitudin arcu.</span></p>
+                                <div class="message__response-buttons"><button class="message__response-btn" type="button">Review</button><button class="message__response-btn" type="button">Decline</button></div>
+                            </div>
+                        </div>
+                        <footer class="message__footer">
+                            <div class="message__data"><span>Sent on 03/10/2019 - 14:55 PM</span></div>
+                        </footer>
+                    </article>
+                </div>
+                <div class="js-fix-textarea-container">
+                    <form class="messages__control-inner js-fix-textarea-toggle" action="#"><textarea class="messages__textarea js-auto-expand-toggle" rows="1" placeholder="Type your message here"></textarea>
+                        <div class="messages__buttons"><label class="messages__attach"><input type="file" hidden><svg class="messages__attach-icon">
+                                    <use xlink:href="{% static 'theme/images/icons.svg' %}#paperclip"></use>
+                                </svg></label><button class="messages__send btn btn--round btn--theme-2" type="submit">Send</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

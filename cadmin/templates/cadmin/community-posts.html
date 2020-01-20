@@ -56,7 +56,7 @@
                         <td><span class="table__mobile-heading">Upvoted</span><span>{{ item.upvoted }}</span></td>
                         <td><span class="table__mobile-heading">Comments</span><span>{{ item.comments }}</span></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/community-post-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/community-post-details?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

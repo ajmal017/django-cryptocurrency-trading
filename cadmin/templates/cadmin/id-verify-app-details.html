@@ -8,7 +8,7 @@
 <main class="page__inner js-nav-close-trigger details">
     <section class="details__section section">
         <header class="section__header">
-            <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/id-verify-app">ID Verify App</a><span> / </span><span>{{ item.id }}</span></h1>
+            <h1 class="section__heading"><a class="details__heading-text" href="{{ cadmin_url }}/id-verify-app">ID Verify App</a><span> / </span><span>{{ item.id }}</span></h1>
         </header>
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
@@ -34,7 +34,7 @@
     </section>
     <div class="page__control">
         <div class="verify-app__reject"><a class="verify-app__reject" href="#" onclick="IDVerifyAppPopup.open()">REJECT THIS ID - Be careful to not reject an application by accident</a></div>
-        <form action="/{{ app_url }}/id-verify-app-accept/" method="POST">
+        <form action="{{ cadmin_url }}/id-verify-app-accept/" method="POST">
             {% csrf_token %}
             <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}" />
             <button type="submit" class="btn btn--red">Accept this ID</button>
@@ -42,7 +42,7 @@
     </div>
 </main>
 <aside class="modal popup popup--small js-id-verify-app-popup-target"><button class="modal__close-outer" type="button" onclick="IDVerifyAppPopup.close()"></button>
-    <form class="popup__container modal__container" action="/{{ app_url }}/id-verify-app-reject/" method="POST">
+    <form class="popup__container modal__container" action="{{ cadmin_url }}/id-verify-app-reject/" method="POST">
         {% csrf_token %}
         <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}" />
         <button class="popup__close-inner" type="button" onclick="IDVerifyAppPopup.close()">

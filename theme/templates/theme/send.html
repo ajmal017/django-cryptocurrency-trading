@@ -1,0 +1,60 @@
+{% extends 'theme/base-site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Send{% endblock %}
+
+{% block page-inner %}
+<form class="page__inner send js-form-toggle" action="#">
+    <header class="content-header content-header--has-list">
+        <ul class="content-header__list">
+            <li class="content-header__item is-active"><a class="content-header__link" href="send.html">Send</a></li>
+            <li class="content-header__item"><a class="content-header__link" href="receive.html">Receive</a></li>
+            <li class="content-header__item"><a class="content-header__link" href="#">Transaction History</a></li>
+            <li class="content-header__item"><a class="content-header__link">Saved Wallets</a></li>
+        </ul>
+        <div class="status">
+            <div class="status__data"><span class="status__text">1.554 BTC in Wallet</span><a class="status__text" href="#">View Full Wallet</a></div>
+            <div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
+        </div>
+    </header>
+    <p class="send__desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi pretium justo ac mattis vestibulum. Cras varius nisi ipsum, a aliquet mauris vehicula condimentum. Quisque vel magna vel diam facilisis feugiat. Quisque faucibus quis lacus in accumsan. Cras a feugiat urna. Quisque luctus mauris sed mi aliquet hendrerit. Integer luctus neque mattis, vulputate odio eu, consequat est. Nam orci justo, blandit at risus auctor, faucibus porttitor ante. Quisque ut neque nec odio pulvinar vehicula a et libero. Donec velit mi, sollicitudin ut libero ut, aliquam accumsan nunc. Cras posuere ex egestas, fermentum nibh ac, varius massa. Nunc mattis metus quis velit euismod varius. Aenean in ante vitae arcu volutpat rutrum.</p>
+    <div class="page__fields">
+        <div class="page__field form-group">
+            <div class="form-group__field-group"><span class="form-group__triangle"></span><select class="form-group__field" required>
+                    <option value="" selected disabled>What you wish to send?</option>
+                    <option value="#">Bitcoin (BTC)</option>
+                    <option value="#">Ethereum (ETH)</option>
+                    <option value="#">Ripple (XRP)</option>
+                </select></div>
+        </div>
+        <div class="page__field form-group">
+            <div class="form-group__field-group">
+<input class="form-group__field" name="blank" type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Receiver Email Address" required><svg class="form-group__required">
+                    <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use></svg>
+</div>
+        </div>
+    </div>
+    <div class="page__field form-group">
+        <div class="form-group__field-group">
+<input class="form-group__field" name="blank" placeholder="Description of this trade" required><svg class="form-group__required">
+                <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
+            </svg></div>
+    </div>
+    <div class="page__fields">
+        <div class="page__field form-group">
+            <div class="form-group__field-group"><span class="form-group__currency">BTC</span><input class="form-group__field" name="blank" type="number" placeholder="Amount in Bitcoin" required><svg class="form-group__required">
+                    <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use></svg>
+</div>
+        </div>
+        <div class="page__field form-group">
+            <div class="form-group__field-group"><span class="form-group__currency">USD</span><input class="form-group__field" name="blank" type="number" placeholder="Amount in USD" required><svg class="form-group__required">
+                    <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use></svg>
+</div>
+        </div>
+    </div>
+    <footer class="send__footer">
+        <p class="send__bottom-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi pretium justo ac mattis vestibulum. Cras varius nisi ipsum, a aliquet mauris vehicula condimentum. Quisque vel magna vel diam facilisis feugiat. </p><button class="send__submit btn btn--round btn--theme-4" type="submit">Send</button>
+    </footer>
+</form>
+{% endblock %}

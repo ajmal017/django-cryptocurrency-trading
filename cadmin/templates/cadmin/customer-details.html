@@ -8,7 +8,7 @@
 <main class="page__inner js-nav-close-trigger details">
     <section class="details__section section">
         <header class="section__header">
-            <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/customers">Customers</a><span> / </span><span>{{ item.id }}</span></h1>
+            <h1 class="section__heading"><a class="details__heading-text" href="{{ cadmin_url }}/customers">Customers</a><span> / </span><span>{{ item.id }}</span></h1>
         </header>
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
@@ -46,7 +46,7 @@
     <div class="page__control"><a class="page__control-item btn btn--accent" href="#" onclick="customerPopup.open()">Suspend customer</a></div>
 </main>
 <aside class="modal popup popup--medium js-customer-popup-target"><button class="modal__close-outer" type="button" onclick="customerPopup.close()"></button>
-    <form class="popup__container modal__container" action="/{{ app_url }}/customer-suspend/" method="POST">
+    <form class="popup__container modal__container" action="{{ cadmin_url }}/customer-suspend/" method="POST">
         {% csrf_token %}
         <input type="hidden" id="item_id" name="item_id" value="{{ item.id }}" />
         <button class="popup__close-inner" type="button" onclick="customerPopup.close()">

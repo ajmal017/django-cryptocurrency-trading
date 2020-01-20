@@ -46,7 +46,7 @@
                         <td><span class="table__mobile-heading">Amount</span><span>${{ item.amount }}</span></td>
                         <td><span class="table__mobile-heading">Source</span><span>{{ item.source }}</span></td>
                         <td><span class="table__mobile-heading">Refund</span>${{ item.refund }}</td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/revenue-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/revenue-details?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

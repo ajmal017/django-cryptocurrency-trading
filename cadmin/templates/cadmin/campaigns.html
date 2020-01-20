@@ -48,7 +48,7 @@
                         <td><span class="table__mobile-heading">Conversions</span><span>{{ item.conversions }}</span></td>
                         <td><span class="table__mobile-heading">Affiliate payout</span><span>${{ item.payout }}</span></td>
                         <td><span class="table__mobile-heading">Created on</span><span>{{ item.created_at }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/campaign-updated?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/campaign-updated?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

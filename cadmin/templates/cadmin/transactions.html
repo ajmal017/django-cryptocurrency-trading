@@ -36,10 +36,10 @@
                         <td><span class="table__mobile-heading">Currency</span><span>{{ item.offer.what_crypto }}</span></td>
                         <td><span class="table__mobile-heading">Trade Initiator</span><a href="#">{{ item.trade_initiator }}</a></td>
                         <td><span class="table__mobile-heading">Vendor</span><a href="#">{{ item.vendor }}</a></td>
-                        <td><span class="table__mobile-heading">Offer ID</span><a href="/{{ app_url }}/offer-details?item_id={{ item.offer.id }}">{{ item.offer.id }}</a></td>
+                        <td><span class="table__mobile-heading">Offer ID</span><a href="{{ cadmin_url }}/offer-details?item_id={{ item.offer.id }}">{{ item.offer.id }}</a></td>
                         <td><span class="table__mobile-heading">txn ID</span><span>{{ item.txn }}</span></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/transaction-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/transaction-details?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

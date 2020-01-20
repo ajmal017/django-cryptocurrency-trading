@@ -49,7 +49,7 @@
                         <td><span class="table__mobile-heading">Total earned</span><span>${{ item.total_earned }}</span></td>
                         <td><span class="table__mobile-heading">Status</span><span class="user_status">{{ item.status }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span>
-                            <a href="/{{ app_url }}/add-new-affiliate?item_id={{ item.id }}">Details</a> | <a class="table-actions__item" href="#" onclick="postAction({'item_id': '{{item.id}}'}, 'Are you sure to suspend this affiliate?', '/{{ app_url }}/affiliates/', function(message) {$('#{{ item.id }}').find('.user_status').text(message)});">Suspend</a>
+                            <a href="{{ cadmin_url }}/add-new-affiliate?item_id={{ item.id }}">Details</a> | <a class="table-actions__item" href="#" onclick="postAction({'item_id': '{{item.id}}'}, 'Are you sure to suspend this affiliate?', '{{ cadmin_url }}/affiliates/', function(message) {$('#{{ item.id }}').find('.user_status').text(message)});">Suspend</a>
                         </td>
                     </tr>
                     {% endfor %}
