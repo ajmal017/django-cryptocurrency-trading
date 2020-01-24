@@ -9,10 +9,10 @@
     <section class="section">
         <header class="section__header">
             <nav class="section__nav page-nav">
-                <a class="page-nav__item {%if status == ''%}is-active{%endif%}" href="{{ cadmin_url }}/trades?start_date={{ start_date }}&end_date={{ end_date }}&search={{ search }}">All ({{ count|keyvalue:"All" }})</a>
-                <a class="page-nav__item {%if status == 'Waiting for trade intiator'%}is-active{%endif%}" href="{{ cadmin_url }}/trades?start_date={{ start_date }}&end_date={{ end_date }}&search={{ search }}&status=Waiting+for+trade+intiator">Waiting for trade intiator ({{ count|keyvalue:"Waiting for trade intiator" }})</a>
-                <a class="page-nav__item {%if status == 'Archive'%}is-active{%endif%}" href="{{ cadmin_url }}/trades?start_date={{ start_date }}&end_date={{ end_date }}&search={{ search }}&status=Archive">Archive ({{ count|keyvalue:"Archive" }})</a>
-                <a class="page-nav__item {%if status == 'Completed'%}is-active{%endif%}" href="{{ cadmin_url }}/trades?start_date={{ start_date }}&end_date={{ end_date }}&search={{ search }}&status=Completed">Completed ({{ count|keyvalue:"Completed" }})</a>
+                <a class="page-nav__item {%if status == ''%}is-active{%endif%}" href="{{ cadmin_url }}/trades?start_date={{ start_date }}&end_date={{ end_date }}&search={{ search }}">All ({{ count|keyvalue:"all" }})</a>
+                <a class="page-nav__item {%if status == 'waiting'%}is-active{%endif%}" href="{{ cadmin_url }}/trades?start_date={{ start_date }}&end_date={{ end_date }}&search={{ search }}&status=Waiting+for+trade+intiator">Waiting for trade intiator ({{ count|keyvalue:"waiting" }})</a>
+                <a class="page-nav__item {%if status == 'archived'%}is-active{%endif%}" href="{{ cadmin_url }}/trades?start_date={{ start_date }}&end_date={{ end_date }}&search={{ search }}&status=Archive">Archive ({{ count|keyvalue:"archived" }})</a>
+                <a class="page-nav__item {%if status == 'completed'%}is-active{%endif%}" href="{{ cadmin_url }}/trades?start_date={{ start_date }}&end_date={{ end_date }}&search={{ search }}&status=Completed">Completed ({{ count|keyvalue:"completed" }})</a>
             </nav>
         </header>
         <div class="section__inner">
@@ -53,11 +53,11 @@
                     <tr>
                         <td><span class="table__mobile-heading">Trade ID</span><a href="#">{{ item.id }}</a></td>
                         <td><span class="table__mobile-heading">Offer ID</span><a href="{{ cadmin_url }}/offer-details?item_id={{ item.offer.id }}">{{ item.offer.id }}</a></td>
-                        <td><span class="table__mobile-heading">Trade initiator</span><a href="#">{{ item.trade_initiator }}</a></td>
+                        <td><span class="table__mobile-heading">Trade initiator</span><a href="#">{{ item.trade_initiator|default_if_none:"" }}</a></td>
                         <td><span class="table__mobile-heading">Vendor</span><a href="#">{{ item.vendor }}</a></td>
                         <td><span class="table__mobile-heading">Payment method</span><span>{{ item.payment_method }}</span></td>
                         <td><span class="table__mobile-heading">Amount</span><span>{{ item.amount }} {{ item.offer.what_crypto }}</span></td>
-                        <td><span class="table__mobile-heading">Status</span><span>{{ item.status }}</span></td>
+                        <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
                         <td><span class="table__mobile-heading">Status</span><span>[[?]]</span></td>
                         <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/trade-details?item_id={{ item.id }}">Details</a></td>
                     </tr>

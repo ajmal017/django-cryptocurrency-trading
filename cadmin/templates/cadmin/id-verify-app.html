@@ -30,9 +30,9 @@
                     {% for item in items %}
                     <tr>
                         <td><span class="table__mobile-heading">Application ID</span><span>{{ item.id }}</span></td>
-                        <td><span class="table__mobile-heading">Username</span><a href="#">{{ item.user.username }}</a></td>
-                        <td><span class="table__mobile-heading">Document type</span><span>{{ item.document_type }}</span></td>
-                        <td><span class="table__mobile-heading">Document</span><a href="#">{{ item.document_file }}</a></td>
+                        <td><span class="table__mobile-heading">Username</span><a href="#">{{ item.user }}</a></td>
+                        <td><span class="table__mobile-heading">Document type</span><span>{{ item.card_name }}</span></td>
+                        <td><span class="table__mobile-heading">Document</span><a href="#">{{ item.images_list|join:', ' }}</a></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/id-verify-app-details?item_id={{ item.id }}">Details</a></td>
                         </td>

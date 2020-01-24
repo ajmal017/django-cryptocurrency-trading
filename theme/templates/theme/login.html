@@ -13,7 +13,7 @@
             <input name="next" value="{{ next }}" type="hidden" />
             <div class="individual__field dropdown__field form-group {% if error.email %}is-invalid{% endif %}">
                 <div class="form-group__field-group">
-                    <input class="form-group__field" name="email" type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Email address" required>
+                    <input class="form-group__field" name="email" type="text" placeholder="Email address or Username" required>
                     {% if error.email %}
                     <svg class="form-group__required is-invalid-item">
                         <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>

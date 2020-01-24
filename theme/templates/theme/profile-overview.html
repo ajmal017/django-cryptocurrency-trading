@@ -34,14 +34,14 @@
                 <li class="dashboard__data-item"><span class="dashboard__caption">Trusted by</span><span class="dashboard__value">{{ user.customer.trusted_by_count }} People</span></li>
                 <li class="dashboard__data-item"><span class="dashboard__caption">Blocked by</span><span class="dashboard__value">{{ user.customer.blocked_by_count }} People</span></li>
                 <li class="dashboard__data-item"><span class="dashboard__caption">Joined</span><span class="dashboard__value">{{ user.date_joined.date }}</span></li>
-            </ul><a class="dashboard__view-profile" href="{{ them_url }}/user-public-profile?item_id={{ user.id }}">VIEW PUBLIC PROFILE</a>
+            </ul><a class="dashboard__view-profile" href="{{ them_url }}/user-public-profile?item_id={{ user.customer.id }}">VIEW PUBLIC PROFILE</a>
         </div>
         <form class="dashboard__form js-form-toggle" action="{{ theme_url }}/profile-overview/" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="page__fields">
                 <div class="page__field form-group {% if error.first_name %}is-invalid{% endif %}">
                     <div class="form-group__field-group">
-                        <input class="form-group__field" name="first_name" placeholder="First name" value="{{ user.first_name }}">
+                        <input class="form-group__field" name="first_name" placeholder="First name" value="{{ user.first_name|default_if_none:'' }}">
                         {% if error.first_name %}
                         <svg class="form-group__required is-invalid-item">
                             <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
@@ -54,7 +54,7 @@
                 </div>
                 <div class="page__field form-group {% if error.last_name %}is-invalid{% endif %}">
                     <div class="form-group__field-group">
-                        <input class="form-group__field" name="last_name" placeholder="Last name" value="{{ user.last_name }}">
+                        <input class="form-group__field" name="last_name" placeholder="Last name" value="{{ user.last_name|default_if_none:'' }}">
                         {% if error.last_name %}
                         <svg class="form-group__required is-invalid-item">
                             <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
@@ -67,7 +67,7 @@
                 </div>
                 <div class="page__field form-group {% if error.email %}is-invalid{% endif %}">
                     <div class="form-group__field-group">
-                        <input class="form-group__field" name="email" type="email" value="{{ user.email|default:'' }}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Email address" required>
+                        <input class="form-group__field" name="email" type="email" value="{{ user.email|default_if_none:'' }}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Email address" required>
                         {% if user.phone_verified %}
                         <svg class="dashboard__tick">
                             <use xlink:href="{% static 'theme/images/icons.svg' %}#check-circle"></use>
@@ -85,7 +85,7 @@
                 </div>
                 <div class="page__field form-group {% if error.billing_address %}is-invalid{% endif %}">
                     <div class="form-group__field-group">
-                        <input class="form-group__field" name="billing_address" placeholder="Biling Address" value="{{ user.billing_address }}">
+                        <input class="form-group__field" name="billing_address" placeholder="Biling Address" value="{{ user.billing_address|default_if_none:'' }}">
                         {% if error.billing_address %}
                         <svg class="form-group__required is-invalid-item">
                             <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
@@ -141,20 +141,28 @@
             <fieldset class="dashboard__section">
                 <legend class="dashboard__heading">Phone Number</legend>
                 <div class="dashboard__phone-verification">
-                    <div class="form-group">
+                    <div class="form-group {% if error.phonenumber %}is-invalid{% endif %}">
                         <div class="form-group__field-group">
-                            <input class="form-group__field" name="phonenumber" value="{{ user.phonenumber }}" type="tel" autocomplete="tel" placeholder="+12 34567 8910">
+                            <input class="form-group__field" name="phonenumber" id="verify_phonenumber" value="{{ user.phonenumber|default_if_none:'' }}" type="tel" autocomplete="tel" placeholder="+12 34567 8910">
                             {% if user.phone_verified %}
                             <svg class="dashboard__tick">
                                 <use xlink:href="{% static 'theme/images/icons.svg' %}#check-circle"></use>
                             </svg>
                             {% endif %}
+                            {% if error.phonenumber %}
+                            <svg class="form-group__required is-invalid-item">
+                                <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
+                            </svg>
+                            {% endif %}
                         </div>
+                        {% if error.phonenumber %}
+                        <p class="form-group__message is-invalid-item">{{ error.phonenumber }}</p>
+                        {% endif %}
                     </div>
                     <svg class="form-group__required">
                         <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
                     </svg>
-                    <button class="dashboard__verify btn" type="button">Verify</button>
+                    <button class="dashboard__verify btn" type="button" id="verify_phonenumber_btn">Verify</button>
                 </div>
             </fieldset>
             <fieldset class="dashboard__section">
@@ -169,8 +177,8 @@
                         <option value="#6ad99f">Green</option>
                         <option value="#8ab9f9">Blue</option>
                     </select><span class="ql-counter">Character remaining: <span class="js-editor-counter-toggle">100</span></span><button class="ql-bold"></button><button class="ql-italic"></button></div>
-                <div class="js-editor-primary">{{ user.overview|safe }}</div><!-- Quill editor-->
-                <textarea hidden id="js_editor_primary" name="overview">{{ user.overview }}</textarea>
+                <div class="js-editor-primary">{{ user.overview|default_if_none:''|safe }}</div><!-- Quill editor-->
+                <textarea hidden id="js_editor_primary" name="overview">{{ user.overview|default_if_none:'' }}</textarea>
             </fieldset>
             <div class="dashboard__controls">
                 <label class="dashboard__checkbox checkbox">
@@ -198,5 +206,34 @@
 <script defer src="{% static 'theme/js/upload.js' %}"></script>
 <script>
 var ICON_TIMES = '{% static "theme/images/icons.svg" %}#times';
+</script>
+<script>
+$(function () {
+    $('#verify_phonenumber_btn').click(function () {
+        var phonenumber = $('#verify_phonenumber').val();
+        if (phonenumber) {
+            $.ajax({
+                url: '{{ theme_url }}/resend-verify-phone/',
+                type: 'POST',
+                data: {csrfmiddlewaretoken: '{{ csrf_token }}', 'phonenumber':phonenumber},
+                success: function(data) {
+                    if (data.success) {
+                        $('#confirm_phonenumber').val(phonenumber);
+                        $('#confirm_phone').attr('action', '{{ theme_url }}/verify-phone/')
+                        confirmation.open()
+                    } else if (data.error) {
+                        alertMessage("Invalid Phonenumber.", "warning")
+                    }
+                },
+                error: function( jqXhr, textStatus, errorThrown ){
+                    alertMessage("Invalid Phonenumber.", "warning")
+                    console.log( errorThrown );
+                }
+            })
+        } else {
+            alertMessage("You need to insert phonenumber first.", "warning")
+        }
+    })
+})
 </script>
 {% endblock %}

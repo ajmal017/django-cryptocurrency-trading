@@ -13,21 +13,21 @@
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Username</dt>
-                    <dd class="data-panel__value"> <a href="#">{{ item.username }}</a></dd>
+                    <dd class="data-panel__value"> <a href="#">{{ item.user.username }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Email</dt>
-                    <dd class="data-panel__value">{{ item.email }}</dd>
+                    <dd class="data-panel__value">{{ item.user.email }}</dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Email verified</dt>
-                    <dd class="data-panel__value is-{{ item.email_verified|lower }}">{{ item.get_email_verified_display }}</dd>
+                    <dd class="data-panel__value is-{{ item.user.email_verified|lower }}">{{ item.user.get_email_verified_display }}</dd>
                 </div>
             </dl>
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Phone verified</dt>
-                    <dd class="data-panel__value is-{{ item.phone_verified|lower }}">{{ item.get_phone_verified_display }}</dd>
+                    <dd class="data-panel__value is-{{ item.user.phone_verified|lower }}">{{ item.user.get_phone_verified_display }}</dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">ID verified</dt>
-                    <dd class="data-panel__value is-{{ item.id_verified|lower }}">{{ item.get_id_verified_display }}</dd>
+                    <dd class="data-panel__value is-{{ item.user.id_verified|lower }}">{{ item.user.get_id_verified_display }}</dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Seller level</dt>
                     <dd class="data-panel__value">{{ item.seller_level }}</dd>
@@ -35,10 +35,10 @@
             </dl>
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Created</dt>
-                    <dd class="data-panel__value">{{ item.created_at }}</dd>
+                    <dd class="data-panel__value">{{ item.user.date_joined }}</dd>
                 </div>
-                <div class="data-panel__item"><dt class="data-panel__heading">Suspended</dt>
-                    <dd class="data-panel__value is-{{ item.suspended|lower }}">{{ item.get_suspended_display }}</dd>
+                <div class="data-panel__item"><dt class="data-panel__heading">Active</dt>
+                    <dd class="data-panel__value is-{{ item.user.is_customer|lower }}">{{ item.user.get_is_customer_display }}</dd>
                 </div>
             </dl>
         </div>

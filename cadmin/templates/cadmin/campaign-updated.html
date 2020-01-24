@@ -48,7 +48,7 @@
                         <p class="attach__formats">*jpg, *png, *gif, *docx, *doc, *txt, *pdf accepted</p>
                     </div><label class="attach__btn">Browse<input id="fileupload" type="file" name="file" multiple
                         style="display: none;"
-                        data-url="/{{ cadmin_url }}/upload/"
+                        data-url="{{ cadmin_url }}/upload/"
                         data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'></label>
                         <input type="hidden" name="creative_materials" class="instead_of_file" value="{{ item.creative_materials }}">
                 </div>

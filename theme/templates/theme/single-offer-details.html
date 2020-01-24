@@ -27,7 +27,11 @@
     </aside>
     {% endif %}
     <div class="single-offer__control">
+        {% if item.created_by == user.customer %}
+        <a class="single-offer__control-btn" href="{{ theme_url }}/offer-activity/?item_id=9">Go To Offer Activity</a>
+        {% else %}
         <a class="single-offer__control-btn" href="{{ theme_url }}/initiate-trade?item_id={{ item.id }}">INITIATE A TRADE</a>
+        {% endif %}
         <div class="single-offer__control-wrapper">
             <div class="single-offer__control-items">
                 {% if item.sms_verification_required %}
@@ -37,15 +41,22 @@
                 <span class="single-offer__control-item">Identified</span>
                 {% endif %}
                 <span class="single-offer__control-item">{{ item.address }}</span>
-                <a class="single-offer__control-link" href="#">View on map</a></div>
+                <a class="single-offer__control-link" href="#">View on map</a>
+            </div>
+            {% if item.created_by != user.customer %}
             <div class="single-offer__control-items">
+                {% if item.counter and item.counter.vendor == user.customer %}
+                <a class="single-offer__control-action" href="#">You already sent offer.</a>
+                {% else %}
                 <a class="single-offer__control-action" href="{{ theme_url }}/send-counter-offer?item_id={{ item.id }}">SEND AN OFFER</a>
+                {% endif %}
                 <form action="{{ theme_url }}/single-offer-detail/" method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="item_id" value="{{ item.id }}" />
                     <button class="single-offer__control-action" type="submit">ADD TO LIST</button>
                 </form>
             </div>
+            {% endif %}
         </div>
     </div>
     <header class="single-offer__header">
@@ -54,10 +65,10 @@
             <div class="single-offer__price-value">${{ item.get_trade_price }}</div>
             <div class="stars-fixed medium">
                 {% for rate in '01234'|make_list %}
-                <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.stat.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                 </svg>
-                <svg class="stars-fixed__icon {%if item.created_by.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                <svg class="stars-fixed__icon {%if item.created_by.customer_rate <= forloop.counter %}is-selected{%endif%}">
                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                 </svg>
                 {% endfor %}
@@ -89,10 +100,10 @@
         <h2 class="single-offer__reviews-heading">Reviews</h2>
         <div class="stars-fixed medium">
             {% for rate in '01234'|make_list %}
-            <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.stat.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+            <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                 <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
             </svg>
-            <svg class="stars-fixed__icon {%if item.created_by.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+            <svg class="stars-fixed__icon {%if item.created_by.customer_rate <= forloop.counter %}is-selected{%endif%}">
                 <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
             </svg>
             {% endfor %}
@@ -104,10 +115,10 @@
             <footer class="review__footer">
                 <div class="stars-fixed small">
                     {% for rate in '01234'|make_list %}
-                    <svg class="stars-fixed__icon stars-fixed__icon--half {%if review.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                    <svg class="stars-fixed__icon stars-fixed__icon--half {%if review.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                         <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                     </svg>
-                    <svg class="stars-fixed__icon {%if review.review_rate <= forloop.counter %}is-selected{%endif%}">
+                    <svg class="stars-fixed__icon {%if review.customer_rate <= forloop.counter %}is-selected{%endif%}">
                         <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                     </svg>
                     {% endfor %}
@@ -134,13 +145,13 @@
                 <td class="table-new__cell"><span class="table-new__mobile-heading">Method</span>
                     <div class="table-new__rate">
                         <p class="table-new__rate-caption">Selling</p>
-                        <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ offer.created_by.stat.review_count }})</a>
+                        <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ offer.created_by.review_count }})</a>
                             <div class="stars-fixed small">
                                 {% for rate in '01234'|make_list %}
-                                <svg class="stars-fixed__icon stars-fixed__icon--half {%if offer.created_by.stat.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                                <svg class="stars-fixed__icon stars-fixed__icon--half {%if offer.created_by.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                                 </svg>
-                                <svg class="stars-fixed__icon {%if offer.created_by.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                                <svg class="stars-fixed__icon {%if offer.created_by.customer_rate <= forloop.counter %}is-selected{%endif%}">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                                 </svg>
                                 {% endfor %}

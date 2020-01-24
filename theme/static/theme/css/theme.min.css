@@ -959,6 +959,7 @@ dt {
 }
 
 .alert {
+  background: #8a0a0a;
   position: relative;
   display: -webkit-box;
   display: flex;

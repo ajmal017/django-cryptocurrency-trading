@@ -45,11 +45,8 @@
                         <li class="user-menu__dropdown-item"><svg class="user-menu__dropdown-item-icon" width="30">
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#sign-out-alt"></use>
                             </svg>
-                            {% if user.is_superuser %}
-                            <a href="/super-admin/logout?next=/cadmin">Log out</a></li>
-                            {% else %}
-                            <a href="{{ cadmin_url }}/logout">Log out</a></li>
-                            {% endif %}
+                            <a href="{{ cadmin_url }}/logout">Log out</a>
+                        </li>
                     </ul>
                 </div>
             </div>

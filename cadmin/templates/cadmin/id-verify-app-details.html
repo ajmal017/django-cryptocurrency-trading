@@ -13,18 +13,18 @@
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Username</dt>
-                    <dd class="data-panel__value"> <a href="#">{{ item.user.username }}</a></dd>
+                    <dd class="data-panel__value"> <a href="#">{{ item.user }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Full name</dt>
-                    <dd class="data-panel__value">{{ item.user.fullname }}</dd>
+                    <dd class="data-panel__value">{{ item.user.get_fullname }}</dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Document type</dt>
-                    <dd class="data-panel__value">{{ item.document_type }}</dd>
+                    <dd class="data-panel__value">{{ item.card_name }}</dd>
                 </div>
             </dl>
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Document file</dt>
-                    <dd class="data-panel__value"><a class="data-panel__file-link" href="{{ item.document_file.file.url }}">{{ item.document_file.file.name }}</a></dd>
+                    <dd class="data-panel__value"><a class="data-panel__file-link" href="{{ item.images_list|join:', ' }}">{{ item.images_list|join:', ' }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Status</dt>
                     <dd class="data-panel__value">{{ item.get_status_display }}</dd>

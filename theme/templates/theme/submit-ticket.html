@@ -12,7 +12,7 @@
         {% if user.customer %}
         <div class="status">
 			<div class="status__data"><span class="status__text">{{ user.customer.balance }} in wallet</span><a class="status__text" href="{{ them_url }}/my-balance">View Full Wallet</a></div>
-			<div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt="[[[?]]]"></div>
+			<div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
         </div>
         {% endif %}
     </header>

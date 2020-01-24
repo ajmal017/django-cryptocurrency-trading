@@ -65,7 +65,7 @@
             <header class="section__header">
                 <h2 class="section__heading">Message for proof of transaction</h2>
             </header>
-            <p class="offer-details__text section__inner">{{ item.message_for_proof }}</p>
+            <div class="offer-details__text section__inner">{{ item.message_for_proof|safe }}</div>
         </section>
     </div>
     <section class="details__section section">

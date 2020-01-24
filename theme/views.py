@@ -20,6 +20,7 @@ from django.views import View
 # from django.http import Http404
 # from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
+from django.core import serializers
 
 from cadmin import models
 from .decorators import customer_user_login_required, user_not_logged_in
@@ -55,10 +56,10 @@ def current_user(request):
         None
 
 
+
 class Index(View):
     
     def get(self, request, more={}):
-        # request.LANGUAGE_CODE == 'zh-hans'
         BTC_items = models.Offers.objects.filter(what_crypto='BTC', admin_confirmed=True).order_by('-created_at')[:5]
         ETH_items = models.Offers.objects.filter(what_crypto='ETH', admin_confirmed=True).order_by('-created_at')[:5]
         XRP_items = models.Offers.objects.filter(what_crypto='XRP', admin_confirmed=True).order_by('-created_at')[:5]
@@ -78,13 +79,24 @@ class Login(View):
         next_to = request.POST.get('next', '').strip()
 
         try:
-            user = models.Users.objects.get(email=email_or_username) # Q(username=email_or_username) |
+            user = models.Users.objects.get(Q(email=email_or_username) | Q(username=email_or_username))
             if user and check_password(password, user.password):
                 token = user.token if user.token else get_random_string(length=100)
                 user.token = token
                 user.save()
+                models.LoginLogs(
+                    user=user,
+                    ip_address=get_client_ip(request)
+                ).save()
                 request.session['user'] = token
             else:
+                try:
+                    models.SecurityStatus(
+                        user=user,
+                        ip_address=get_client_ip(request)
+                    ).save()
+                except:
+                    log = 'here it need to sys log for error user login.'
                 if next_to:
                     return self.get(request, {'next': next_to, 'error': {'password': 'Incorrect Password'}})
                 else:
@@ -146,7 +158,7 @@ class Register(View):
             customer = models.Customers(
                 user = user,
                 customer_type = customer_type,
-                seller_level = 1 if customer_type == 'sell' else None
+                seller_level = 1# if customer_type == 'sell' else None
             )
             customer.save()
             token = user.token if user.token else get_random_string(length=100)
@@ -177,7 +189,7 @@ class ForgotPassword(View):
         try:
             users = models.Users.objects.filter(Q(email=email) | Q(phonenumber=phonenumber))
             if users.count() > 0:
-                user = user[0]
+                user = users[0]
             else:
                 if email:
                     if next_to:
@@ -198,7 +210,11 @@ class ForgotPassword(View):
                 else:
                     return JsonResponse({'success': 'Verification Email sent to your email, Please check your emails.'})
             elif phonenumber:
-                user.send_phone_code(phonenumber)
+                if not user.send_phone_code(phonenumber):
+                    if next_to:
+                        return ForgotPasswordPhone.get(ForgotPasswordPhone, request, {'error': {'phonenumber': 'Please Insert correct Phone number.'}, 'next': next_to})
+                    else:
+                        return JsonResponse({'error': {'phonenumber': 'Please Insert correct Phonenumber.'}})
                 if next_to:
                     return redirect(app_url+'/confirm-forgot-password-phone-code?phonenumber='+phonenumber+'&next='+next_to)
                 else:
@@ -206,6 +222,7 @@ class ForgotPassword(View):
             else:
                 return {'error': 'Insert Email or Phonenumber'}
         except Exception as e:
+            print(e)
             return JsonResponse({'error': True})
         
         if next_to:
@@ -246,7 +263,9 @@ class ResendConfirmPhone(View):
         phonenumber = request.POST.get('phonenumber', '')
         try:
             user = models.Users.objects.get(phonenumber=phonenumber)
-            # user.send_phone_code(phonenumber)
+            if not user.send_phone_code(phonenumber):
+                return JsonResponse({'error': 'Try again.'})
+
             return JsonResponse({'success': 'Phone code resent.'})
         except:
             return JsonResponse({'error': 'Try again.'})
@@ -345,9 +364,13 @@ class ResendVerifyEmail(View):
 class ResendVerifyPhone(View):
 
     def post(self, request):
+        phonenumber = request.POST.get('phonenumber', '')
         user = current_user(request)
-        user.send_phone_code()
-        return JsonResponse({'success': 'Phone code sent.'})
+        if models.Users.objects.filter(~Q(id=user.id), Q(phonenumber=phonenumber, phone_verified=True)).count() > 0:
+            return JsonResponse({'error': True})
+        # if not user.send_phone_code(phonenumber):
+        #     return JsonResponse({'error': True})
+        return JsonResponse({'success': True})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -383,8 +406,19 @@ class VerifyEmail(View):
 @method_decorator(customer_user_login_required, name='dispatch')
 class VerifyPhone(View):
 
-    def get(self, request, more={}):
-        return render(request, 'theme/index.html', {**more})
+    def post(self, request, more={}):
+        phonenumber = request.POST.get('phonenumber', '')
+        code = request.POST.get('code', '')
+        try:
+            user = current_user(request)
+            if not user.validate_phone_code(phonenumber, code):
+                return JsonResponse({'error': 'That`s invalid phone code.'})
+            user.phone_verified = True
+            user.phonenumber = phonenumber
+            user.save()
+            return JsonResponse({'success': True})
+        except:
+            return JsonResponse({'error': 'Try again.'})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -432,13 +466,13 @@ class NewOffer(View):
             'minimum_successful_trades': request.POST.get('minimum_successful_trades'),
             'minimum_complete_trade_rate': request.POST.get('minimum_complete_trade_rate'),
             'admin_confirmed': False,
-            'created_by': current_user(request).customer(),
             'created_at': datetime.now(),
         }
 
         offer = models.Offers()
         try:
             offer.__dict__.update(object_data)
+            offer.created_by = current_user(request).customer()
             offer.save()
             return OfferActivity.get(OfferActivity, request, {'item_id': offer.pk, 'offer_success': 'Offer Posted'})
         except Exception as e:
@@ -502,16 +536,23 @@ class ProfileOverview(View):
             'billing_address': request.POST.get('billing_address', ''),
             'overview': request.POST.get('overview', ''),
             'phonenumber': request.POST.get('phonenumber', ''),
-            'use_2factor_authentication': True if request.POST.get('use_2factor_authentication') == 'on' else False,
         }
         user = current_user(request)
         user.__dict__.update(object_data)
 
+        # set 2 factor authentication
+        if user.phone_verified:
+            user.use_2factor_authentication= True if request.POST.get('use_2factor_authentication') == 'on' else False,
+        else:
+            return self.get(request, {'error': {'phonenumber': 'Verify your phone before setting 2 factor authentication.'}})
+
+        # update password through checking old password
         if password and check_password(password_old, user.password) and password == password_confirm:
             user.password = make_password(password)
         elif password:
             return self.get(request, {'error': {'password_old': 'Incorrect Password!'}})
 
+        # set avatar
         lists = avatars.split(',') if avatars else []
         if len(lists) > 0:
             print(lists)
@@ -525,15 +566,15 @@ class ProfileOverview(View):
 class ReceivedOffers(View):
 
     def get(self, request, more={}):
-        items = models.CounterOffers.objects.filter(Q(offer__created_by=current_user(request).customer(), status='pending') | Q(created_by=current_user(request).customer(), status='accepted')).order_by('-created_at')[:3]
+        items = models.Trades.objects.filter(Q(offer__created_by=current_user(request).customer()), Q(status='waiting'), Q(Q(counter_status='accepted') | Q(counter_status=None))).order_by('-created_at')[:3]
         return render(request, 'theme/received-offers.html', {'items': items, **more})
 
     def post(self, request):
         item_id = request.POST.get('item_id', '')
         mode = request.POST.get('mode', '')
         try:
-            item = models.CounterOffers.objects.get(id=item_id)
-            item.status = mode
+            item = models.Trades.objects.get(id=item_id)
+            item.counter_status = mode
             item.save()
             return JsonResponse({'success': 'Declined!'})
         except:
@@ -543,14 +584,72 @@ class ReceivedOffers(View):
 class BuySellCoins(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/index.html', {**more})
+        return redirect(app_url+'/withdrawals')
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
 class Funding(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/fund.html', {**more})
+        currency = request.GET.get('currency', '')
+        return render(request, 'theme/fund.html', {'currency': currency, **more})
+
+    def post(self, request):
+        mode = request.POST.get('mode', '')
+        if mode == 'add_card':
+            card_name = request.POST.get('card_name', '')
+            card_number = request.POST.get('card_number', '')
+            security_code = request.POST.get('security_code', '')
+            expiration_date = request.POST.get('expiration_date', '')
+            # [[[?]]] require checking bankcard
+            try:
+                try:
+                    exist = models.UserIDs.objects.get(user=current_user(request), card_name=card_name)
+                    return self.get(request, {'alert': {'warning': 'Already, Inserted.'}})
+                except:
+                    card = models.UserIDs()
+                    card.card_name = card_name
+                    card.card_number = card_number
+                    card.security_code = security_code
+                    card.expiration_date = expiration_date
+                    card.user = current_user(request)
+                    card.save()
+                    return self.get(request, {'alert': {'success': 'Created card'}})
+            except Exception as e:
+                print(e)
+                return self.get(request, {'alert': {'warning': 'Not created. Try again.'}})
+
+        if mode == 'remove_card':
+            item_id = request.POST.get('item_id', '')
+            try:
+                card = models.UserIDs.objects.get(id=item_id)
+                card.delete()
+                return self.get(request, {'alert': {'success': 'Card deleted.'}})
+            except:
+                return self.get(request, {'alert': {'warning': 'Try again.'}})
+
+        if mode == 'fund':
+            fund_crypto = request.POST.get('fund_crypto', '')
+            amount = request.POST.get('amount', '')
+            card_id = request.POST.get('card', '')
+            # [[[?]]]get money from card.
+            try:
+                obj, created = models.Balance.objects.get_or_create(customer=current_user(request).customer(), currency=fund_crypto)
+                obj.amount = float(amount) + obj.amount
+                obj.save()
+                card = models.UserIDs.objects.get(id=card_id)
+                drawlist = models.DrawLists()
+                drawlist.draw_type = 'fund'
+                drawlist.amount = float(amount)
+                drawlist.currency = fund_crypto
+                drawlist.card = card
+                drawlist.details = 'Fund from ' + card.card_name
+                drawlist.created_by = current_user(request).customer()
+                drawlist.save()
+                return self.get(request, {'alert': {'success': amount+' '+fund_crypto+' Funded.'}})
+            except Exception as e:
+                print(e)
+                return self.get(request, {'alert': {'warning': 'Try again.'}})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -577,10 +676,12 @@ class OfferActivity(View):
     def post(self, request):
         item_id = request.POST.get('item_id', '')
         item = models.Offers.objects.get(id=item_id)
-        item.is_paused = True
-        item.paused_by = current_user(request)
+        item.is_paused = not item.is_paused
+        item.paused_by = current_user(request) if item.is_paused else None
         item.save()
-        return self.get(request, {'item_id': item_id, 'offer_error': 'Your Offer is paused by moderator.'})
+        offer_success = 'Your Offer is resumed by moderator.' if not item.is_paused else False
+        offer_error = 'Your Offer is paused by moderator.' if item.is_paused else False
+        return self.get(request, {'item_id': item_id, 'offer_error': offer_error, 'offer_success': offer_success })
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -589,51 +690,58 @@ class EditOffer(View):
     def get(self, request, more={}):
         item_id = more['item_id'] if 'item_id' in more else request.GET.get('item_id', '')
         item = models.Offers.objects.get(id=item_id)
-        return render(request, 'theme/edit-offer.html', {'item': item, **more})
+        if item.created_by == current_user(request).customer():
+            return render(request, 'theme/edit-offer.html', {'item': item, **more})
+        else:
+            return redirect(app_url)
 
     def post(self, request):
         item_id = request.POST.get('item_id', '')
         trade_price = float(request.POST.get('trade_price', 0))
         if request.POST.get('useMarketPrice', '').strip() == 'on':
-            trade_price = 123#[[[?]]]
+            trade_price = models.Pricing.get_rate(request.POST.get('what_crypto'), request.POST.get('flat'), 'market_price')
         if request.POST.get('trailMarketPrice', '').strip() == 'on':
-            trade_price = 123#[[[?]]]
+            trade_price = models.Pricing.get_rate(request.POST.get('what_crypto'), request.POST.get('flat'), 'trail_market_price')
+
+        object_data = {
+            'trade_type': request.POST.get('trade_type'),
+            'what_crypto': request.POST.get('what_crypto'),
+            'flat': request.POST.get('flat'),
+            'postal_code': request.POST.get('postal_code') if request.POST.get('postal_code') else None,
+            'show_postcode': True if request.POST.get('show_postcode') == 'on' else False,
+            'country': request.POST.get('country'),
+            'city': request.POST.get('city'),
+            'trade_price': trade_price,
+            'use_market_price': True if request.POST.get('useMarketPrice') == 'on' else False,
+            'trail_market_price': True if request.POST.get('trailMarketPrice') == 'on' else False,
+            'profit_start': float(request.POST.get('profit_start')) if request.POST.get('profit_start', '') != '' else None,
+            'profit_end': float(request.POST.get('profit_end')) if request.POST.get('profit_end', '') != '' else None,
+            'profit_time': request.POST.get('profit_time'),
+            'minimum_transaction_limit': request.POST.get('minimum_transaction_limit'),
+            'maximum_transaction_limit': request.POST.get('maximum_transaction_limit'),
+            'operating_hours_start': request.POST.get('operating_hours_start'),
+            'operating_hours_end': request.POST.get('operating_hours_end'),
+            'restrict_hours_start': request.POST.get('restrict_hours_start'),
+            'restrict_hours_end': request.POST.get('restrict_hours_end'),
+            'proof_times': request.POST.get('proof_times'),
+            'supported_location': request.POST.getlist('supported_location[]'),
+            'trade_overview': request.POST.get('trade_overview', '').strip(),
+            'message_for_proof': request.POST.get('message_for_proof', '').strip(),
+            'identified_user_required': True if request.POST.get('identified_user_required') == 'on' else False,
+            'sms_verification_required': True if request.POST.get('sms_verification_required') == 'on' else False,
+            'minimum_successful_trades': request.POST.get('minimum_successful_trades'),
+            'minimum_complete_trade_rate': request.POST.get('minimum_complete_trade_rate'),
+            'admin_confirmed': False,
+            'created_at': datetime.now(),
+        }
         try:
             offer = models.Offers.objects.get(id=item_id)
-            object_data = {
-                'what_crypto': request.POST.get('what_crypto'),
-                'flat': request.POST.get('flat'),
-                'postal_code': request.POST.get('postal_code'),
-                'show_postcode': True if request.POST.get('show_postcode') == 'on' else False,
-                'country': request.POST.get('country'),
-                'city': request.POST.get('city'),
-                'trade_price': trade_price,
-                'profit_start': float(request.POST.get('profit_start')) if request.POST.get('profit_start', None) != '' else None,
-                'profit_end': float(request.POST.get('profit_end')) if request.POST.get('profit_end', None) != '' else None,
-                'profit_time': request.POST.get('profit_time'),
-                'minimum_transaction_limit': request.POST.get('minimum_transaction_limit'),
-                'maximum_transaction_limit': request.POST.get('maximum_transaction_limit'),
-                'operating_hours_start': request.POST.get('operating_hours_start'),
-                'operating_hours_end': request.POST.get('operating_hours_end'),
-                'restrict_hours_start': request.POST.get('restrict_hours_start'),
-                'restrict_hours_end': request.POST.get('restrict_hours_end'),
-                'proof_times': request.POST.get('proof_times'),
-                'supported_location': request.POST.getlist('supported_location[]'),
-                'trade_overview': request.POST.get('trade_overview', '').strip(),
-                'message_for_proof': request.POST.get('message_for_proof', '').strip(),
-                'identified_user_required': True if request.POST.get('identified_user_required') == 'on' else False,
-                'sms_verification_required': True if request.POST.get('sms_verification_required') == 'on' else False,
-                'minimum_successful_trades': request.POST.get('minimum_successful_trades'),
-                'minimum_complete_trade_rate': request.POST.get('minimum_complete_trade_rate'),
-                'admin_confirmed': False,
-                'created_by': current_user(request),
-                'created_at': datetime.now(),
-            }
-
             offer.__dict__.update(object_data)
+            offer.created_by = current_user(request).customer()
             offer.save()
             return OfferActivity.get(OfferActivity, request, {'item_id': offer.pk, 'offer_success': 'Offer Posted'})
-        except:
+        except Exception as e:
+            print(e)
             return OfferActivity.get(OfferActivity, request, {'item_id': offer.pk, 'offer_error': 'Your Offer is not running. Ref: RD23. <a href="'+app_url+'/issue?name=RD23">Find out</a> what it means'})
 
 
@@ -641,7 +749,7 @@ class EditOffer(View):
 class AllOffers(View):
 
     def get(self, request, more={}):
-        items = models.Offers.objects.order_by('-created_at').filter(created_by=current_user(request))
+        items = models.Offers.objects.order_by('-created_at').filter(created_by=current_user(request).customer())
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
         base_url = app_url+'/all-offers/?'
@@ -689,10 +797,10 @@ class OfferListing(View):
                 ).order_by('-created_at')
         else:
             if int(trade_price) > 0:
-                items = models.Offers.objects.filter(trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat, 
+                items = models.Offers.objects.filter(admin_confirmed=True, trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat, 
                 minimum_transaction_limit__lte=trade_price, maximum_transaction_limit__gte=trade_price).order_by('-created_at')
             else:
-                items = models.Offers.objects.filter(trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat).order_by('-created_at')
+                items = models.Offers.objects.filter(admin_confirmed=True, trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat).order_by('-created_at')
 
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
@@ -743,34 +851,57 @@ class InitiateTrade(View):
 
     def get(self, request, more={}):
         item_id = more['item_id'] if 'item_id' in more else request.GET.get('item_id', '')
-        return render(request, 'theme/initiate-trade.html', {'offer_id': item_id, **more})
+        trade_id = more['trade_id'] if 'trade_id' in more else request.GET.get('trade_id', '')
+        return render(request, 'theme/initiate-trade.html', {'offer_id': item_id, 'trade_id': trade_id, **more})
 
     def post(self, request):
         offer_id = request.POST.get('offer_id', '')
-        offer = models.Offers.objects.get(id=offer_id)
-        if offer.is_started():
-            return self.get(request, {'item_id': offer_id, 'alert': {'warning': 'Warning! Already started. ' + ('<a href="'+app_url+'/trade-processed?item_id='+str(offer.is_started().id)+'">go to trade.</a>' if offer.is_started() else '')}})
+        trade_id = request.POST.get('trade_id', '')
+        if trade_id:
+            trade = models.Trades.objects.get(id=trade_id)
+        else:
+            offer = models.Offers.objects.get(id=offer_id)
+            try:
+                trade = models.Trades.objects.get(offer=offer, vendor=current_user(request).customer(), status='waiting')
+            except Exception as e:
+                trade = models.Trades()
+                trade.vendor = current_user(request).customer()
+                trade.offer = offer
+
+            if current_user(request).customer() == offer.created_by:
+                return self.get(request, {'item_id': offer_id, 'alert': {'warning': 'It`s your offer. '}})
+            if offer.is_started() and offer.status == 'archived':
+                return self.get(request, {'item_id': offer_id, 'alert': {'warning': 'Warning! Already started. ' + ('<a href="'+app_url+'/trade-processed?item_id='+str(offer.is_started().id)+'">go to trade.</a>' if offer.is_started() else '')}})
+
         payment_method = request.POST.get('payment_method', '')
         amount = request.POST.get('amount', '')
         try:
-            trade = models.Trades()
-            trade.offer = offer
             trade.payment_method = payment_method
             trade.amount = amount
-            trade.status = True
-            trade.vendor = current_user(request).customer()
+            trade.status = 'archived'
+            trade.trade_initiator = current_user(request).customer()
             trade.created_at = datetime.now()
             trade.save()
-            escrow = models.Escrows()
-            escrow.trade = trade
-            escrow.held_for = trade.buyer()
-            escrow.held_from = trade.seller()
-            escrow.status = False
-            escrow.amount = amount
-            escrow.created_at = datetime.now()
-            escrow.save()
-            calculate_escrow(escrow.pk)
-            return TradeProcessed.get(TradeProcessed, request, {'item_id': trade.pk, 'alert': {'success': 'Success intiate trade.'}})
+
+            escrow1, craeted1 = models.Escrows.objects.get_or_create(trade=trade, held_from=trade.seller(), held_for=trade.buyer(), defaults={
+                'created_at': datetime.now(), 'status': False, 'amount': amount, 'currency': trade.offer.what_crypto
+            })
+            escrow1.amount = amount
+            escrow1.currency = trade.offer.what_crypto
+            escrow1.save()
+
+            escrow2, craeted2 = models.Escrows.objects.get_or_create(trade=trade, held_for=trade.seller(), held_from=trade.buyer(), defaults={
+                'created_at': datetime.now(), 'status': False, 'amount': trade.flat_amount(), 'currency': trade.trade_flat()
+            })
+            escrow2.amount = trade.flat_amount()
+            escrow2.currency = trade.trade_flat()
+            escrow2.save()
+
+            userrel1, created3 = models.UserRelations.objects.get_or_create(user=trade.buyer().user, partner=trade.seller().user, defaults={'created_at': datetime.now()})
+            userrel2, created4 = models.UserRelations.objects.get_or_create(user=trade.seller().user, partner=trade.buyer().user, defaults={'created_at': datetime.now()})
+
+            # calculate_escrow(escrow.pk)#[[[?]]]
+            return redirect(app_url+'/trade-processed?item_id='+str(trade.pk))
         except Exception as e:
             print(e)
             return self.get(request, {'item_id': offer_id, 'alert': {'warning': 'Sorry, Try again.'}})
@@ -778,9 +909,15 @@ class InitiateTrade(View):
 
 def caculateTrade(request):
     offer_id = request.POST.get('offer_id', '')
-    offer = models.Offers.objects.get(id=item_id)
+    trade_id = request.POST.get('trade_id', '')
+    if trade_id:
+        trade = models.Trades.objects.get(id=trade_id)
+    else:
+        offer = models.Offers.objects.get(id=offer_id)
     payment_method = request.POST.get('payment_method', '')
     amount = request.POST.get('amount', '')
+
+    # [[[[?]]]]
     return JsonResponse({
         'you_pay_amount': 400, 'you_pay_flat': 'USD',
         'you_get_amount': 1981, 'you_get_flat': 'XRP',
@@ -809,20 +946,16 @@ class ProofOfTransaction(View):
     def post(self, request):
         trade_id = request.POST.get('trade_id', '')
         trade = models.Trades.objects.get(id=trade_id)
-        gift_card_code = request.POST.get('gift_card_code', '')
+        proof_gift_code = request.POST.get('proof_gift_code', '')
         reference_number = request.POST.get('reference_number', '')
         proof_documents = request.POST.get('proof_documents', '')
-        proof_not_opened = request.POST.get('proof_not_opened', '')
+        # proof_not_opened = request.POST.get('proof_not_opened', '')
         try:
-            trade.gift_card_code = gift_card_code
-            trade.reference_number = reference_number
+            trade.proof_gift_code = proof_gift_code
             trade.proof_documents = proof_documents
-            trade.proof_not_opened = proof_not_opened
-            trade.trade_date = datetime.now()
-            trade.trade_complete = False
-            trade.trade_status = False
+            trade.reference_number = reference_number
             trade.save()
-            return redirect(app_url+'/trade-complete?item_id='+trade_id)
+            return self.get(request, {'item_id': trade_id, 'success': True})
         except Exception as e:
             print(e)
             return self.get(request, {'item_id': trade_id, 'alert': {'warning': 'Sorry, Try again.'}})
@@ -841,12 +974,16 @@ class TradeComplete(View):
         trade = models.Trades.objects.get(id=trade_id)
         review_rate = request.POST.get('rate', '')
         try:
-            review = models.Reviews()
-            review.trade = trade
-            review.to_customer = trade.buyer() if trade.seller == current_user(request) else trade.seller()
-            review.as_role = 'buyer' if trade.seller() == current_user(request) else 'seller'
+            try: 
+                review = models.Reviews.objects.get(created_by=current_user(request).customer(), trade=trade)
+            except:
+                review = models.Reviews()
+                review.trade = trade
+                review.created_by = current_user(request).customer()
+
+            review.to_customer = trade.buyer() if trade.seller() == current_user(request).customer() else trade.seller()
+            review.as_role = 'buyer' if trade.seller() == current_user(request).customer() else 'seller'
             review.review_rate = review_rate
-            review.created_by = current_user(request).customer()
             review.created_at = datetime.now()
             review.save()
             return self.get(request, {'item_id': trade_id, 'alert': {'success': 'Rate submited.'}})
@@ -866,15 +1003,21 @@ class SendCounterOffer(View):
         offer_id = request.POST.get('offer_id', '')
         offer = models.Offers.objects.get(id=offer_id)
         try:
-            counter = models.CounterOffers()
-            counter.offer = offer
-            counter.created_by = current_user(request).customer()
-            counter.price = request.POST.get('price', '')
+            try:
+                counter = models.Trades.objects.get(offer=offer, vendor=current_user(request).customer())
+            except:
+                counter = models.Trades()
+                counter.offer = offer
+                counter.vendor = current_user(request).customer()
+            counter.price = request.POST.get('price')
             counter.flat = request.POST.get('flat', '')
             counter.message = request.POST.get('message', '').strip()
             counter.created_at = datetime.now()
-            counter.status = 'pending'
+            counter.status = 'waiting'
             counter.save()
+
+            userrel1, created1 = models.UserRelations.objects.get_or_create(user=counter.offer.created_by.user, partner=counter.vendor.user, defaults={'created_at': datetime.now()})
+
             return self.get(request, {'item_id': offer_id, 'alert': {'success': 'Sent your offer.'}})
         except Exception as e:
             print(e)
@@ -945,7 +1088,7 @@ class LeaveReview(View):
         try:
             item.feedback = feedback
             item.save()
-            return self.get(request, {'item_id': item_id, 'alert' : {'success': 'Successfuly saved.'}})
+            return redirect(app_url+'/trade-complete?item_id='+str(item.trade.id))
         except:
             return self.get(request, {'item_id': item_id, 'alert' : {'warning': 'Not saved. Try later.'}})
 
@@ -972,13 +1115,17 @@ class VendorProofOfTransaction(View):
     def get(self, request, more={}):
         item_id = more['item_id'] if 'item_id' in more else request.GET.get('item_id', '')
         item = models.Trades.objects.get(id=item_id)
+        if item.is_gift_card():
+            return redirect(app_url+'/vpof-gift-card-steps?item_id='+item_id)
+
         return render(request, 'theme/vendor-proof-of-transaction.html', {'item': item, **more})
 
     def post(self, request):
         item_id = request.POST.get('item_id', '')
         try:
             item = models.Trades.objects.get(id=item_id)
-            item.is_completed = True
+            item.status = 'completed'
+            item.trade_date = datetime.now()
             item.save()
             return self.get(request, {'item_id': item_id, 'alert' : {'success': 'Trade Approved.'}})
         except:
@@ -990,14 +1137,29 @@ class VendorProofOfTransaction(View):
 class VPOFGiftCardSteps(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/vpof-giftcard-steps.html', {**more})
+        item_id = more['item_id'] if 'item_id' in more else request.GET.get('item_id', '')
+        return render(request, 'theme/vpof-giftcard-steps.html', {'item_id': item_id, **more})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
 class VPOFGiftCardOpenCode(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/vpof-giftcard-open-code.html', {**more})
+        item_id = more['item_id'] if 'item_id' in more else request.GET.get('item_id', '')
+        item = models.Trades.objects.get(id=item_id)
+        return render(request, 'theme/vpof-giftcard-open-code.html', {'item':item, **more})
+
+    def post(self, request, more={}):
+        item_id = request.POST.get('item_id', '')
+        try:
+            item = models.Trades.objects.get(id=item_id)
+            item.status = 'completed'
+            item.proof_opened = True
+            item.trade_date = datetime.now()
+            item.save()
+            return JsonResponse({'success': 'Gift Card Opend.'})
+        except:
+            return JsonResponse({'error': 'Sorry, Something Wrong. Try later.'})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -1006,25 +1168,69 @@ class Send(View):
     def get(self, request, more={}):
         return render(request, 'theme/send.html', {**more})
 
+    def post(self, request):
+        try:
+            item = models.SendCryptos()
+            item.crypto_amount = float(request.POST.get('crypto_amount'))
+            item.flat_amount = float(request.POST.get('flat_amount'))
+            item.receiver_email = request.POST.get('receiver_email')
+            item.currency = request.POST.get('currency')
+            item.description = request.POST.get('description')
+            item.created_by = current_user(request).customer()
+            item.save()
+            return self.get(request, {'alert' : {'success': 'Sended.'}})
+        except Exception as e:
+            print(e)
+            return self.get(request, {'alert' : {'warning': 'Error!. Try later.'}})
+
 
 @method_decorator(customer_user_login_required, name='dispatch')
-def receive(request):
-
-    return render(request, 'theme/receive.html', {**more})
-
-
-@method_decorator(customer_user_login_required, name='dispatch')
-class TransactionHistory(View):
+class Receive(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/transaction-history.html', {**more})
+        mode = request.GET.get('mode', 'BTC')
+        if mode == 'BTC':
+            items = []
+        if mode == 'ETH':
+            items = []
+        if mode == 'XRP':
+            items = []
+        return render(request, 'theme/receive.html', {'mode':mode, 'items': items, **more})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
-class SavedWallets(View):
+class TradeHistory(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/saved-wallets.html', {**more})
+        mode = request.GET.get('mode', 'sold')
+        if mode == 'sold':
+            items = models.Trades.objects.filter(Q(status__in=['completed', 'cancelled']), Q(Q(offer__created_by=current_user(request).customer(), offer__trade_type='sell') | Q(vendor=current_user(request).customer(), offer__trade_type='buy')))
+        if mode == 'bought':
+            items = models.Trades.objects.filter(Q(status__in=['completed', 'cancelled']), Q(Q(offer__created_by=current_user(request).customer(), offer__trade_type='buy') | Q(vendor=current_user(request).customer(), offer__trade_type='sell')))
+        if mode == 'successful':
+            items = models.Trades.objects.filter(Q(status='completed'), Q(Q(offer__created_by=current_user(request).customer()) | Q(vendor=current_user(request).customer())))
+        if mode == 'cancelled':
+            items = models.Trades.objects.filter(Q(status='cancelled'), Q(Q(offer__created_by=current_user(request).customer()) | Q(vendor=current_user(request).customer())))
+
+        return render(request, 'theme/trade-history.html', {'mode':mode, 'items': items, **more})
+
+
+@method_decorator(customer_user_login_required, name='dispatch')
+class SavedWallet(View):
+
+    def get(self, request, more={}):
+        btc_items = models.SavedWallets.objects.filter(crypto='BTC')
+        eth_items = models.SavedWallets.objects.filter(crypto='ETH')
+        return render(request, 'theme/saved-wallet.html', {'btc_items': btc_items, 'eth_items': eth_items, **more})
+
+    def post(self, request):
+        item_id = request.POST.get('item_id', '')
+        try:
+            savedwallet = models.SavedWallets.objects.get(id=item_id)
+            savedwallet.delete()
+            return JsonResponse({'success': 'Saved Wallet deleted.'})
+        except:
+            return JsonResponse({'error': 'Try again.'})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -1038,7 +1244,31 @@ class MyBalance(View):
 class WithdrawFunds(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/withdraw-funds.html', {**more})
+        currency = request.GET.get('currency', '')
+        return render(request, 'theme/withdraw-funds.html', {'currency': currency, **more})
+
+    def post(self, request):
+        currency = request.POST.get('currency', '')
+        amount = request.POST.get('amount', '')
+        details = request.POST.get('details', '')
+        # [[[?]]]put money to card.
+        try:
+            obj, created = models.Balance.objects.get_or_create(customer=current_user(request).customer(), currency=currency)
+            obj.amount = obj.amount - float(amount)
+            if obj.amount < 0:
+                return self.get(request, {'alert': {'warning': 'Not Enough your balance for '+currency}})
+            obj.save()
+            drawlist = models.DrawLists()
+            drawlist.draw_type = 'withdraw'
+            drawlist.amount = float(amount)
+            drawlist.currency = currency
+            drawlist.details = details
+            drawlist.created_by = current_user(request).customer()
+            drawlist.save()
+            return self.get(request, {'alert': {'success': amount+' '+currency+' Withdrawed.'}})
+        except Exception as e:
+            print(e)
+            return self.get(request, {'alert': {'warning': 'Try again.'}})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -1080,7 +1310,16 @@ class IdVerification(View):
 class Notifications(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/notifications.html', {**more})
+        notifications = []
+        processed_trades = models.Trades.objects.filter(Q(Q(offer__created_by=current_user(request).customer()) | Q(vendor=current_user(request).customer())), Q(status='archived'))
+        for trade in processed_trades:
+            trade_id = str(trade.id)
+            notifications.append({'text': 'Trade No. '+trade_id+' has been processed.', 'url': app_url+'/trade-processed?item_id='+trade_id})
+            if trade.is_proofed():
+                notifications.append({'text': 'Review proof of transaction for Trade No. '+trade_id+'.', 'url': app_url+'/vendor-proof-of-transaction?item_id='+trade_id})
+        completed_trades = models.Trades.objects.filter(Q(Q(offer__created_by=current_user(request).customer()) | Q(vendor=current_user(request).customer())), Q(status='completed', ))
+
+        return render(request, 'theme/notifications.html', {'items': notifications, **more})
 
 
 class BlogListing(View):
@@ -1106,7 +1345,30 @@ class BlogDetail(View):
 class Vendors(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/seller-directory.html', {**more})
+        q = request.GET.get('q', '').strip()
+        s = request.GET.get('s', 'active').strip()
+        status = True
+        if s == 'active':
+            status = True
+        elif s == 'new':
+            status = False
+
+        items = models.Customers.objects.filter(user__username__contains=q, customer_type='sell', user__is_customer=status)
+        page_number = request.GET.get('page', 1)
+        items, paginator = do_paginate(items, page_number)
+        base_url = app_url+'/vendors/?'
+        return render(request, 'theme/seller-directory.html', {'items': items, 's': s, 'q':q, 'paginator' : paginator, 'base_url': base_url, **more})
+
+    def post(self, request):
+        q = request.POST.get('q', '').strip()
+        s = request.POST.get('s', 'active').strip()
+        status = True
+        if s == 'active':
+            status = True
+        elif s == 'new':
+            status = False
+        items = list(models.Customers.objects.filter(user__username__contains=q, customer_type='sell', user__is_customer=status).values_list('user__username', flat=True)[:10])
+        return JsonResponse({'items': items})
 
 
 class Contact(View):
@@ -1147,6 +1409,15 @@ class Referrals(View):
 
     def get(self, request, more={}):
         return render(request, 'theme/referrals.html', {**more})
+
+    def post(self, request):
+        email = request.POST.get('email', '')
+        fullname = request.POST.get('fullname', '')
+        message = request.POST.get('message', '').strip()
+        if current_user(request).send_invite_email(email, fullname, message):
+            return self.get(request, {'alert': {'success': 'Invite Email Sent.'}})
+        else:
+            return self.get(request, {'alert': {'warning': 'Sorry!. Try Later!'}})
 
 
 class Buy(View):

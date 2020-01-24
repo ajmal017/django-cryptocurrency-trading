@@ -38,8 +38,8 @@
                     {% for item in items %}
                     <tr>
                         <td><span class="table__mobile-heading">Ticket number</span><a href="#">{{ item.id }}</a></td>
-                        <td><span class="table__mobile-heading">Created by</span><a href="#">{{ item.transaction.trade_initiator }}</a></td>
-                        <td><span class="table__mobile-heading">Created on</span><span>{{ item.transaction.offer.created_at }}</span></td>
+                        <td><span class="table__mobile-heading">Created by</span><a href="#">{{ item.email }}</a></td>
+                        <td><span class="table__mobile-heading">Created on</span><span>{{ item.created_at }}</span></td>
                         <td><span class="table__mobile-heading">Topic</span><span>{{ item.topic }}</span></td>
                         <td><span class="table__mobile-heading">Is dispute?</span><span>{{ item.get_is_dispute_display }}</span></td>
                         <td><span class="table__mobile-heading">Ticket manager</span><a href="#">{{ item.ticket_manager }}</a></td>

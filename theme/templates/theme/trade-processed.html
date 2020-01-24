@@ -17,28 +17,28 @@
     {% endif %}
     <header class="trade-details__header">
         <h1 class="trade-details__heading">Trade No. {{ item.id }}</h1>
-        {% if not item.is_gift_card and not is_proofed %}
+        {% if not item.is_gift_card and not item.is_proofed %}
         <div class="trade-details__header-inner">
             <p class="trade-details__status badge badge--secondary">Awaiting proof of transaction</p>
             <a class="trade-details__btn btn btn--theme-2 btn--round" href="{{ theme_url }}/proof-of-transaction?item_id={{ item.id }}">Upload Proof</a>
         </div>
         {% endif %}
-        {% if not item.is_gift_card and is_proofed %}
+        {% if not item.is_gift_card and item.is_proofed %}
         <div class="trade-details__header-inner">
             <p class="trade-details__status badge">Proof already uploaded</p>
-            <a class="trade-details__btn btn btn--theme-2 btn--round" href="{{ theme_url }}/view-proof?item_id={{ item.id }}">View proof</a>
+            <a class="trade-details__btn btn btn--theme-2 btn--round" href="{{ theme_url }}/vendor-proof-of-transaction?item_id={{ item.id }}">View proof</a>
         </div>
         {% endif %}
-        {% if item.is_gift_card and not is_proofed %}
+        {% if item.is_gift_card and not item.is_proofed %}
         <div class="trade-details__header-inner">
             <p class="trade-details__status badge badge--secondary">Awaiting gift card code</p>
             <a class="trade-details__btn btn btn--theme-2 btn--round" href="{{ theme_url }}/proof-of-transaction?item_id={{ item.id }}">Add Gift Card Code</a>
         </div>
         {% endif %}
-        {% if item.is_gift_card and is_proofed %}
+        {% if item.is_gift_card and item.is_proofed %}
         <div class="trade-details__header-inner">
             <p class="trade-details__status badge">Code already added</p>
-            <a class="trade-details__btn btn btn--theme-2 btn--round" href="{{ theme_url }}/view-proof?item_id={{ item.id }}">View code</a>
+            <a class="trade-details__btn btn btn--theme-2 btn--round" href="{{ theme_url }}/vendor-proof-of-transaction?item_id={{ item.id }}">View code</a>
         </div>
         {% endif %}
     </header>
@@ -57,6 +57,9 @@
                     <li class="dashboard__data-item"><span class="dashboard__caption">Joined</span><span class="dashboard__value">{{ item.seller.user.date_joined.date }}</span></li>
                 </ul>
             </div>
+            {% if item.seller == user.customer %}
+            <a class="trade-details__view-escrow" href="{{ theme_url }}/independent-escrow?trade_id={{ item.id }}">View Escrow</a>
+            {% endif %}
         </div>
         <div class="trade-details__data">
             <table class="trade-details__table">
@@ -107,7 +110,10 @@
                     <li class="dashboard__data-item"><span class="dashboard__caption">Blocked by</span><span class="dashboard__value">{{ item.buyer.blocked_by_count }} People</span></li>
                     <li class="dashboard__data-item"><span class="dashboard__caption">Joined</span><span class="dashboard__value">{{ item.buyer.user.date_joined.date }}</span></li>
                 </ul>
-            </div><a class="trade-details__view-escrow" href="{{ theme_url }}/independent-escrow?trade_id={{ item.id }}">View Escrow</a>
+            </div>
+            {% if item.buyer == user.customer %}
+            <a class="trade-details__view-escrow" href="{{ theme_url }}/independent-escrow?trade_id={{ item.id }}">View Escrow</a>
+            {% endif %}
         </div>
     </div>
 </div>

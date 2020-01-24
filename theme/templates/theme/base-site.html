@@ -56,7 +56,7 @@
                             <li class="nav__item"><a class="nav__link" href="{{ theme_url }}/offer-listing?trade_type=buy">I’m a Seller</a></li>
                             <li class="nav__item"><a class="nav__link" href="{{ theme_url }}/blog-listing">Our Blog</a></li>
                             <li class="nav__item"><a class="nav__link" href="{{ theme_url }}/profile-overview">Dashboard</a></li>
-                            <li class="nav__item"><a class="nav__link" href="{{ theme_url }}/[[[?]]]">Transactions</a></li>
+                            <li class="nav__item"><a class="nav__link" href="{{ theme_url }}/notifications">Transactions</a></li>
                             <li class="nav__item"><a class="nav__link" href="{{ theme_url }}/messages">Messages</a></li>
                             <li class="nav__item"><a class="nav__link" href="{{ theme_url }}/funding">Funding</a></li>
                             <li class="nav__item"><a class="nav__link" href="{{ theme_url }}/received-offers">Offers </a></li>
@@ -197,7 +197,7 @@
                     {% csrf_token %}
                     <div class="login_email dropdown__field form-group {% if error.login.email %}is-invalid{% endif %}">
                         <div class="form-group__field-group">
-                            <input class="form-group__field" name="email" type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Email address" required>
+                            <input class="form-group__field" name="email" type="text" placeholder="Email address" required>
                             {% if error.login.email %}
                             <svg class="form-group__required is-invalid-item">
                                 <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
@@ -337,7 +337,7 @@
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/profile-overview">Dashboard</a></li>
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/all-offers">All Offers</a></li>
                     <li class="dropdown__menu-item"><span class="dropdown__counter">3</span><a class="dropdown__link" href="{{ theme_url }}/received-offers">Received Offers</a></li>
-                    <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/[[[?]]]">Transactions</a></li>
+                    <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/notifications">Transactions</a></li>
                     <li class="dropdown__menu-item"><span class="dropdown__counter">2</span><a class="dropdown__link" href="{{ theme_url }}/messages">Messages</a></li>
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/funding">Funding</a></li>
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/trade-history">Trade History</a></li>
