@@ -22,12 +22,12 @@
             {% for item in items %}
             <div class="escrows__item">
                 <div class="escrows__price-wrapper">
-                    <h2 class="escrows__price">{{ item.trade_price }} {{ item.trade_flat }}</h2>
+                    <h2 class="escrows__price">{{ item.amount }} {{ item.currency }}</h2>
                     <p class="escrows__date">Escrow on {{ item.created_at }}</p>
                 </div>
                 <div class="escrows__desc-wrapper">
-                    <p class="escrows__desc">{% if item.held_for == user %}Held from {{ item.held_from }}{% else %}Held for {{ item.held_for }}{% endif %}</p>
-                    <p class="escrows__status">{{ item.confirmed }} / {{ item.get_status_display }}</p>
+                    <p class="escrows__desc">{% if item.held_for == user.customer %}Held from {{ item.held_from }}{% else %}Held for {{ item.held_for }}{% endif %}</p>
+                    <p class="escrows__status">{{ item.get_status_display }}</p>
                 </div>
             </div>
             {% endfor %}

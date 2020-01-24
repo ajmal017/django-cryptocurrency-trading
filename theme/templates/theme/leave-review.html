@@ -26,7 +26,7 @@
         </header>
         <div class="page__field form-group form-group--textarea">
             <div class="form-group__field-group">
-                <textarea class="form-group__field" name="feedback" rows="6" placeholder="Your comment">{{ item.feedback|safe }}</textarea>
+                <textarea class="form-group__field" name="feedback" rows="6" placeholder="Your comment">{{ item.feedback|default_if_none:''|safe }}</textarea>
             </div>
         </div>
         <button class="leave-review__btn btn btn--round btn--theme-4" type="submit">Post this review</button>

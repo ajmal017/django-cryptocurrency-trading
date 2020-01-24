@@ -14,18 +14,18 @@
             </div>
             <div>
                 <h1 class="public-profile__user-name">{{ customer }}</h1>
-                <p class="public-profile__user-data">Average trade completion time: {{ customer.stat.average_trade_complete_time }} hours</p>
-                <p class="public-profile__user-data">Trade intiate to completion rate: {{ customer.stat.trade_initiate_complete_rate }}%</p>
+                <p class="public-profile__user-data">Average trade completion time: {{ customer.average_trade_complete_time }} hours</p>
+                <p class="public-profile__user-data">Trade intiate to completion rate: {{ customer.trade_initiate_complete_rate }}%</p>
             </div>
         </div>
-        <div class="public-profile__user-rate public-profile__user-rate--1"><span class="public-profile__user-rated-amount">{{ customer.stat.customer_rate_amount }}</span>
+        <div class="public-profile__user-rate public-profile__user-rate--1"><span class="public-profile__user-rated-amount">{{ customer.customer_rate_amount }}</span>
             <!--+stars("user-rate", "medium")(star_40 = "checked")-->
             <div class="stars-fixed medium">
                 {% for rate in '01234'|make_list %}
-                <svg class="stars-fixed__icon stars-fixed__icon--half {%if customer.stat.review_rate < forloop.counter %}is-selected{%endif%}">
+                <svg class="stars-fixed__icon stars-fixed__icon--half {%if customer.customer_rate < forloop.counter %}is-selected{%endif%}">
                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                 </svg>
-                <svg class="stars-fixed__icon {%if customer.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                <svg class="stars-fixed__icon {%if customer.customer_rate <= forloop.counter %}is-selected{%endif%}">
                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                 </svg>
                 {% endfor %}
@@ -49,10 +49,10 @@
                         <div class="feedback__header-part">
                             <div class="stars-fixed small">
                                 {% for rate in '01234'|make_list %}
-                                <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.customer.stat.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                                <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.customer.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                                 </svg>
-                                <svg class="stars-fixed__icon {%if item.customer.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                                <svg class="stars-fixed__icon {%if item.customer.customer_rate <= forloop.counter %}is-selected{%endif%}">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                                 </svg>
                                 {% endfor %}
@@ -62,10 +62,10 @@
                         <div class="feedback__header-part"><span class="feedback__average">Average </span>
                             <div class="stars-fixed small dark">
                                 {% for rate in '01234'|make_list %}
-                                <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                                <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.customer.successful_trade_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                                 </svg>
-                                <svg class="stars-fixed__icon {%if item.created_by.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                                <svg class="stars-fixed__icon {%if item.customer.successful_trade_rate <= forloop.counter %}is-selected{%endif%}">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                                 </svg>
                                 {% endfor %}
@@ -102,13 +102,13 @@
                     <td class="table-new__cell"><span class="table-new__mobile-heading">Method</span>
                         <div class="table-new__rate">
                             <p class="table-new__rate-caption">Selling</p>
-                            <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ item.created_by.stat.review_count }})</a>
+                            <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ item.created_by.trade_count }})</a>
                                 <div class="stars-fixed small">
                                     {% for rate in '01234'|make_list %}
-                                    <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.stat.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                                    <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                                         <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                                     </svg>
-                                    <svg class="stars-fixed__icon {%if item.created_by.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                                    <svg class="stars-fixed__icon {%if item.created_by.customer_rate <= forloop.counter %}is-selected{%endif%}">
                                         <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                                     </svg>
                                     {% endfor %}

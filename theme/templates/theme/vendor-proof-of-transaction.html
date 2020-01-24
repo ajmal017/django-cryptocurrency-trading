@@ -8,7 +8,12 @@
 <div class="page__inner proof-transaction">
     <header class="proof-transaction__header">
         <h1 class="proof-transaction__heading">Review proof of transaction</h1>
+        {% if item.is_completed %}
+        <a class="proof-transaction__approve btn btn--theme-2 btn--round" href="{{ theme_url }}/trade-complete?item_id={{ item.id }}">Complete</a>
+        {% endif %}
+        {% if not item.is_completed %}
         <button class="proof-transaction__approve btn btn--theme-2 btn--round" form="form1" type="submit">Approve trade</button>
+        {% endif %}
     </header>
     <h2 class="proof-transaction__subheading">Trade {{ item.id }}</h2>
     <form action="{{ theme_url }}/vendor-proof-of-transaction/" method="POST" id="form1">
@@ -29,7 +34,7 @@
                 <h3 class="proof-transaction__document-heading">Uploaded document</h3>
                 <div class="proof-transaction__document-inner">
                     {% for doc in item.proof_documents_list %}
-                    <a class="proof-transaction__document-img-wrapper" href="#">
+                    <a class="proof-transaction__document-img-wrapper" href="javascript: window.open('{{ doc.file.url }}')">
                         <img class="proof-transaction__document-img" height="200" src="{{ doc.file.url }}" alt="">
                         <svg class="proof-transaction__document-icon">
                             <use xlink:href="{% static 'theme/images/icons.svg' %}#search"></use>

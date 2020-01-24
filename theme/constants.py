@@ -13,11 +13,16 @@ CRYPTO_CHOICES = (
     ('XRP', 'Ripple'),
 )
 
-CURRENCY_CHOICES = FLAT_CHOICES[1:] + CRYPTO_CHOICES[1:]
+CURRENCY_CHOICES = FLAT_CHOICES + CRYPTO_CHOICES
 
 REGISTRATION_CHOICES = (
     ('BUY', 'I want to buy'),
     ('SELL', 'I want to sell'),
+)
+
+DRAWALS_CHOIES = (
+    ('withdraw', 'Withdraw'),
+    ('fund', 'Deposit'),
 )
 
 CC_TYPES = (
@@ -42,6 +47,11 @@ LANGUAGE_CHOICES = (
 TICKET_STATUS_CHOICES = (
     ('p', 'Pending'),
     ('s', 'Solved')
+)
+
+VOTE_TYPES = (
+    ('up', 'Up vote'),
+    ('down', 'Down vote')
 )
 
 TRADE_TYPES = (
@@ -87,6 +97,19 @@ STATUS_TYPES = (
     (False, 'Suspend'),
 )
 
+TRADE_STATUS_TYPES = (
+    ('waiting', 'Waing for the intiation'),
+    ('archived', 'Archived'),
+    ('completed', 'Completed'),
+    ('cancelled', 'cancelled'),
+)
+
+ESCROWS_STATUS_TYPES = (
+    ('opened', 'Opened'),
+    ('closed', 'Closed'),
+    ('cancelled', 'Cancelled'),
+)
+
 VERIFIED_TYPES = (
     (True, 'Verified'),
     (False, 'Unverified'),
@@ -95,6 +118,11 @@ VERIFIED_TYPES = (
 PENDING_TYPES = (
     (True, 'Released'),
     (False, 'Pending'),
+)
+
+BLOCK_TYPES = (
+    (True, 'Accepted'),
+    (False, 'Blocked'),
 )
 
 ACCEPTIVE_TYPES = (

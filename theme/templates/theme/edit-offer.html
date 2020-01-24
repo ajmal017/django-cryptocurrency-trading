@@ -50,18 +50,18 @@
 		<h1 class="content-header__heading">Edit Offer</h1>
 		<div class="status">
 			<div class="status__data"><span class="status__text">{{ user.customer.balance }} in wallet</span><a class="status__text" href="{{ them_url }}/my-balance">View Full Wallet</a></div>
-			<div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt="[[[?]]]"></div>
+			<div class="status__userpic"><img class="status__user-img" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
 		</div>
 	</header>
 	<p class="new-offer__note">Don’t understand how to fill this form? <b><a class="new-offer__note-link" href="#">Watch this video[[[?]]]<span class="new-offer__note-circle"></span></a></b></p>
 	<div class="new-offer__mode">
 		{% if item.trade_type == 'buy' %}
 		<label class="new-offer__mode-option">
-			<input type="radio" name="trade_type" value="buy" hidden><span class="new-offer__mode-caption">BUY</span></label>
+			<input  name="trade_type" value="buy" hidden><span class="new-offer__mode-caption">BUY</span></label>
 		{% endif %}
 		{% if item.trade_type == 'sell' %}
 		<label class="new-offer__mode-option">
-			<input type="radio" name="trade_type" value="sell" hidden><span class="new-offer__mode-caption">SELL</span></label>
+			<input  name="trade_type" value="sell" hidden><span class="new-offer__mode-caption">SELL</span></label>
 		{% endif %}
 	</div>
 	<div class="new-offer__fields"><span class="new-offer__field-caption">Buying</span>
@@ -85,7 +85,7 @@
 		</div>
 		<div class="new-offer__postal-code form-group">
 			<div class="form-group__field-group">
-				<input class="form-group__field" name="postal_code" value="{{ item.postal_code }}"  {% if key == item.show_postcode %}disabled{% endif %} autocomplete="postal-code" placeholder="Postcode">
+				<input class="form-group__field" name="postal_code" value="{{ item.postal_code|default_if_none:'' }}"  {% if key == item.show_postcode %}disabled{% endif %} autocomplete="postal-code" placeholder="Postcode">
 				<svg class="form-group__required">
 					<use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
 				</svg>
@@ -107,7 +107,7 @@
 		</div>
 		<div class="new-offer__city page__field form-group">
 			<div class="form-group__field-group">
-				<input class="form-group__field" name="city" value="{{ item.city }}" placeholder="Enter city" required>
+				<input class="form-group__field" name="city" value="{{ item.city|default_if_none:'' }}" placeholder="Enter city" required>
 				<svg class="form-group__required">
 					<use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
 				</svg>
@@ -117,7 +117,7 @@
 	<div class="page__field">
 		<div class="new-offer__market-price-inner form-group">
 			<div class="form-group__field-group js-trade-price-field">
-				<input class="form-group__field" name="trade_price" type="number" value="{{ item.get_trade_price }}" placeholder="Asking Price? Current Market Price 3885 USD" required>
+				<input class="form-group__field" name="trade_price" type="number" value="{{ item.trade_price|default_if_none:'' }}" placeholder="Asking Price? Current Market Price 3885 USD" required>
 				<svg class="form-group__required">
 					<use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
 				</svg>
@@ -126,13 +126,13 @@
 		<div class="new-offer__additions form-group">
 			<div class="new-offer__checkboxes">
 				<label class="new-offer__price-checkbox checkbox">
-					<input type="checkbox" name="useMarketPrice" onclick="handleMarketPrice()" hidden><span class="checkbox__field"></span><span class="checkbox__text">Use market price</span></label>
+					<input type="checkbox" name="useMarketPrice" {% if item.use_market_price %}checked{% endif %} onclick="handleMarketPrice()" hidden><span class="checkbox__field"></span><span class="checkbox__text">Use market price</span></label>
 				<label class="new-offer__price-checkbox checkbox">
-					<input type="checkbox" name="trailMarketPrice" onclick="handleMarketPrice()" hidden><span class="checkbox__field"></span><span class="checkbox__text">Trail market price*</span></label>
+					<input type="checkbox" name="trailMarketPrice" {% if item.trail_market_price %}checked{% endif %} onclick="handleMarketPrice()" hidden><span class="checkbox__field"></span><span class="checkbox__text">Trail market price*</span></label>
 			</div>
 			<div class="new-offer__edit"> <span class="new-offer__edit-caption">Additional options: </span><span class="new-offer__">Add profit markup</span>
-				<input class="new-offer__number-input" name="profit_start" type="number" value="{{ item.profit_start }}"><span class="new-offer__">% if price goes </span>
-				<input class="new-offer__number-input" name="profit_end" type="number" value="{{ item.profit_end }}"><span class="new-offer__">% in</span>
+				<input class="new-offer__number-input" name="profit_start" type="number" value="{{ item.profit_start|default_if_none:'' }}"><span class="new-offer__">% if price goes </span>
+				<input class="new-offer__number-input" name="profit_end" type="number" value="{{ item.profit_end|default_if_none:'' }}"><span class="new-offer__">% in</span>
 				<select class="new-offer__select" name="profit_time">
 					<option value="5" {%if 5 == item.profit_time%}selected{%endif%}>5 minutes</option>
 					<option value="30" {%if 30 == item.profit_time%}selected{%endif%}>30 minutes</option>
@@ -278,6 +278,7 @@
             tags:!0,
             tokenSeparators:[","]
         })
-    })
+	})
+	handleMarketPrice()
 </script>
 {% endblock %}

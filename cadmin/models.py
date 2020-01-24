@@ -1,4 +1,4 @@
-from theme.constants import FLAT_CHOICES, CRYPTO_CHOICES, CURRENCY_CHOICES,REGISTRATION_CHOICES,CC_TYPES,LANGUAGE_CHOICES,TICKET_STATUS_CHOICES,TRADE_TYPES,CUSTOMER_TYPES,PAYMENT_METHODS,ROLE_TYPES,BOOLEAN_TYPES,STATUS_TYPES,VERIFIED_TYPES,PENDING_TYPES,ACCEPTIVE_TYPES,PAGESTATUS_TYPES,COUNTRY_CODE
+from theme.constants import BLOCK_TYPES, DRAWALS_CHOIES, ESCROWS_STATUS_TYPES, VOTE_TYPES, TRADE_STATUS_TYPES, FLAT_CHOICES, CRYPTO_CHOICES, CURRENCY_CHOICES,REGISTRATION_CHOICES,CC_TYPES,LANGUAGE_CHOICES,TICKET_STATUS_CHOICES,TRADE_TYPES,CUSTOMER_TYPES,PAYMENT_METHODS,ROLE_TYPES,BOOLEAN_TYPES,STATUS_TYPES,VERIFIED_TYPES,PENDING_TYPES,ACCEPTIVE_TYPES,PAGESTATUS_TYPES,COUNTRY_CODE
 
 from django.db import models
 from django.core.mail import send_mail
@@ -49,6 +49,9 @@ class Users(MyModel, AbstractUser):
     overview = models.TextField(null=True)
     billing_address = models.CharField(max_length=255, null=True)
     use_2factor_authentication = models.BooleanField(default=False)
+    organization = models.CharField(max_length=255, null=True)
+    postcode = models.IntegerField(null=True)
+    country = models.CharField(max_length=255, null=True)
 
     def __str__(self):
         return self.username
@@ -65,11 +68,23 @@ class Users(MyModel, AbstractUser):
         except:
             return None
 
+    def affiliate(self):
+        try:
+            return Affiliates.objects.get(user=self)
+        except:
+            return None
+
     def get_fullname(self):
         try:
             return self.fullname if self.fullname else (self.first_name + ' ' +self.last_name)
         except:
             return self.username
+
+    def id_cards_list(self):
+        return UserIDs.objects.filter(user=self)
+
+    def supported_language(self):
+        return 'English, Germany'
 
     def send_info_email(self):
         send_mail(
@@ -97,6 +112,18 @@ class Users(MyModel, AbstractUser):
             recipient_list=[self.email]
         )
         return settings.HOSTNAME+'/verify-email?t='+self.token+next
+
+    def send_invite_email(self, invite_email, message, fullname):
+        try:
+            send_mail(
+                subject='Invite from Raplev by '+self.get_fullname(),
+                message='<h4>Hi, '+fullname+'</h4><p>'+message + '</p><p>Click <a href="'+settings.HOSTNAME+'/verify-email?t='+self.token+next+'">here</a> to try Raplev, or follow to this link.</p>',
+                from_email='admin@raplev.com',
+                recipient_list=[invite_email]
+            )
+            return True
+        except:
+            return False
 
     def send_email_code(self, email):
         send_mail(
@@ -128,12 +155,6 @@ class Users(MyModel, AbstractUser):
         if verification_check:
             self.phonenumber = phonenumber
         return verification_check
-
-    def id_cards_list(self):
-        return UserIDs.objects.filter(user=self)
-
-    def supported_language(self):
-        return 'English, Germany'
 
 
 class Admins(MyModel):
@@ -182,11 +203,17 @@ class Customers(MyModel):
     def customer_rate(self):
         return 4.9
 
+    def review_count(self):
+        return 58
+
     def trade_count(self):
         return 3
 
     def successful_trade_count(self):
         return 2
+
+    def successful_trade_rate(self):
+        return round(self.successful_trade_count()/self.trade_count()*100)
 
     def unsuccessful_trade_count(self):
         return 1
@@ -200,11 +227,18 @@ class Customers(MyModel):
     def blocked_by_count(self):
         return 3
 
-    def received_offers(self):
-        try:
-            return CounterOffers.objects.get(Q(offer=self) | Q(created_by=True, is_accepted=True))
-        except:
-            return None
+    def set_suspend(self):
+        user = self.user
+        user.is_customer = False
+        user.save()
+        return True
+
+    def withdrawals(self):
+        return DrawLists.objects.filter(created_by=self, draw_type='withdraw')[:20]
+
+    def deposits(self):
+        return DrawLists.objects.filter(created_by=self, draw_type='fund')[:20]
+        
 
 
 class Balance(MyModel):
@@ -231,6 +265,9 @@ class Medias(MyModel):
     file = models.FileField(upload_to='', null=True)
     created_by = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.file.url
 
 
 class Reviews(MyModel):
@@ -299,12 +336,18 @@ class Offers(MyModel):
 
     def counter(self):
         try:
-            return CounterOffers.objects.get(offer=self)
+            return Trades.objects.get(offer=self, status='waiting')
         except:
             return None
 
     def relate_trades(self):
         return Trades.objects.filter(offer=self)
+
+    def completed_trade(self):
+        try:
+            return Trades.objects.get(offer=self, status='completed')
+        except:
+            return None
 
     def get_trade_price(self):
         if self.use_market_price:
@@ -327,43 +370,90 @@ class Offers(MyModel):
 
     def is_started(self):
         try:
-            return Trades.objects.get(offer=self)
+            return Trades.objects.get(Q(offer=self), ~Q(status='waiting'))
         except:
             return None
 
+    def bought_amount(self):
+        if self.trade_type == 'buy':
+            try:
+                return self.completed_trade.amount
+            except:
+                return 0
+        else:
+            try:
+                return self.completed_trade.flat_amount_completed()
+            except:
+                return 0
 
-class CounterOffers(MyModel):
-    offer = models.ForeignKey('Offers', on_delete=models.CASCADE)
-    price = models.FloatField()
-    flat = models.CharField(max_length=100, choices=FLAT_CHOICES)
-    message = models.TextField()
-    status = models.CharField(max_length=100, default='pending')
-    created_by = models.ForeignKey('Customers', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now=True)
+    def sold_amount(self):
+        if self.trade_type == 'sell':
+            try:
+                return self.completed_trade.amount
+            except:
+                return 0
+        else:
+            try:
+                return self.completed_trade.flat_amount_completed()
+            except:
+                return 0
+
+    def bought_currency(self):
+        if self.trade_type == 'buy':
+            return self.what_crypto
+        else:
+            try:
+                return self.completed_trade.trade_flat
+            except:
+                return '-'
+
+    def sold_currency(self):
+        if self.trade_type == 'sell':
+            return self.what_crypto
+        else:
+            try:
+                return self.completed_trade.trade_flat
+            except:
+                return '-'
+
+    def status(self):
+        if self.is_expired:
+            return 'Expired'
+        elif self.is_paused:
+            return 'Paused'
+        else:
+            return 'Pending'
+
+    def is_completed(self):
+        return True if self.completed_trade() else False
 
 
 class Trades(MyModel):
     offer = models.ForeignKey('Offers', on_delete=models.CASCADE)
-    vendor = models.ForeignKey('Customers', on_delete=models.CASCADE)
+    trade_initiator = models.ForeignKey('Customers', on_delete=models.CASCADE, null=True, related_name='trade_initiator_customer')
+    vendor = models.ForeignKey('Customers', on_delete=models.CASCADE, related_name='vendor_customer')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
-    amount = models.FloatField()
-    status = models.BooleanField(choices=STATUS_TYPES)
+    price = models.FloatField(null=True)
+    flat = models.CharField(max_length=100, choices=FLAT_CHOICES, null=True)
+    counter_status = models.CharField(max_length=10, null=True)
+    message = models.TextField(null=True)
+    amount = models.FloatField(null=True)
+    status = models.CharField(max_length=10, choices=TRADE_STATUS_TYPES)
     proof_documents = models.TextField(null=True)
     reference_number = models.CharField(max_length=255, null=True)
-    proof_not_opened = models.CharField(max_length=255, null=True)
-    proof_opened = models.CharField(max_length=255, null=True)
+    proof_gift_code = models.CharField(max_length=255, null=True)
+    proof_opened = models.BooleanField(default=False)
     trade_date = models.DateTimeField(null=True)
-    is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField()
 
     def is_gift_card(self):
         return True if '_gc' in self.payment_method else False
 
     def is_proofed(self):
-        if self.is_gift_card():
-            return True if self.proof_not_opened else False
-        else:
-            return True if self.proof_documents else False
+        return True if self.proof_gift_code or self.reference_number else False
+
+    def is_completed(self):
+        return True if self.status == 'completed' else False
 
     def is_opened(self):
         return True if self.proof_opened else False
@@ -372,11 +462,17 @@ class Trades(MyModel):
         return self.offer.created_by if self.offer.trade_type == 'sell' else self.vendor
 
     def buyer(self):
-        return self.vendor if self.offer.trade_type == 'buy' else self.offer.created_by
+        return self.offer.created_by if self.offer.trade_type == 'buy' else self.vendor
 
-    def received_review(self):
+    def offerer_review(self):
         try:
-            return Reviews.objects.get(trade=self)
+            return Reviews.objects.get(trade=self, to_customer=self.offer.created_by)
+        except:
+            return None
+
+    def vender_review(self):
+        try:
+            return Reviews.objects.get(trade=self, to_customer=self.vendor)
         except:
             return None
 
@@ -395,15 +491,27 @@ class Trades(MyModel):
             return False
 
     def trade_price(self):
-        try:
-            return self.offer.counter().price
-        except:
-            return self.offer.get_trade_price
+        return self.price if self.price else self.offer.get_trade_price()
+
+    def trade_flat(self):
+        return self.flat if self.flat else self.offer.flat
+
+    def trade_payment(self):
+        return self.payment_method
 
     def proof_documents_list(self):
-        string = self.proof_not_opened
-        lists = string.split(',')
-        return Medias.objects.filter(id__in=lists)
+        try:
+            string = self.proof_documents
+            lists = string.split(',')
+            return Medias.objects.filter(id__in=lists)
+        except:
+            return []
+
+    def flat_amount_completed(self):
+        return self.trade_price()*self.amount if self.status == 'completed' else 0
+
+    def flat_amount(self):
+        return float(self.trade_price()) * float(self.amount)
 
 
 class Pricing(MyModel):
@@ -441,25 +549,20 @@ class Pricing(MyModel):
         try:
             return item[0].price
         except:
-            return None
+            return 0
 
 class Escrows(MyModel):
     trade = models.ForeignKey('Trades', on_delete=models.CASCADE)
     held_for = models.ForeignKey('Customers', on_delete=models.CASCADE, related_name='escrows_held_for')
     held_from = models.ForeignKey('Customers', on_delete=models.CASCADE, related_name='escrows_held_from')
     status = models.BooleanField(choices=PENDING_TYPES)
-    confirmed = models.CharField(max_length=10, default='opened') #opened, closed, cancelled
+    confirmed = models.CharField(max_length=10, default='opened', choices=ESCROWS_STATUS_TYPES)
     amount = models.FloatField()
+    currency = models.CharField(max_length=100, null=True)
     created_at = models.DateTimeField()
 
     def trade_price(self):
         return self.trade.trade_price()
-
-    def trade_flat(self):
-        return self.trade.offer.flat
-
-    def trade_crypto(self):
-        return self.trade.offer.what_crypto
 
 
 class Lists(MyModel):
@@ -478,9 +581,10 @@ class Tickets(MyModel):
     topic = models.CharField(max_length=255)
     content = models.TextField(null=True)
     is_dispute = models.BooleanField(choices=PENDING_TYPES)
-    ticket_manager = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
+    ticket_manager = models.ForeignKey('Users', null=True, on_delete=models.CASCADE, related_name='manager_ticket')
     ticket_priority = models.CharField(max_length=10)
     attached_files = models.TextField(null=True)
+    created_by = models.ForeignKey('Users', null=True, on_delete=models.CASCADE, related_name='created_by_tickete')
     created_at = models.DateTimeField()
 
     def attached_files_list(self):
@@ -488,7 +592,7 @@ class Tickets(MyModel):
         return Medias.objects.filter(id__in=lists)
 
     def messages_list(self):
-        return Messages.objects.filter(message_type='ticket', ticket=self)
+        return Messages.objects.filter(message_type='ticket', ticket=self).order_by('-created_at')
 
 
 class Messages(MyModel):
@@ -498,10 +602,29 @@ class Messages(MyModel):
     writer = models.ForeignKey('Users', null=True, on_delete=models.CASCADE, related_name='messages_writer')
     content = models.TextField()
     message_type = models.CharField(max_length=100,null=True)
+    readed = models.BooleanField(default=False, choices=BOOLEAN_TYPES)
     created_at = models.DateTimeField()
 
     def sub_messages(self):
         return Messages.objects.filter(message_type='sub_message', message=self)
+
+
+class UserRelations(MyModel):
+    user = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='relation_user')
+    partner = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='relation_partner')
+    status = models.BooleanField(default=True, choices=BLOCK_TYPES)
+    viewed_at = models.DateTimeField(null=True)
+    blocked_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField()
+
+    def unreaded_messages(self):
+        return Messages.objects.filter(partner=self.user, writer=self.partner, readed=False)
+
+    def unreaded_first_message(self):
+        try:
+            return Messages.objects.filter(partner=self.user, writer=self.partner, readed=False).order_by('created_at')[0]
+        except:
+            return None
 
 
 class Contacts(MyModel):
@@ -514,26 +637,26 @@ class Contacts(MyModel):
     readed = models.BooleanField(default=False, choices=BOOLEAN_TYPES)
 
 
-# class Revenue(MyModel):
-#     source = models.CharField(max_length=255)
-#     revenue_type = models.CharField(max_length=255)
-#     amount = models.FloatField()
-#     refund = models.FloatField()
-#     date = models.DateTimeField()
+class Revenue(MyModel):
+    source = models.CharField(max_length=255)
+    revenue_type = models.CharField(max_length=255)
+    amount = models.FloatField()
+    refund = models.FloatField()
+    date = models.DateTimeField()
 
 
-# class Pages(MyModel):
-#     title = models.CharField(max_length=255)
-#     posted_by = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
-#     status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
-#     context = models.TextField()
-#     updated_on = models.DateTimeField()
-#     created_at = models.DateTimeField()
+class Pages(MyModel):
+    title = models.CharField(max_length=255)
+    posted_by = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
+    context = models.TextField()
+    updated_on = models.DateTimeField()
+    created_at = models.DateTimeField()
 
 
 class Posts(MyModel):
     title = models.CharField(max_length=255)
-    posted_by = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
+    posted_by = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
     context = models.TextField()
     tags = models.TextField()
@@ -557,9 +680,19 @@ class Posts(MyModel):
         return self.tags.split(',')
 
     def related_post_list(self):
-        # rposts = Posts.objects.filter(tags__in=(self.tags_list))
-        # ret = rposts[:3] if rposts.count() > 0 else []
-        return []
+        try:
+            return Posts.objects.filter(~Q(id=self.id)).order_by('-created_at')[:3]
+        except:
+            return []
+
+    def upvotes_count(self):
+        return Votes.objects.filter(post=self, vote_type='up').count()
+
+    def comments_count(self):
+        return Comments.objects.filter(post=self).count()
+
+    def comments_list(self):
+        return Comments.objects.filter(post=self)
 
 
 class Tags(MyModel):
@@ -569,114 +702,129 @@ class Tags(MyModel):
     created_at = models.DateTimeField(auto_now=True)
 
 
-# class Idcards(MyModel):
-#     user = models.ForeignKey(Customers, on_delete=models.CASCADE)
-#     document_type = models.CharField(max_length=100)
-#     document_file = models.ForeignKey(Medias, on_delete=models.CASCADE)
-#     status = models.BooleanField(choices=ACCEPTIVE_TYPES)
+class LoginLogs(MyModel):
+    user = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
+    ip_address = models.CharField(max_length=255)
+    destination = models.CharField(default='raplev', max_length=255)
+    created_at = models.DateTimeField(auto_now=True)
 
 
-# class LoginLogs(MyModel):
-#     user = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
-#     ip_address = models.CharField(max_length=255)
-#     destination = models.CharField(default='raplev', max_length=255)
-#     created_at = models.DateTimeField(auto_now=True)
+class FlaggedPosts(MyModel):
+    post = models.ForeignKey('Posts', on_delete=models.CASCADE)
+    flagged_by = models.ForeignKey('Users', on_delete=models.CASCADE)
+    flag_reason = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField()
 
 
-# class FlaggedPosts(MyModel):
-#     post = models.ForeignKey(Posts, on_delete=models.CASCADE)
-#     flagged_by = models.CharField(max_length=255)
-#     flag_reason = models.CharField(max_length=255)
-#     message = models.TextField()
-#     created_at = models.DateTimeField()
+class LandingPages(MyModel):
+    template_page = models.ForeignKey('Pages', on_delete=models.CASCADE)
+    personalized_link = models.CharField(max_length=255)
+    redirection_type = models.CharField(max_length=255)
 
 
-# class LandingPages(MyModel):
-#     template_page = models.ForeignKey(Pages, on_delete=models.CASCADE)
-#     personalized_link = models.CharField(max_length=255)
-#     redirection_type = models.CharField(max_length=255)
+class PersLinks(MyModel):
+    landing_page = models.ForeignKey('LandingPages', on_delete=models.CASCADE)
+    personalized_link = models.CharField(max_length=255)
+    assigned_to_user = models.CharField(max_length=255)
+    leads = models.IntegerField()
 
 
-# class PersLinks(MyModel):
-#     landing_page = models.ForeignKey(LandingPages, on_delete=models.CASCADE)
-#     personalized_link = models.CharField(max_length=255)
-#     assigned_to_user = models.CharField(max_length=255)
-#     leads = models.IntegerField()
+class RedirectionLinks(MyModel):
+    old_link = models.CharField(max_length=255)
+    new_link = models.CharField(max_length=255)
+    redirection_type = models.CharField(max_length=255)
 
 
-# class RedirectionLinks(MyModel):
-#     old_link = models.CharField(max_length=255)
-#     new_link = models.CharField(max_length=255)
-#     redirection_type = models.CharField(max_length=255)
+class Issues(MyModel):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    attached_files = models.TextField()
+    created_at = models.DateTimeField()
 
 
-# class Issues(MyModel):
-#     title = models.CharField(max_length=255)
-#     description = models.TextField()
-#     attached_files = models.TextField()
-#     created_at = models.DateTimeField()
+class Options(MyModel):
+    option_type = models.CharField(max_length=255)
+    option_param1 = models.CharField(default=None, max_length=255, null=True)
+    option_param2 = models.CharField(default=None, max_length=255, null=True)
+    option_param3 = models.CharField(default=None, max_length=255, null=True)
+    option_field = models.CharField(max_length=255)
+    option_value = models.TextField()
 
 
-# class Options(MyModel):
-#     option_type = models.CharField(max_length=255)
-#     option_param1 = models.CharField(default=None, max_length=255, null=True)
-#     option_param2 = models.CharField(default=None, max_length=255, null=True)
-#     option_param3 = models.CharField(default=None, max_length=255, null=True)
-#     option_field = models.CharField(max_length=255)
-#     option_value = models.TextField()
+class SecurityStatus(MyModel):
+    ip_address = models.CharField(max_length=255)
+    user = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now=True)
 
 
-# class SecurityStatus(MyModel):
-#     ip_address = models.CharField(max_length=255)
-#     user = models.ForeignKey(Users, null=True, on_delete=models.CASCADE)
-#     created_at = models.DateTimeField(auto_now=True)
+class Campaigns(MyModel):
+    campaign_name = models.CharField(max_length=255)
+    campaign_url = models.CharField(max_length=255)
+    overview = models.TextField()
+    payout = models.IntegerField()
+    campaign_type = models.CharField(max_length=100)
+    target_location = models.TextField()
+    creative_materials = models.TextField()
+    clicks = models.IntegerField(default=0)
+    conversions = models.IntegerField(default=0)
+    updated_on = models.DateTimeField()
+    created_at = models.DateTimeField()
+
+    def creative_materials_as_file_list(self):
+        lists = self.creative_materials.split(',') if self.creative_materials else []
+        return Medias.objects.filter(id__in=lists)
 
 
-# class Campaigns(MyModel):
-#     campaign_name = models.CharField(max_length=255)
-#     campaign_url = models.CharField(max_length=255)
-#     overview = models.TextField()
-#     payout = models.IntegerField()
-#     campaign_type = models.CharField(max_length=100)
-#     target_location = models.TextField()
-#     creative_materials = models.TextField()
-#     clicks = models.IntegerField(default=0)
-#     conversions = models.IntegerField(default=0)
-#     updated_on = models.DateTimeField()
-#     created_at = models.DateTimeField()
-
-#     def creative_materials_as_file_list(self):
-#         lists = self.creative_materials.split(',') if self.creative_materials else []
-#         return Medias.objects.filter(id__in=lists)
+class Affiliates(MyModel):
+    user = models.ForeignKey('Users', on_delete=models.CASCADE)
 
 
-# class Affiliates(MyModel):
-#     first_name = models.CharField(max_length=255)
-#     last_name = models.CharField(max_length=255)
-#     organization = models.CharField(max_length=255)
-#     address = models.CharField(max_length=255)
-#     postcode = models.IntegerField()
-#     country = models.CharField(max_length=255)
-#     email_address = models.CharField(max_length=255)
-#     password = models.CharField(max_length=255)
-#     status = models.BooleanField(default=False, choices=STATUS_TYPES)
-#     created_at = models.DateTimeField()
-
-#     def send_info_email(self):
-#         send_mail(
-#             subject='Welcome to Raplev',
-#             message='Your Info: \n - First Name: {}\n - Last Name: {}\n - Email: {}\n - Organization: {}\n - Address: {}\n - Postcode: {}\n - Country: {}\n - Created_at: {}\n'.format(
-#                 self.first_name, self.last_name, self.email, self.organization, self.address, self.postcode, self.country, self.created_at),
-#             from_email='admin@raplev.com',
-#             recipient_list=[self.email]
-#         )
-
-# class Reports(MyModel):
-#     user_joined = models.CharField(max_length=255)
-#     affiliate = models.ForeignKey(Affiliates, on_delete=models.CASCADE)
-#     lead_status = models.BooleanField(default=False)
-#     campaign = models.ForeignKey(Campaigns, on_delete=models.CASCADE)
-#     created_at = models.DateTimeField()
-#     report_field = models.CharField(max_length=100)
+class Reports(MyModel):
+    affiliate = models.ForeignKey('Affiliates', on_delete=models.CASCADE)
+    lead_status = models.BooleanField(default=False)
+    campaign = models.ForeignKey('Campaigns', on_delete=models.CASCADE)
+    created_at = models.DateTimeField()
+    report_field = models.CharField(max_length=100)
 
 
+class Votes(MyModel):
+    post = models.ForeignKey('Posts', on_delete=models.CASCADE)
+    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES)
+    created_by = models.ForeignKey('Users', on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class Comments(MyModel):
+    post = models.ForeignKey('Posts', on_delete=models.CASCADE, null=True)
+    comment = models.ForeignKey('Comments', on_delete=models.CASCADE, null=True)
+    message = models.TextField()
+    created_by = models.ForeignKey('Users', on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class DrawLists(MyModel):
+    draw_type = models.CharField(max_length=10, choices=DRAWALS_CHOIES)
+    amount = models.FloatField(default=0)
+    currency = models.CharField(max_length=10, null=True, choices=CURRENCY_CHOICES)
+    details = models.TextField(null=True)
+    card = models.ForeignKey('UserIDs', on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey('Customers', on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class SavedWallets(MyModel):
+    crypto = models.CharField(max_length=10, null=True, choices=CRYPTO_CHOICES)
+    description = models.TextField(null=True)
+    created_by = models.ForeignKey('Customers', on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now=True)
+    
+
+class SendCryptos(MyModel):
+    cryto_amount = models.FloatField(default=0)
+    flat_amount = models.FloatField(default=0)
+    receiver_email = models.CharField(max_length=255)
+    currency = models.CharField(max_length=10, null=True, choices=CURRENCY_CHOICES)
+    description = models.TextField(null=True)
+    created_by = models.ForeignKey('Customers', on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now=True)

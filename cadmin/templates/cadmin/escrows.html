@@ -22,7 +22,7 @@
                         <th>Held from</th>
                         <th>Amount</th>
                         <th>Currency type</th>
-                        <th>Offer ID</th>
+                        <th>Trade ID</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -34,8 +34,8 @@
                         <td><span class="table__mobile-heading">Held for</span><a href="#">{{ item.held_for }}</a></td>
                         <td><span class="table__mobile-heading">Held from</span><a href="#">{{ item.held_from }}</a></td>
                         <td><span class="table__mobile-heading">Amount</span><span>{{ item.amount }}</span></td>
-                        <td><span class="table__mobile-heading">Currency type</span><span>{{ item.offer.what_crypto }}</span></td>
-                        <td><span class="table__mobile-heading">Offer ID</span><a href="{{ cadmin_url }}/offer-details?item_id={{ item.offer.id }}">{{ item.offer.id }}</a></td>
+                        <td><span class="table__mobile-heading">Currency type</span><span>{{ item.trade.offer.what_crypto }}</span></td>
+                        <td><span class="table__mobile-heading">Trade ID</span><a href="{{ cadmin_url }}/trade-details?item_id={{ item.trade.id }}">{{ item.trade.id }}</a></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/escrow-details?item_id={{ item.id }}">Details</a></td>
                         </td>

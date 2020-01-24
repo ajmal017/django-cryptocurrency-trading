@@ -14,11 +14,12 @@
         <div class="initiation__wrapper">
             <form class="initiation__form" action="{{ theme_url }}/initiate-trade/" method="POST" id="form1">
                 {% csrf_token %}
-                <input type="hidden" name="offer_id" value="{{ offer_id }}" />
+                <input type="hidden" name="offer_id" value="{{ offer_id }}" id="offer_id" />
+                <input type="hidden" name="trade_id" value="{{ trade_id }}" id="trade_id" />
                 <div class="initiation__field form-group">
                     <div class="form-group__field-group">
                         <span class="form-group__triangle"></span>
-                        <select class="form-group__field" name="payment_method" required>
+                        <select class="form-group__field" name="payment_method" id="payment_method" required>
                             {% for key, value in PAYMENT_METHODS %}
                                 <option value="{{ key }}">{{ value }}</option>
                             {% endfor %}
@@ -27,7 +28,7 @@
                 </div>
                 <div class="initiation__field form-group">
                     <div class="form-group__field-group">
-                        <input class="form-group__field" name="amount" placeholder="Amount to buy" required>
+                        <input class="form-group__field" name="amount" id="amount" placeholder="Amount to buy" required>
                         <svg class="form-group__required">
                             <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
                         </svg>
@@ -36,21 +37,21 @@
             </form>
             <div class="initiation__info">
                 <div class="initiation__info-items">
-                    <dl class="initiation__info-item">
+                    <dl class="initiation__info-item" id="you_will_pay">
                         <dt class="initiation__info-heading">You will pay</dt>
                         <dd class="initiation__info-sum">497 USD</dd>
                     </dl>
-                    <dl class="initiation__info-item">
+                    <dl class="initiation__info-item" id="you_will_get">
                         <dt class="initiation__info-heading">You will get</dt>
                         <dd class="initiation__info-sum">1981 XRP</dd>
                     </dl>
                 </div>
                 <div class="initiation__info-addition">
-                    <dl class="initiation__info-addition-item">
+                    <dl class="initiation__info-addition-item" id="offerer_will_pay">
                         <dt class="initiation__info-addition-heading">Offerer will pay</dt>
                         <dd class="initiation__info-addition-sum">18 XRP</dd>
                     </dl>
-                    <dl class="initiation__info-addition-item">
+                    <dl class="initiation__info-addition-item" id="you_cover_pay">
                         <dt class="initiation__info-addition-heading">You’ll cover cost for</dt>
                         <dd class="initiation__info-addition-sum">9.5 XRP</dd>
                     </dl>
@@ -65,4 +66,40 @@
         </footer>
     </div>
 </div>
+{% endblock %}
+
+{% block bottom-script %}
+{{ block.super }}
+<script>
+$(function() {
+    $('#amount').keyup(function () {
+        calculating_func();
+    })
+    $('#payment_method').change(function () {
+        calculating_func();
+    })
+    function calculating_func() {
+        $.ajax({
+            url: '{{ theme_url }}/caculate-trade/',
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}', 
+                'offer_id': $('#offer_id').val(),
+                'trade_id': $('#trade_id').val(),
+                'amount': $('#amount').val(),
+                'payment_method': $('#payment_method').val()
+            },
+            success: function(data) {
+                $("#you_will_pay").find(".initiation__info-sum").text(data.you_pay_amount + ' ' + data.you_pay_flat)
+                $("#you_will_get").find(".initiation__info-sum").text(data.you_get_amount + ' ' + data.you_get_flat)
+                $("#offerer_will_pay").find(".initiation__info-addition-sum").text(data.offerer_pay_amount + ' ' + data.offerer_pay_flat)
+                $("#you_cover_pay").find(".initiation__info-addition-sum").text(data.you_cover_amount + ' ' + data.you_cover_flat)
+            },
+            error: function( jqXhr, textStatus, errorThrown ){
+                console.log( errorThrown );
+            }
+        })
+    }
+})
+</script>
 {% endblock %}

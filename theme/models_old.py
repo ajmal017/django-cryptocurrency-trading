@@ -300,7 +300,7 @@ class Trades(MyModel):
     def buyer(self):
         return self.trade_initiator if self.offer.trade_type == 'buy' else self.offer.created_by
 
-    def received_review(self):
+    def offerer_review(self):
         try:
             return Reviews.objects.get(transaction=self)
         except:

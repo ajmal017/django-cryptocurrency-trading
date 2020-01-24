@@ -30,36 +30,36 @@
             <div class="stars-select">
                 <input class="stars-select__input stars-select__input--none" disabled="disabled" checked="checked" name="rate" value="0" type="radio" />
                 <label class="stars-select__label" for="rate-1">
-                    <svg class="stars-select__icon {%if item.received_review.review_rate == 1 %}is-selected{%endif%}"><use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use></svg>
+                    <svg class="stars-select__icon {%if item.offerer_review.review_rate == 1 %}is-selected{%endif%}"><use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use></svg>
                 </label>
-                <input class="stars-select__input" id="rate-1" {%if item.received_review.review_rate == 1 %}checked{%endif%} name="rate" value="1" type="radio" />
-                    <label class="stars-select__label" for="rate-2"><svg class="stars-select__icon {%if item.received_review.review_rate == 1 %}is-selected{%endif%}">
+                <input class="stars-select__input" id="rate-1" {%if item.offerer_review.review_rate == 1 %}checked{%endif%} name="rate" value="1" type="radio" />
+                    <label class="stars-select__label" for="rate-2"><svg class="stars-select__icon {%if item.offerer_review.review_rate == 1 %}is-selected{%endif%}">
                         <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
-                    </svg></label><input class="stars-select__input" id="rate-2" {%if item.received_review.review_rate == 2 %}checked{%endif%} name="rate" value="2" type="radio" /><label class="stars-select__label" for="rate-3">
-                        <svg class="stars-select__icon {%if item.received_review.review_rate == 3 %}is-selected{%endif%}">
+                    </svg></label><input class="stars-select__input" id="rate-2" {%if item.offerer_review.review_rate == 2 %}checked{%endif%} name="rate" value="2" type="radio" /><label class="stars-select__label" for="rate-3">
+                        <svg class="stars-select__icon {%if item.offerer_review.review_rate == 3 %}is-selected{%endif%}">
                         <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
-                    </svg></label><input class="stars-select__input" id="rate-3" {%if item.received_review.review_rate == 3 %}checked{%endif%} name="rate" value="3" type="radio" /><label class="stars-select__label" for="rate-4">
-                        <svg class="stars-select__icon {%if item.received_review.review_rate == 4 %}is-selected{%endif%}">
+                    </svg></label><input class="stars-select__input" id="rate-3" {%if item.offerer_review.review_rate == 3 %}checked{%endif%} name="rate" value="3" type="radio" /><label class="stars-select__label" for="rate-4">
+                        <svg class="stars-select__icon {%if item.offerer_review.review_rate == 4 %}is-selected{%endif%}">
                         <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
-                    </svg></label><input class="stars-select__input" id="rate-4" {%if item.received_review.review_rate == 4 %}checked{%endif%} name="rate" value="4" type="radio" /><label class="stars-select__label" for="rate-5">
-                        <svg class="stars-select__icon {%if item.received_review.review_rate == 5 %}is-selected{%endif%}">
+                    </svg></label><input class="stars-select__input" id="rate-4" {%if item.offerer_review.review_rate == 4 %}checked{%endif%} name="rate" value="4" type="radio" /><label class="stars-select__label" for="rate-5">
+                        <svg class="stars-select__icon {%if item.offerer_review.review_rate == 5 %}is-selected{%endif%}">
                         <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
-                    </svg></label><input class="stars-select__input" id="rate-5" {%if item.received_review.review_rate == 5 %}checked{%endif%} name="rate" value="5" type="radio" />
+                    </svg></label><input class="stars-select__input" id="rate-5" {%if item.offerer_review.review_rate == 5 %}checked{%endif%} name="rate" value="5" type="radio" />
             </div>
         </div>
         <div style="margin-bottom: 20px; text-align: right;">
-            {% if not item.received_review.review_rate %}
+            {% if not item.offerer_review.review_rate %}
             <button class=" btn btn--theme-4" type="submit">Submit</button>
             {% endif %}
         </div>
     </form>
-    {% if not item.received_review.feedback %}
+    {% if not item.offerer_review.feedback %}
     <div class="trade-details__rate">
-        <a class="trade-details__rate-text" href="{{ theme_url }}/leave-review?item_id={{ item.received_review.id }}">Leave Feedback</a>
+        <a class="trade-details__rate-text" href="{{ theme_url }}/leave-review?item_id={{ item.offerer_review.id }}">Leave Feedback</a>
     </div>
     {% else %}
     <div class="trade-details__rate">
-        {{ item.received_review.feedback|safe }}
+        {{ item.offerer_review.feedback|safe }}
     </div>
     {% endif %}
     <div class="trade-details__container">

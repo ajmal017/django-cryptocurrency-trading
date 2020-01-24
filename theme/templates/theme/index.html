@@ -159,17 +159,18 @@
                 </thead>
                 <tbody>
                     {% for item in BTC_items %}
+                    {% if not item.is_completed %}
                     <tr class="table-new__row">
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Method</span>
                             <div class="table-new__rate">
                                 <p class="table-new__rate-caption">{{ item.get_trade_type_display }}</p>
-                                <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ item.created_by.stat.review_count }})</a>
+                                <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ item.created_by.review_count }})</a>
                                     <div class="stars-fixed small">
                                         {% for rate in '01234'|make_list %}
-                                        <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.stat.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                                        <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                                             <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                                         </svg>
-                                        <svg class="stars-fixed__icon {%if item.created_by.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                                        <svg class="stars-fixed__icon {%if item.created_by.customer_rate <= forloop.counter %}is-selected{%endif%}">
                                             <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                                         </svg>
                                         {% endfor %}
@@ -182,6 +183,7 @@
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Short description</span><span class="table-new__text">{{ item.trade_overview }}</span></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Price/BTC</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
                     </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -202,17 +204,18 @@
                 </thead>
                 <tbody>
                     {% for item in ETH_items %}
+                    {% if not item.is_completed %}
                     <tr class="table-new__row">
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Method</span>
                             <div class="table-new__rate">
                                 <p class="table-new__rate-caption">{{ item.get_trade_type_display }}</p>
-                                <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ item.created_by.stat.review_count }})</a>
+                                <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ item.created_by.review_count }})</a>
                                     <div class="stars-fixed small">
                                         {% for rate in '01234'|make_list %}
-                                        <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.stat.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                                        <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                                             <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                                         </svg>
-                                        <svg class="stars-fixed__icon {%if item.created_by.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                                        <svg class="stars-fixed__icon {%if item.created_by.customer_rate <= forloop.counter %}is-selected{%endif%}">
                                             <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                                         </svg>
                                         {% endfor %}
@@ -225,6 +228,7 @@
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Short description</span><span class="table-new__text">{{ item.trade_overview }}</span></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Price/ETH</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
                     </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -245,17 +249,18 @@
                 </thead>
                 <tbody>
                     {% for item in XRP_items %}
+                    {% if not item.is_completed %}
                     <tr class="table-new__row">
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Method</span>
                             <div class="table-new__rate">
                                 <p class="table-new__rate-caption">{{ item.get_trade_type_display }}</p>
-                                <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ item.created_by.stat.review_count }})</a>
+                                <div class="table-new__rate-wrapper"><a class="table-new__rate-sum" href="#">({{ item.created_by.review_count }})</a>
                                     <div class="stars-fixed small">
                                         {% for rate in '01234'|make_list %}
-                                        <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.stat.review_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
+                                        <svg class="stars-fixed__icon stars-fixed__icon--half {%if item.created_by.customer_rate < forloop.counter %}is-selected{%endif%}"><!-- item.rate -->
                                             <use xlink:href="{% static 'theme/images/icons.svg' %}#star-half"></use>
                                         </svg>
-                                        <svg class="stars-fixed__icon {%if item.created_by.stat.review_rate <= forloop.counter %}is-selected{%endif%}">
+                                        <svg class="stars-fixed__icon {%if item.created_by.customer_rate <= forloop.counter %}is-selected{%endif%}">
                                             <use xlink:href="{% static 'theme/images/icons.svg' %}#star"></use>
                                         </svg>
                                         {% endfor %}
@@ -268,6 +273,7 @@
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Short description</span><span class="table-new__text">{{ item.trade_overview }}</span></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Price/XRP</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
                     </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>

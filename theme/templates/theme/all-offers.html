@@ -22,11 +22,11 @@
             </span>
             <span class="all-offers__col listing__col">
                 <span class="listing__mobile-caption">Sold: </span>
-                <span>{% if item.trade_type == 'sell' %}{{ item.maximum_transaction_limit }} {{ item.what_crypto }}{% endif %}</span>
+                <span>{{ item.sold_amount }} {{ item.sold_currency }}</span>
             </span>
             <span class="all-offers__col listing__col">
                 <span class="listing__mobile-caption">Bought: </span>
-                <span>{% if item.trade_type == 'buy' %}{{ item.maximum_transaction_limit }} {{ item.what_crypto }}{% endif %}</span>
+                <span>{{ item.bought_amount }} {{ item.bought_currency }}</span>
             </span>
             <span class="all-offers__col listing__col"> 
                 <span class="listing__mobile-caption">Created: </span>

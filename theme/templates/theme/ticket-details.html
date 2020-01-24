@@ -14,17 +14,18 @@
         {% endif %}
     </header>
     <div class="ticket-details__history">
-        <h2 class="ticket-details__history-heading">Dispute history</h2>
-        <p class="ticket-details__history-desc">{{ item.cotent|safe }}</p>
+        <h2 class="ticket-details__history-heading">Content</h2>
+        <!-- Dispute history -->
+        <p class="ticket-details__history-desc">{{ item.content|safe }}</p>
     </div>
     <div class="ticket-details__search">
-        <form action="{{ theme_url }}/add-message/" method="POST">
+        <form action="{{ theme_url }}/add-message/" method="POST" style="width: 100%;">
             {% csrf_token %}
             <input type="hidden" name="ticket_id" value="{{ item.id }}">
             <input type="hidden" name="message_type" value="ticket">
             <input type="hidden" name="writer_id" value="{{ user.customer.id }}">
-            <input class="ticket-details__search-input" name="content" type="text">
-            <button class="ticket-details__search-btn btn btn--round btn--theme-2" type="submit">Send</button>
+            <input class="ticket-details__search-input" name="content" type="text" style="width: calc(100% - 160px);">
+            <button class="ticket-details__search-btn btn btn--round btn--theme-2" style="float: right;" type="submit">Send</button>
         </form>
     </div>
     <div class="ticket-details__messages">

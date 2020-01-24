@@ -1,10 +1,11 @@
 from django.http import HttpResponseRedirect
+from cadmin.models import Users
 
 
-def cadmin_user_is_logged_in(f):
+def user_not_logged_in(f):
     def wrap(request, *args, **kwargs):
-        if 'cadmin_user' in request.session.keys() or request.user.is_superuser:
-            return HttpResponseRedirect("/cadmin")
+        if 'user' in request.session.keys():
+            return HttpResponseRedirect("/")
         return f(request, *args, **kwargs)
 
     wrap.__doc__=f.__doc__
@@ -12,11 +13,13 @@ def cadmin_user_is_logged_in(f):
     return wrap
 
 
-def cadmin_user_login_required(f):
+def admin_login_required(f):
     def wrap(request, *args, **kwargs):
-        if 'cadmin_user' in request.session.keys() or request.user.is_superuser:
-            return f(request, *args, **kwargs)
-        return HttpResponseRedirect("/cadmin/login")
+        if 'user' in request.session.keys():
+            user = Users.objects.get(token=request.session['user'])
+            if user.is_admin:
+                return f(request, *args, **kwargs)
+        return HttpResponseRedirect("/cadmin/login?next="+request.get_full_path())
 
     wrap.__doc__=f.__doc__
     # wrap.__name__=f.__name__
