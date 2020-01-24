@@ -28,7 +28,7 @@ SECRET_KEY = '-ftl$49mojhozrjk)ue7$1uq!-td)hn+qvrrp(6nod7#d**q*u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['unstable-v.raplev.com']
+ALLOWED_HOSTS = ['unstable-v.raplev.com', 'affiliates.raplev.com']
 
 # Application definition
 
