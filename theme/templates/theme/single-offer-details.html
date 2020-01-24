@@ -28,7 +28,7 @@
     {% endif %}
     <div class="single-offer__control">
         {% if item.created_by == user.customer %}
-        <a class="single-offer__control-btn" href="{{ theme_url }}/offer-activity/?item_id=9">Go To Offer Activity</a>
+        <a class="single-offer__control-btn" href="{{ theme_url }}/offer-activity/?item_id={{ item.id }}">Go To Offer Activity</a>
         {% else %}
         <a class="single-offer__control-btn" href="{{ theme_url }}/initiate-trade?item_id={{ item.id }}">INITIATE A TRADE</a>
         {% endif %}

@@ -541,15 +541,15 @@ class ProfileOverview(View):
         user.__dict__.update(object_data)
 
         # set 2 factor authentication
-        if user.phone_verified:
-            user.use_2factor_authentication= True if request.POST.get('use_2factor_authentication') == 'on' else False,
-        else:
+        if request.POST.get('use_2factor_authentication') == 'on' and not user.phone_verified:
             return self.get(request, {'error': {'phonenumber': 'Verify your phone before setting 2 factor authentication.'}})
+        else:
+            user.use_2factor_authentication= True if request.POST.get('use_2factor_authentication') == 'on' else False
 
         # update password through checking old password
         if password and check_password(password_old, user.password) and password == password_confirm:
             user.password = make_password(password)
-        elif password:
+        elif password != '':
             return self.get(request, {'error': {'password_old': 'Incorrect Password!'}})
 
         # set avatar
