@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'raplev.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ameribtc3',
+        'NAME': 'ameribtc4',
         'USER': 'ameribtc3',
         'PASSWORD': 'Ameribtc3',
         'HOST': 'localhost',
