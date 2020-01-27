@@ -6,7 +6,8 @@ def user_not_logged_in(f):
     def wrap(request, *args, **kwargs):
         # if 'user' in request.session.keys():
         if request.user.is_authenticated and request.user.is_affiliate:
-            return HttpResponseRedirect("/affiliates")
+            # return HttpResponseRedirect("/affiliates")
+            return HttpResponseRedirect("/")
         return f(request, *args, **kwargs)
 
     wrap.__doc__=f.__doc__
@@ -21,7 +22,8 @@ def affiliates_login_required(f):
             # user = Users.objects.get(token=request.session['user'])
             if request.user.is_affiliate:
                 return f(request, *args, **kwargs)
-        return HttpResponseRedirect("/affiliates/login?next="+request.get_full_path())
+        # return HttpResponseRedirect("/affiliates/login?next="+request.get_full_path())
+        return HttpResponseRedirect("/login?next="+request.get_full_path())
 
     wrap.__doc__=f.__doc__
     # wrap.__name__=f.__name__
