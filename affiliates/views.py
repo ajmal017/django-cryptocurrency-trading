@@ -82,7 +82,7 @@ class Login(View):
             print(e)
             return render(request, 'affiliates/login.html', {'error': 'Incorrect User'})
         
-        return redirect(app_url+'')
+        return redirect(app_url+'/')
 
 
 @affiliates_login_required
@@ -90,14 +90,14 @@ def logout(request):
     # del request.session['user']
     auth_logout(request)
     # request.session['global_alert'] = {'success': "You are logged out."}
-    return redirect(app_url+'')
+    return redirect(app_url+'/')
 
 
 @method_decorator(affiliates_login_required, name='dispatch')
 class Index(View):
     
     def get(self, request):
-        return redirect(app_url+'/dashboard')
+        return redirect(app_url+'/dashboard/')
 
 
 @method_decorator(user_not_logged_in, name='dispatch')
@@ -178,7 +178,7 @@ class ForgotPassword(View):
                 user.save()
                 send_mail(
                     subject='Recovery password verification Email',
-                    message='Please verify if you are owner of this email by clicking <a href="{}/reset?t={}">here</a>.'.format(app_url, token),
+                    message='Please verify if you are owner of this email by clicking <a href="{}/reset/?t={}">here</a>.'.format(app_url, token),
                     from_email='admin@raplev.com',
                     recipient_list=[email]
                 )
@@ -211,7 +211,7 @@ class ResetPassword(View):
         except:
             return self.get(request, {'error': Try})
         
-        return redirect(app_url+'')
+        return redirect(app_url+'/')
 
 
 @method_decorator(affiliates_login_required, name='dispatch')
