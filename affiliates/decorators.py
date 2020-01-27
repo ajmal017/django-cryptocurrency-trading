@@ -23,7 +23,7 @@ def affiliates_login_required(f):
             if request.user.is_affiliate:
                 return f(request, *args, **kwargs)
         # return HttpResponseRedirect("/affiliates/login?next="+request.get_full_path())
-        return HttpResponseRedirect("/login?next="+request.get_full_path())
+        return HttpResponseRedirect("/login/?next="+request.get_full_path())
 
     wrap.__doc__=f.__doc__
     # wrap.__name__=f.__name__
