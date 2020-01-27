@@ -1,0 +1,135 @@
+{% extends 'affiliates/base-site.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Profile{% endblock %}
+
+{% block page-inner %}
+<main class="page__inner js-nav-close-trigger">
+    <form action="" method="POST">
+        {% csrf_token %}
+        {% if success %}
+        <aside class="page__alert alert alert--success">
+            <span>Profile updated</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)">
+                <svg class="alert__close-icon" width="30">
+                    <use xlink:href="{% static 'affiliates/images/icons.svg' %}#times"></use>
+                </svg>
+            </button>
+        </aside>
+        {% endif %}
+        <section class="section">
+            <div class="section__inner">
+                <div class="section__fields">
+                    <div class="section__field form-group {% if error.first_name %}is-invalid{% endif %}">
+                        <div class="form-group__field-group">
+                            <input class="form-group__field" name="first_name" autocomplete="given-name" placeholder="First name" value="{{ user.first_name|default_if_none:'' }}">
+                            {% if error.first_name %}
+                            <svg class="form-group__required is-invalid-item">
+                                <use xlink:href="{% static 'affiliates/images/icons.svg' %}#exclamation-circle"></use>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        {% if error.first_name %}
+                        <p class="form-group__message is-invalid-item">{{ error.first_name }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="section__field form-group {% if error.last_name %}is-invalid{% endif %}">
+                        <div class="form-group__field-group">
+                            <input class="form-group__field" name="last_name" autocomplete="family-name" placeholder="Last name" value="{{ user.last_name|default_if_none:'' }}">
+                            {% if error.last_name %}
+                            <svg class="form-group__required is-invalid-item">
+                                <use xlink:href="{% static 'affiliates/images/icons.svg' %}#exclamation-circle"></use>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        {% if error.last_name %}
+                        <p class="form-group__message is-invalid-item">{{ error.last_name }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="section__field form-group {% if error.organization %}is-invalid{% endif %}">
+                        <div class="form-group__field-group">
+                            <input class="form-group__field" name="organization" autocomplete="organization" placeholder="Organization" value="{{ user.organization|default_if_none:'' }}">
+                            {% if error.organization %}
+                            <svg class="form-group__required is-invalid-item">
+                                <use xlink:href="{% static 'affiliates/images/icons.svg' %}#exclamation-circle"></use>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        {% if error.organization %}
+                        <p class="form-group__message is-invalid-item">{{ error.organization }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="section__fields">
+                    <div class="section__field form-group {% if error.billing_address %}is-invalid{% endif %}">
+                        <div class="form-group__field-group">
+                            <input class="form-group__field" name="billing_address" autocomplete="address-line1" placeholder="Address" value="{{ user.billing_address|default_if_none:'' }}">
+                            {% if error.billing_address %}
+                            <svg class="form-group__required is-invalid-item">
+                                <use xlink:href="{% static 'affiliates/images/icons.svg' %}#exclamation-circle"></use>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        {% if error.billing_address %}
+                        <p class="form-group__message is-invalid-item">{{ error.billing_address }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="section__field form-group {% if error.postcode %}is-invalid{% endif %}">
+                        <div class="form-group__field-group">
+                            <input class="form-group__field" name="postcode" autocomplete="postal-code" placeholder="Postcode" value="{{ user.postcode|default_if_none:'' }}">
+                            {% if error.postcode %}
+                            <svg class="form-group__required is-invalid-item">
+                                <use xlink:href="{% static 'affiliates/images/icons.svg' %}#exclamation-circle"></use>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        {% if error.postcode %}
+                        <p class="form-group__message is-invalid-item">{{ error.postcode }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="section__field form-group">
+                        <div class="form-group__field-group">
+                            <select class="form-group__field" name="country">
+                                <option value="" disabled>Country</option>
+                                {% for key, value in COUNTRY_CODE %}
+                                    <option value="{{ key }}" {% if key == user.country %}selected{% endif %}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="form-group__triangle"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="section__field form-group">
+                    <div class="form-group__field-group {% if error.email %}is-invalid{% endif %}">
+                        <input class="form-group__field" name="email" type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Email address" value="{{ user.email|default_if_none:'' }}">
+                        {% if error.email %}
+                            <svg class="form-group__required is-invalid-item">
+                                <use xlink:href="{% static 'affiliates/images/icons.svg' %}#exclamation-circle"></use>
+                            </svg>
+                            {% endif %}
+                        </div>
+                    {% if error.email %}
+                    <p class="form-group__message is-invalid-item">{{ error.email }}</p>
+                    {% endif %}
+                    <label class="form-group__checkbox checkbox">
+                        <input type="checkbox" name="checkbox" onclick="passwordField.classList.toggle('is-active')" hidden>
+                        <span class="checkbox__field"></span>
+                        <span class="checkbox__text">I want to change password</span>
+                    </label>
+                </div>
+                <div class="section__field pw-generator form-group js-pw-generator-toggle" id="passwordField">
+                    <div class="form-group__field-group">
+                        <button class="pw-generator__visibility" type="button">
+                        <svg class="pw-generator__visibility-icon" width="30">
+                            <use xlink:href="{% static 'affiliates/images/icons.svg' %}#eye"></use>
+                        </svg>
+                    </button>
+                    <button class="pw-generator__generate" type="button">Generate </button>
+                    <input class="form-group__field" name="password" type="password" autocomplete="new-password" placeholder="New password"></div>
+                </div>
+            </div>
+        </section>
+        <button class="page__submit btn btn--theme-1" type="submit">UPDATE MY PROFILE</button>
+    </form>
+</main>
+{% endblock %}

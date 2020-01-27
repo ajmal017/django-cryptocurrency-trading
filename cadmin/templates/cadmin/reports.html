@@ -24,11 +24,11 @@
             <div class="reports__control">
                 <div class="reports__selection form-group">
                     <div class="form-group__field-group"><span class="form-group__triangle"></span>
-                        <select class="form-group__field" name="report_field" onchange="this.form.submit()" required>
+                        <select class="form-group__field" name="campaign" onchange="this.form.submit()" required>
                             <option value="" disabled>Select field</option>
-                            <option value="re1" {% if report_field == 're1' %}selected{% endif %}>Option 1</option>
-                            <option value="re2" {% if report_field == 're2' %}selected{% endif %}>Option 2</option>
-                            <option value="re3" {% if report_field == 're3' %}selected{% endif %}>Option 3</option>
+                            {% for citem in campaigns %}
+                            <option value="{{ citem.id }}" {% if campaign == citem.id %}selected{% endif %}>{{ citem.capaign_name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div><a class="reports__export" href="#">Export CSV</a>

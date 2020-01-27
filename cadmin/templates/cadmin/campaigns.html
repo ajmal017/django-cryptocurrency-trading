@@ -43,7 +43,7 @@
                     {% for item in items %}
                     <tr>
                         <td><span class="table__mobile-heading">Campaign ID</span><a href="#">{{ item.id }}</a></td>
-                        <td><span class="table__mobile-heading">Campaigns name</span><a href="#">{{ item.campaign_name }}</a></td>
+                        <td><span class="table__mobile-heading">Campaigns name</span><a href="#">{{ item.get_name }}</a></td>
                         <td><span class="table__mobile-heading">Clicks</span><span>{{ item.clicks }}</span></td>
                         <td><span class="table__mobile-heading">Conversions</span><span>{{ item.conversions }}</span></td>
                         <td><span class="table__mobile-heading">Affiliate payout</span><span>${{ item.payout }}</span></td>

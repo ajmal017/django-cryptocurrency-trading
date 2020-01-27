@@ -1,10 +1,7 @@
 import logging
-# import re
-# import uuid
 from datetime import datetime, timedelta
 
-from django.utils.decorators import method_decorator   
-# from month.models import Month
+from django.utils.decorators import method_decorator
 
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponseBadRequest
 from django.contrib.auth.hashers import make_password, check_password
@@ -12,13 +9,7 @@ from django.utils.crypto import get_random_string
 from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth import logout, authenticate, login
-# from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
-# from django.contrib.auth import views as auth_views
-# from django.core.exceptions import ObjectDoesNotExist
 from django.views import View
-# from django.core.paginator import Paginator
-# from django.http import Http404
-# from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.core import serializers
 
@@ -27,6 +18,7 @@ from .decorators import customer_user_login_required, user_not_logged_in
 from .context_processors import theme_decorators
 # from .cache import CurrencyExchangeData, GoogleMapsGeocoding
 from django.template.defaulttags import register
+from django.contrib.auth import (login as auth_login, logout as auth_logout)
 
 logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
@@ -50,8 +42,9 @@ def get_client_ip(request):
 
 def current_user(request):
     try:
-        user = models.Users.objects.get(token=request.session['user'])
-        return user
+        # user = models.Users.objects.get(token=request.session['user'])
+        # return user
+        return request.user
     except:
         None
 
@@ -80,7 +73,7 @@ class Login(View):
 
         try:
             user = models.Users.objects.get(Q(email=email_or_username) | Q(username=email_or_username))
-            if user and check_password(password, user.password):
+            if user and check_password(password, user.password) and user.is_customer:
                 token = user.token if user.token else get_random_string(length=100)
                 user.token = token
                 user.save()
@@ -88,7 +81,8 @@ class Login(View):
                     user=user,
                     ip_address=get_client_ip(request)
                 ).save()
-                request.session['user'] = token
+                auth_login(request, user)
+                # request.session['user'] = token
             else:
                 try:
                     models.SecurityStatus(
@@ -101,7 +95,8 @@ class Login(View):
                     return self.get(request, {'next': next_to, 'error': {'password': 'Incorrect Password'}})
                 else:
                     return JsonResponse({'error': {'password': 'Incorrect Password'}})
-        except:
+        except Exception as e:
+            price(e)
             if next_to:
                 return self.get(request, {'next': next_to, 'error': {'email': 'Incorrect User'}})
             else:
@@ -115,7 +110,8 @@ class Login(View):
 
 @customer_user_login_required
 def logout(request):
-    del request.session['user']
+    # del request.session['user']
+    auth_logout(request)
     # request.session['global_alert'] = {'success': "You are logged out."}
     return redirect('/'+app_url+'')
 
@@ -164,7 +160,8 @@ class Register(View):
             token = user.token if user.token else get_random_string(length=100)
             user.token = token
             user.save()
-            request.session['user'] = token
+            auth_login(request, user)
+            # request.session['user'] = token
 
         except Exception as e:
             if next_to:
@@ -289,7 +286,8 @@ class ConfirmForgotPWPhoneCode(View):
                 user.phone_verified = True
                 user.phonenumber = phonenumber
                 user.save()
-                request.session['user'] = user.token
+                auth_login(request, user)
+                # request.session['user'] = user.token
                 if next_to:
                     return redirect(app_url+'/reset-password?next='+next_to)
                 else:
@@ -314,7 +312,8 @@ class ConfirmForgotPWEmail(View):
             user = models.Users.objects.get(token=token)
             user.email_verified = True
             user.save()
-            request.session['user'] = user.token
+            auth_login(request, user)
+            # request.session['user'] = user.token
         
             if next_to:
                 return redirect(app_url+'/reset-password?next='+next_to)
@@ -1382,11 +1381,12 @@ class Contact(View):
         use_my_email = request.POST.get('use_my_email', '')
         subject = request.POST.get('subject', '').strip()
         content = request.POST.get('content', '').strip()
-        customer = None
+        user = None
         if use_my_email == 'on':
             try:
-                customer = models.Customers.objects.get(token=request.session['theme_user'])
-                email_address = customer.email
+                # user = models.Users.objects.get(token=request.session['user'])
+                user = request.user
+                email_address = user.email
             except:
                 return self.get(request, {'error': {'email_address': 'Not valid email address.'}})
         elif email_address == '':
@@ -1397,7 +1397,7 @@ class Contact(View):
         contact.email_address = email_address
         contact.subject = subject
         contact.content = content
-        contact.customer = customer
+        contact.user = user
         contact.ip_address = get_client_ip(request)
         contact.save()
 

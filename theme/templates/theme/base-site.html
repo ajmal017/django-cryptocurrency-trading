@@ -44,7 +44,7 @@
                     </div>
                 </div>
                 <nav class="header__nav nav">
-                    {% if user %}
+                    {% if user.is_authenticated and user.is_customer %}
                     <div class="nav__list-wrapper">
                         <ul class="nav__mobile-list js-mobile-menu-target">
                             <li class="nav__item nav__user-mobile">

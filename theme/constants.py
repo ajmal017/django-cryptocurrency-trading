@@ -97,6 +97,11 @@ STATUS_TYPES = (
     (False, 'Suspend'),
 )
 
+CAMPAIGN_STATUS_TYPES = (
+    (True, 'Active'),
+    (False, 'Paused'),
+)
+
 TRADE_STATUS_TYPES = (
     ('waiting', 'Waing for the intiation'),
     ('archived', 'Archived'),

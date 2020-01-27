@@ -1,0 +1,123 @@
+{% extends 'affiliates/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<div class="page__container js-nav-target-primary">
+    <header class="page__header header">
+        <div class="header__container">
+            <div class="nav-toggle js-nav-toggle">
+                <div class="nav-toggle__container">
+                    <div class="nav-toggle__bar"></div>
+                    <div class="nav-toggle__bar"></div>
+                    <div class="nav-toggle__bar"></div>
+                </div>
+            </div>
+            <div class="user-menu">
+                <div class="user-menu__main">
+                    <div class="user-menu__text" onclick="user_dropdown.classList.toggle('is-active')">
+                        <span>Welcome back, </span>
+                        <span class="user-menu__name">{{ user.get_fullname }}</span>
+                    </div>
+                </div>
+                <div class="user-menu__dropdown" id="user_dropdown">
+                    <ul class="user-menu__dropdown-bottom">
+                        <li class="user-menu__dropdown-item"><a href="{{ affiliates_url }}/profile">View profile</a></li>
+                        <li class="user-menu__dropdown-item"><a href="{{ affiliates_url }}/logout">Log out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% block page-inner %}{% endblock %}
+</div>
+<nav class="page__nav nav js-nav-target-secondary">
+    <header class="nav__header"><a class="nav__logo" href="{{ affiliates_url }}">
+        <img class="nav__logo-img" src="{% static 'affiliates/images/logo-light.png' %}" alt="Raplev logo"></a>
+    </header>
+    <ul>
+        <li class="nav__item is-active"><a class="nav__link" href="{{ affiliates_url }}/dashboard"><svg class="nav__icon" width="30">
+                    <use xlink:href="{% static 'affiliates/images/icons.svg' %}#th-large"></use>
+                </svg>
+                <p class="nav__caption">Dashboard</p>
+            </a></li>
+        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/campaigns"><svg class="nav__icon" width="30">
+                    <use xlink:href="{% static 'affiliates/images/icons.svg' %}#bullhorn"></use>
+                </svg>
+                <p class="nav__caption">Campaigns</p>
+            </a></li>
+        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/reports"><svg class="nav__icon" width="30">
+                    <use xlink:href="{% static 'affiliates/images/icons.svg' %}#chart-bar"></use>
+                </svg>
+                <p class="nav__caption">Reports</p>
+            </a></li>
+        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/contact"><svg class="nav__icon" width="30">
+                    <use xlink:href="{% static 'affiliates/images/icons.svg' %}#envelope-open-text"></use>
+                </svg>
+                <p class="nav__caption">Contact</p>
+            </a></li>
+    </ul>
+</nav>
+<aside class="dialog_modal" id="modal_dialog">
+    <button class="popup__close-inner dialog_close" type="button">
+        <svg class="popup__close-icon" width="30">
+            <use xlink:href="{% static 'affiliates/images/icons.svg' %}#times"></use>
+        </svg></button>
+    <h1 class="popup__heading title">Are you sure you want to cancel this escrow?</h1>
+    <div class="popup__buttons">
+        <div class="popup__buttons-top">
+            <button class="popup__true-btn dialog_yes">YES</button>
+            <button class="popup__false-btn dialog_no" type="button">NO</button></div>
+    </div>
+</aside>
+{% endblock %}
+
+{% block bottom-script %}
+<script>
+    function postAction(params, title='Are you sure?', url='', additional_func=null) {
+        dialog(title, function() {
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                data: {csrfmiddlewaretoken: '{{ csrf_token }}', ...params},
+                success: function( data, textStatus, jQxhr ){
+                    alertMessage(data.success)
+                    additional_func(data.content)
+                },
+                error: function( jqXhr, textStatus, errorThrown ){
+                    console.log( errorThrown );
+                }
+            });
+        })
+        
+    }
+
+    function dialog(message, yesCallback, noCallback=false) {
+        $('.title').html(message);
+        var dialog = $('#modal_dialog')
+        dialog.show();
+
+        $('.dialog_yes').click(function() {
+            dialog.hide();
+            yesCallback();
+            $('.dialog_yes').off('click')
+        });
+        $('.dialog_no').click(function() {
+            dialog.hide();
+            noCallback();
+            $('.dialog_no').off('click')
+        });
+        $('.dialog_close').click(function() {
+            dialog.hide();
+            noCallback();
+            $('.dialog_close').off('click')
+        });
+    }
+
+    function alertMessage(message='Success', mode='success') {
+        $('.alert-wrapper').append('<aside class="alert alert--'+mode+'"><span>'+message+'</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30"><use xlink:href="{% static "affiliates/images/icons.svg" %}#times"></use></svg></button></aside>')
+    }
+</script>
+{% endblock %}

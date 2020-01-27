@@ -28,7 +28,8 @@ SECRET_KEY = '-ftl$49mojhozrjk)ue7$1uq!-td)hn+qvrrp(6nod7#d**q*u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['unstable-v.raplev.com', 'affiliates.raplev.com']
+ALLOWED_HOSTS = ['unstable-v.raplev.com', 'localhost', '192.168.1.107']
+HOSTNAME = 'http://localhost:8000'
 
 # Application definition
 
@@ -81,7 +82,7 @@ TEMPLATES = [
                'raplev.context_processors.global_settings',
             #    'commento_sso.context_processors.commento_host',
                'cadmin.context_processors.cadmin_decorators',
-               'theme.context_processors.theme_decorators'
+               'theme.context_processors.theme_decorators',
                'affiliates.context_processors.affiliates_decorators'
            ],
        },
@@ -97,7 +98,7 @@ WSGI_APPLICATION = 'raplev.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ameribtc4',
+        'NAME': 'ameribtc3',
         'USER': 'ameribtc3',
         'PASSWORD': 'Ameribtc3',
         'HOST': 'localhost',
@@ -170,8 +171,8 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/v-raplev/media'
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_ROOT = '/var/www/v-raplev/media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DATE_INPUT_FORMATS = ('%d-%m-%Y', '%Y-%m-%d', '%a %B %m %Y')
 TIME_INPUT_FORMATS = ('%I:%M %p', '%H:%M:%S', '%H:%M')

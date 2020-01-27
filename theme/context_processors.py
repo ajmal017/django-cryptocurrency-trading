@@ -12,21 +12,7 @@ def theme_decorators(request):
         # 'XRP_USD': cache.CurrencyExchangeData.get_or_set_rate('XRP', 'USD'),
     } 
 
-        
-    if request.user.is_superuser:
-        user = request.user
-        user.fullname = 'SuperUser'
-    else:
-        if 'user' in request.session:
-            user_token = request.session['user']
-        else:
-            user_token = ''
-        try:
-            user = Users.objects.get(token=user_token)
-        except:
-            user = None
-
-    return { 'user': user, 'pricing': pricing, 'theme_url': '', **global_setting() }
+    return { 'pricing': pricing, 'theme_url': '', **global_setting() }
 
 
 def global_setting():
