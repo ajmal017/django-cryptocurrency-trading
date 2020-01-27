@@ -1,4 +1,4 @@
-from theme.constants import BLOCK_TYPES, DRAWALS_CHOIES, ESCROWS_STATUS_TYPES, VOTE_TYPES, TRADE_STATUS_TYPES, FLAT_CHOICES, CRYPTO_CHOICES, CURRENCY_CHOICES,REGISTRATION_CHOICES,CC_TYPES,LANGUAGE_CHOICES,TICKET_STATUS_CHOICES,TRADE_TYPES,CUSTOMER_TYPES,PAYMENT_METHODS,ROLE_TYPES,BOOLEAN_TYPES,STATUS_TYPES,VERIFIED_TYPES,PENDING_TYPES,ACCEPTIVE_TYPES,PAGESTATUS_TYPES,COUNTRY_CODE
+from theme.constants import CAMPAIGN_STATUS_TYPES, BLOCK_TYPES, DRAWALS_CHOIES, ESCROWS_STATUS_TYPES, VOTE_TYPES, TRADE_STATUS_TYPES, FLAT_CHOICES, CRYPTO_CHOICES, CURRENCY_CHOICES,REGISTRATION_CHOICES,CC_TYPES,LANGUAGE_CHOICES,TICKET_STATUS_CHOICES,TRADE_TYPES,CUSTOMER_TYPES,PAYMENT_METHODS,ROLE_TYPES,BOOLEAN_TYPES,STATUS_TYPES,VERIFIED_TYPES,PENDING_TYPES,ACCEPTIVE_TYPES,PAGESTATUS_TYPES,COUNTRY_CODE
 
 from django.db import models
 from django.core.mail import send_mail
@@ -42,7 +42,7 @@ class Users(MyModel, AbstractUser):
     is_customer = models.BooleanField(choices=BOOLEAN_TYPES, default=False)
     is_affiliate = models.BooleanField(choices=BOOLEAN_TYPES, default=False)
     is_staff = models.BooleanField(choices=BOOLEAN_TYPES, default=False)
-    is_active = models.BooleanField(choices=BOOLEAN_TYPES, default=False)
+    is_active = models.BooleanField(choices=BOOLEAN_TYPES, default=True)
     last_login = models.DateTimeField(null=True)
     updated_at = models.DateTimeField(auto_now=True)
     avatar = models.ForeignKey('Medias', on_delete=models.CASCADE, null=True)
@@ -629,12 +629,14 @@ class UserRelations(MyModel):
 
 class Contacts(MyModel):
     email_address = models.CharField(max_length=255)
+    cc_email_address = models.CharField(max_length=255, null=True)
     fullname = models.CharField(max_length=255, null=True)
     user = models.ForeignKey('Users', on_delete=models.CASCADE, null=True)
     subject = models.TextField()
     content = models.TextField()
     ip_address = models.CharField(max_length=100)
     readed = models.BooleanField(default=False, choices=BOOLEAN_TYPES)
+    created_at = models.DateTimeField()
 
 
 class Revenue(MyModel):
@@ -761,19 +763,29 @@ class SecurityStatus(MyModel):
 class Campaigns(MyModel):
     campaign_name = models.CharField(max_length=255)
     campaign_url = models.CharField(max_length=255)
-    overview = models.TextField()
-    payout = models.IntegerField()
-    campaign_type = models.CharField(max_length=100)
-    target_location = models.TextField()
-    creative_materials = models.TextField()
-    clicks = models.IntegerField(default=0)
-    conversions = models.IntegerField(default=0)
-    updated_on = models.DateTimeField()
+    overview = models.TextField(null=True)
+    status = models.BooleanField(default=False, choices=CAMPAIGN_STATUS_TYPES)
+    target_location = models.TextField(null=True)
+    creative_materials = models.TextField(null=True)
+    owner = models.ForeignKey('Affiliates', null=True, on_delete=models.CASCADE)
+    updated_on = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField()
 
-    def creative_materials_as_file_list(self):
+    def creative_materials_list(self):
         lists = self.creative_materials.split(',') if self.creative_materials else []
         return Medias.objects.filter(id__in=lists)
+
+    def get_name(self):
+        return self.campaign_name + (' ['+self.target_location+']' if self.target_location else '')
+
+    def total_payouts(self):
+        return Reports.objects.filter(campaign=self).aggregate(Sum('payout'))['payout__sum']
+
+    def total_clicks(self):
+        return Reports.objects.filter(campaign=self, report_field='click').count()
+
+    def total_conversions(self):
+        return Reports.objects.filter(campaign=self, report_field='conversion').count()
 
 
 class Affiliates(MyModel):
@@ -781,8 +793,8 @@ class Affiliates(MyModel):
 
 
 class Reports(MyModel):
-    affiliate = models.ForeignKey('Affiliates', on_delete=models.CASCADE)
     lead_status = models.BooleanField(default=False)
+    payout = models.IntegerField(default=0)
     campaign = models.ForeignKey('Campaigns', on_delete=models.CASCADE)
     created_at = models.DateTimeField()
     report_field = models.CharField(max_length=100)

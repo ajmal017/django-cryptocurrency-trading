@@ -19,7 +19,7 @@
                 </svg></button>
             <div class="user-menu">
                 <div class="user-menu__main">
-                    <div class="user-menu__text"><span class="user-menu__greeting">Welcome back, </span><span class="user-menu__name">{{ cadmin_user.fullname }}</span></div>
+                    <div class="user-menu__text"><span class="user-menu__greeting">Welcome back, </span><span class="user-menu__name">{{ user.get_fullname }}</span></div>
                     <div class="user-menu__pic" onclick="user_dropdown.classList.toggle('is-active')">
                         <div class="user-menu__default-icon"><svg class="user-menu__icon" width="30">
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#user"></use>
@@ -34,7 +34,7 @@
                                 </svg></div><img class="user-menu__img" src="{% static 'cadmin/images/draft/user.jpg' %}" alt="User">
                         </div>
                         <div class="user-menu__dropdown-control">
-                            <p class="user-menu__name">{{ cadmin_user.fullname }}</p>
+                            <p class="user-menu__name">{{ user.get_fullname }}</p>
                             <p class="user-menu__dropdown-control-options"><a href="{{ cadmin_url }}/profile">Edit profile </a><span>| </span><a href="{{ cadmin_url }}/profile#change_password">Change PW</a></p>
                         </div>
                     </div>

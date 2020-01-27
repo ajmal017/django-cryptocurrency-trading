@@ -24,6 +24,7 @@ from . import models
 from .models import COUNTRY_CODE
 from .form import MediasForm
 from .decorators import admin_login_required, user_not_logged_in
+from django.contrib.auth import (login as auth_login, logout as auth_logout)
 
 logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
@@ -47,7 +48,7 @@ def get_client_ip(request):
 
 
 def super_admin_view(request):
-    if 'user' in request.session.keys():
+    if request.user.is_authenticated:
         return redirect('/cadmin')
     else:
         return redirect('/super-admin/login')
@@ -55,8 +56,9 @@ def super_admin_view(request):
 
 def current_user(request):
     try:
-        user = models.Users.objects.get(token=request.session['user'])
-        return user
+        # user = models.Users.objects.get(token=request.session['user'])
+        # return user
+        return request.user
     except:
         None
 
@@ -73,7 +75,7 @@ class LoginView(View):
 
         try:
             user = models.Users.objects.get(Q(username=email_or_username) | Q(email=email_or_username))
-            if user and check_password(password, user.password):
+            if user and check_password(password, user.password) and user.is_admin:
                 token = user.token if user.token else get_random_string(length=100)
                 user.token = token
                 user.save()
@@ -81,7 +83,8 @@ class LoginView(View):
                     user=user,
                     ip_address=get_client_ip(request)
                 ).save()
-                request.session['user'] = token
+                auth_login(request, user)
+                # request.session['user'] = token
             else:
                 try:
                     models.SecurityStatus(
@@ -100,7 +103,8 @@ class LoginView(View):
 
 @admin_login_required
 def logout(request):
-    del request.session['user']
+    # del request.session['user']
+    auth_logout(request)
     # request.session['global_alert'] = {'success': "You are logged out."}
     return redirect(app_url+'')
 
@@ -226,7 +230,7 @@ class RecoverView(View):
 class SetPWView(View):
 
     def get(self, request):
-        token = request.POST.get('token', '').strip()
+        token = request.GET.get('t', '').strip()
         return render(request, 'cadmin/set-pw.html', {'token': token})
 
     def post(self, request):
@@ -1343,16 +1347,17 @@ class AddNewAffiliateView(View):
 class ReportsView(View):
 
     def get(self, request):
-        report_field = request.GET.get('report_field', '').strip()
+        campaign = request.GET.get('campaign', '').strip()
         startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
         start_date = request.GET.get('start_date', startweek).strip()
         end_date = request.GET.get('end_date', endweek).strip()
-        items = models.Reports.objects.filter(report_field__icontains=report_field, created_at__range=(start_date, end_date))
+        items = models.Reports.objects.filter(campaign_id=campaign, created_at__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = app_url+'/reports/?report_field=' + report_field + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        campaigns = models.Campaigns.objects.all()
+        base_url = app_url+'/reports/?campaign=' + campaign + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/reports.html',
-                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'report_field': report_field, 
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'campaign': campaign, 'campaigns': campaigns, 
                       'start_date': start_date, 'end_date': end_date})
 
     def post(self, request):

@@ -1,0 +1,35 @@
+{% extends 'affiliates/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Reset password{% endblock %}
+
+{% block body %}password-recovery dialog{% endblock %}
+
+{% block content %}
+<form class="dialog__container" action="" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="token" value="{{ token }}">
+    <a class="dialog__logo" href="index.html"><img class="dialog__logo-img" src="{% static 'affiliates/images/logo-dark.png' %}" alt="Raplev logo"></a>
+    <p class="password-recovery__desc">Please enter your new password.</p> 
+    {% if success %}
+    <p class="password-recovery__desc">Your password has been reset. You can now login with your new login details 
+        <a class="dialog__link" href="{{ affiliates_url }}/login">here</a>.
+    </p>
+    {% endif %}
+    <div class="dialog__field form-group {% if error.password %}is-invalid{% endif %}">
+        <div class="form-group__field-group">
+            <input class="form-group__field" name="password" type="password" placeholder="Enter your new password" required>
+            {% if error.password %}
+            <svg class="form-group__required is-invalid-item">
+                <use xlink:href="{% static 'affiliates/images/icons.svg' %}#exclamation-circle"></use>
+            </svg>
+            {% endif %}
+        </div>
+        {% if error.password %}
+        <p class="form-group__message is-invalid-item">{{ error.password }}</p>
+        {% endif %}
+    </div>
+    <button class="password-recovery__submit btn btn--round btn--theme-1" type="submit">Reset my password</button>
+</form>
+{% endblock %}

@@ -299,7 +299,7 @@
 {% endblock %}
 
 {% block bottom-script %}
-{% if user and not user.email_verified %}
+{% if user.is_authenticated and user.is_customer and not user.email_verified %}
 <script>
     document.addEventListener("DOMContentLoaded", () => emailActivation.open());
 </script> 
