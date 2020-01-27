@@ -96,7 +96,6 @@ class Login(View):
                 else:
                     return JsonResponse({'error': {'password': 'Incorrect Password'}})
         except Exception as e:
-            price(e)
             if next_to:
                 return self.get(request, {'next': next_to, 'error': {'email': 'Incorrect User'}})
             else:
