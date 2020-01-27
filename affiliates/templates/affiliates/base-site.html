@@ -22,8 +22,8 @@
                 </div>
                 <div class="user-menu__dropdown" id="user_dropdown">
                     <ul class="user-menu__dropdown-bottom">
-                        <li class="user-menu__dropdown-item"><a href="{{ affiliates_url }}/profile">View profile</a></li>
-                        <li class="user-menu__dropdown-item"><a href="{{ affiliates_url }}/logout">Log out</a></li>
+                        <li class="user-menu__dropdown-item"><a href="{{ affiliates_url }}/profile/">View profile</a></li>
+                        <li class="user-menu__dropdown-item"><a href="{{ affiliates_url }}/logout/">Log out</a></li>
                     </ul>
                 </div>
             </div>
@@ -32,26 +32,26 @@
     {% block page-inner %}{% endblock %}
 </div>
 <nav class="page__nav nav js-nav-target-secondary">
-    <header class="nav__header"><a class="nav__logo" href="{{ affiliates_url }}">
+    <header class="nav__header"><a class="nav__logo" href="{{ affiliates_url }}/">
         <img class="nav__logo-img" src="{% static 'affiliates/images/logo-light.png' %}" alt="Raplev logo"></a>
     </header>
     <ul>
-        <li class="nav__item is-active"><a class="nav__link" href="{{ affiliates_url }}/dashboard"><svg class="nav__icon" width="30">
+        <li class="nav__item is-active"><a class="nav__link" href="{{ affiliates_url }}/dashboard/"><svg class="nav__icon" width="30">
                     <use xlink:href="{% static 'affiliates/images/icons.svg' %}#th-large"></use>
                 </svg>
                 <p class="nav__caption">Dashboard</p>
             </a></li>
-        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/campaigns"><svg class="nav__icon" width="30">
+        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/campaigns/"><svg class="nav__icon" width="30">
                     <use xlink:href="{% static 'affiliates/images/icons.svg' %}#bullhorn"></use>
                 </svg>
                 <p class="nav__caption">Campaigns</p>
             </a></li>
-        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/reports"><svg class="nav__icon" width="30">
+        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/reports/"><svg class="nav__icon" width="30">
                     <use xlink:href="{% static 'affiliates/images/icons.svg' %}#chart-bar"></use>
                 </svg>
                 <p class="nav__caption">Reports</p>
             </a></li>
-        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/contact"><svg class="nav__icon" width="30">
+        <li class="nav__item"><a class="nav__link" href="{{ affiliates_url }}/contact/"><svg class="nav__icon" width="30">
                     <use xlink:href="{% static 'affiliates/images/icons.svg' %}#envelope-open-text"></use>
                 </svg>
                 <p class="nav__caption">Contact</p>

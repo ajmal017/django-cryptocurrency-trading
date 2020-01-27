@@ -9,7 +9,7 @@
 {% block content %}
 <form class="dialog__container" action="" method="POST">
     {% csrf_token %}
-    <a class="dialog__logo" href="{{ affiliates_url }}">
+    <a class="dialog__logo" href="{{ affiliates_url }}/">
         <img class="dialog__logo-img" src="{% static 'affiliates/images/logo-dark.png' %}" alt="Raplev logo">
     </a>
     {% if error %}
@@ -48,7 +48,7 @@
     </div>
     <div class="login__control">
         <button class="login__submit btn btn--round btn--theme-1" type="submit">LOGIN</button>
-        <a href="{{ affiliates_url }}/password">Forgot your password?</a>
+        <a href="{{ affiliates_url }}/password/">Forgot your password?</a>
     </div>
 </form>
 {% endblock %}

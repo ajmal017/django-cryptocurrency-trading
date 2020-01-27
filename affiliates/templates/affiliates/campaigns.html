@@ -46,7 +46,7 @@
                         <td><span class="table__mobile-heading">Conversions</span><span>{{ item.conversions|default_if_none:0 }}</span></td>
                         <td><span class="table__mobile-heading">Clicks</span><span>{{ item.clicks|default_if_none:0 }}</span></td>
                         <td><span class="table__mobile-heading">Payouts</span><span>${{ item.payouts|default_if_none:0 }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="{{ affiliates_url }}/campaign-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="{{ affiliates_url }}/campaign-details/?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
