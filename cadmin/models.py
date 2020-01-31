@@ -4,9 +4,12 @@ from django.db import models
 from django.core.mail import send_mail
 import random
 import string
+import timeago
+from datetime import datetime, timezone
 from raplev import settings
 from django.db.models import Q, Sum, Count, F
 from django.contrib.auth.models import AbstractUser
+from bs4 import BeautifulSoup as bs
 
 
 class MyModelBase( models.base.ModelBase ):
@@ -657,14 +660,15 @@ class Pages(MyModel):
 
 
 class Posts(MyModel):
+    slug = models.CharField(max_length=255, null=True)
     title = models.CharField(max_length=255)
     posted_by = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES)
+    status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES, default='Published')
     context = models.TextField()
-    tags = models.TextField()
-    featured_images = models.TextField()
-    disallow_comments = models.BooleanField(choices=BOOLEAN_TYPES)
-    updated_on = models.DateTimeField()
+    tags = models.TextField(null=True)
+    featured_images = models.TextField(null=True)
+    disallow_comments = models.BooleanField(choices=BOOLEAN_TYPES, default=False)
+    updated_on = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField()
 
     def featured_images_list(self):
@@ -674,9 +678,17 @@ class Posts(MyModel):
     def first_featured_image(self):
         return self.featured_images_list()[:1]
     
+    @property
+    def posted_by_name(self):
+        return self.posted_by.username
+    
+    @property
     def beauty_context(self):
-        # beautify code for context
-        return self.context[:1000]
+        return text_from_html(self.context)[:300]
+
+    @property
+    def hidden_context(self):
+        return text_from_html(self.context)[300:]
 
     def tags_list(self):
         return self.tags.split(',')
@@ -687,14 +699,45 @@ class Posts(MyModel):
         except:
             return []
 
+    @property
     def upvotes_count(self):
         return Votes.objects.filter(post=self, vote_type='up').count()
 
+    @property
     def comments_count(self):
         return Comments.objects.filter(post=self).count()
 
+    @property
     def comments_list(self):
         return Comments.objects.filter(post=self)
+
+    @property
+    def get_update_time(self):
+        return 'Posted ' + timeago.format(self.updated_on, datetime.now(timezone.utc))
+
+
+def text_from_html(html):
+    soup = bs(html, 'html.parser')
+    text = soup.text
+
+    # output = ''
+    # blacklist = [
+    #     '[document]',
+    #     'noscript',
+    #     'header',
+    #     'html',
+    #     'meta',
+    #     'head', 
+    #     'input',
+    #     'script',
+    #     'img',
+    #     # there may be more elements you don't want, such as "style", etc.
+    # ]
+
+    # for t in text:
+    #     if t.parent.name not in blacklist:
+    #         output += '{} '.format(t)
+    return text
 
 
 class Tags(MyModel):
@@ -800,17 +843,49 @@ class Reports(MyModel):
     report_field = models.CharField(max_length=100)
 
 
-class Votes(MyModel):
-    post = models.ForeignKey('Posts', on_delete=models.CASCADE)
-    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES)
-    created_by = models.ForeignKey('Users', on_delete=models.PROTECT)
-    created_at = models.DateTimeField(auto_now=True)
-
-
 class Comments(MyModel):
     post = models.ForeignKey('Posts', on_delete=models.CASCADE, null=True)
     comment = models.ForeignKey('Comments', on_delete=models.CASCADE, null=True)
     message = models.TextField()
+    created_by = models.ForeignKey('Users', on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now=True)
+
+    def sub_comment_list(self):
+        return Comments.objects.filter(comment=self)
+
+    @property
+    def posted_by_name(self):
+        return self.created_by.username
+    
+    @property
+    def beauty_context(self):
+        return text_from_html(self.message)[:300]
+
+    @property
+    def hidden_context(self):
+        return text_from_html(self.message)[300:]
+
+    @property
+    def upvotes_count(self):
+        return Votes.objects.filter(comment=self, vote_type='up').count()
+
+    @property
+    def comments_count(self):
+        return Comments.objects.filter(comment=self).count()
+
+    @property
+    def comments_list(self):
+        return Comments.objects.filter(comment=self)
+
+    @property
+    def get_update_time(self):
+        return 'Posted ' + timeago.format(self.created_at, datetime.now(timezone.utc))
+
+
+class Votes(MyModel):
+    post = models.ForeignKey('Posts', on_delete=models.CASCADE, null=True)
+    comment = models.ForeignKey('Comments', on_delete=models.CASCADE, null=True)
+    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES)
     created_by = models.ForeignKey('Users', on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now=True)
 
