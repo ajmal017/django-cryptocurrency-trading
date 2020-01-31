@@ -19,7 +19,7 @@
         {% endif %}
         <article class="blog-listing__item">
             <div class="blog-listing__img-wrapper"><img class="blog-listing__img" src="{{ item.first_featured_image }}" alt=""></div>
-            <h2 class="blog-listing__heading"> <a class="blog-listing__link" href="{{ theme_url }}/blog-detail?item_id={{ item.id }}">{{ item.title }}</a></h2><time class="blog-listing__pub-data" datetime="2019-05-01 00:00">{{ item.created_at }} - Added by {{ item.posted_by.fullname }}</time>
+            <h2 class="blog-listing__heading"> <a class="blog-listing__link" href="{{ theme_url }}/blog-detail?item_id={{ item.id }}">{{ item.title }}</a></h2><time class="blog-listing__pub-data" datetime="2019-05-01 00:00">{{ item.get_update_time }} - Added by {{ item.posted_by.fullname }}</time>
             <p class="blog-listing__excerpt">{{ item.beauty_context|safe }}</p><a class="blog-listing__read-more" href="{{ theme_url }}/blog-detail?item_id={{ item.id }}">READ MORE</a>
         </article>
         {% if forloop.counter|multiple3 %}

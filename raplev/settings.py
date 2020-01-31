@@ -51,17 +51,36 @@ INSTALLED_APPS = [
     # 'phonenumber_field',
     'theme',
     'affiliates',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'apis',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # <-- And here
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 2
+}
+
+CORS_ORIGIN_WHITELIST = [
+    "https://community.raplev.com",
+    "https://affiliates.raplev.com",
+    "http://localhost:8001",
 ]
 
 ROOT_URLCONF = 'raplev.urls'
