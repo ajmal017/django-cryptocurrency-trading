@@ -663,7 +663,7 @@ class Posts(MyModel):
     slug = models.CharField(max_length=255, null=True)
     title = models.CharField(max_length=255)
     posted_by = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES, default='Published')
+    status = models.CharField(max_length=20, choices=PAGESTATUS_TYPES, default='Publish')
     context = models.TextField()
     tags = models.TextField(null=True)
     featured_images = models.TextField(null=True)
