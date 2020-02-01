@@ -78,9 +78,8 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_WHITELIST = [
-    "https://community.raplev.com",
-    "https://affiliates.raplev.com",
-    "http://localhost:8001",
+    "http://community.raplev.com",
+    "http://affiliates.raplev.com",
 ]
 
 ROOT_URLCONF = 'raplev.urls'
