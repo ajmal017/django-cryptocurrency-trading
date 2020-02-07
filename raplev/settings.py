@@ -97,10 +97,8 @@ TEMPLATES = [
                'django.contrib.messages.context_processors.messages',
                'django.template.context_processors.media',
                'raplev.context_processors.global_settings',
-            #    'commento_sso.context_processors.commento_host',
                'cadmin.context_processors.cadmin_decorators',
                'theme.context_processors.theme_decorators',
-               'affiliates.context_processors.affiliates_decorators'
            ],
        },
    },
