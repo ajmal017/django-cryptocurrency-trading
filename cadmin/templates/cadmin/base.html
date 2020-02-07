@@ -43,10 +43,8 @@
             </svg></button></aside>
             {% endif %}
         </section>
-        <main>
-            {% block content %}
-            {% endblock %}
-        </main>
+        {% block content %}
+        {% endblock %}
         {% block bottom-script %}
         {% endblock %}
     </body>

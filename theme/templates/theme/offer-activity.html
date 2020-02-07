@@ -18,12 +18,12 @@
     {% endif %}
     <header class="activity__header">
         <h1 class="activity__heading">OFFER #{{ item.id }} ACTIVITY</h1>
-        <form action="{{ theme_url }}/offer-activity/" method="POST">
+        <form action="{{ theme_url }}/offer-activity/" method="POST" style="margin-bottom: 10px;">
             {% csrf_token %}
             <input type="hidden" name="item_id" value="{{ item.id }}" />
             <button class="activity__btn btn {% if item.is_paused %}btn--theme-4{% else %}btn--theme-5{% endif %} btn--round" type="submit">{% if item.is_paused %}Resume{% else %}Pause Offer{% endif %}</button>
         </form>
-        <a class="activity__btn btn btn--theme-2 btn--round" href="{{ theme_url }}/edit-offer?item_id={{ item.id }}">Edit Offer</a>
+        <a class="activity__btn btn btn--theme-2 btn--round" style="margin-bottom: 10px;" href="{{ theme_url }}/edit-offer?item_id={{ item.id }}">Edit Offer</a>
     </header>
     <table class="table-new">
         <thead class="table-new__thead">

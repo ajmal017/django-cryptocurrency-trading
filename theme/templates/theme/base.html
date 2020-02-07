@@ -28,7 +28,7 @@
         <article class="cookie-alert">
             <div class="cookie-alert__container"><span>We use cookies to personalize content and ads, to provide social media features and to analyse our traffic. We also share information about your use of our site with our social media, advertising and analytics partners who may combine it with other information that you’ve provided to them or that they’ve collected from your use of their services</span><button class="cookie-alert__btn" type="button" onclick="this.parentElement.parentElement.remove()">ACCEPT</button></div>
         </article>
-        <section class="alert-wrapper" style="position: fixed; top: 50px; right: 50px; z-index: 403;">
+        <section class="alert-wrapper" style="position: fixed; top: 50px; right: 130px; z-index: 403;">
             {% if 'success' in global_alert or 'success' in alert %}
             <aside class="alert alert--success"><span>{{ global_alert.success|default:alert.success|safe }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>

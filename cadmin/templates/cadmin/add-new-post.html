@@ -61,7 +61,7 @@
                 {% endfor %}
             </div> 
             <div class="editor__control-input">
-                <input class="editor__control-input-tag" name="tags" placeholder="Enter tags" value="{{ item.tags }}">
+                <input class="editor__control-input-tag" name="tags" placeholder="Enter tags" value="{{ item.tags|default_if_none:'' }}">
                 <svg class="editor__control-input-icon" width="30">
                     <use xlink:href="{% static 'cadmin/images/icons.svg' %}#plus"></use>
                 </svg>

@@ -844,6 +844,12 @@ class SingleOfferDetail(View):
             return self.get(request, {'item_id': item_id, 'alert': {'success': 'Added to your list.'}})
 
 
+import string, random
+
+def generate_trade_id():
+    return random.choice(string.ascii_letters).upper() + str(random.randrange(9)) + str(round(datetime.now().timestamp()))
+
+
 @method_decorator(customer_user_login_required, name='dispatch')
 class InitiateTrade(View):
 
@@ -863,6 +869,7 @@ class InitiateTrade(View):
                 trade = models.Trades.objects.get(offer=offer, vendor=current_user(request).customer(), status='waiting')
             except Exception as e:
                 trade = models.Trades()
+                trade.id = generate_trade_id()
                 trade.vendor = current_user(request).customer()
                 trade.offer = offer
 
@@ -1005,6 +1012,7 @@ class SendCounterOffer(View):
                 counter = models.Trades.objects.get(offer=offer, vendor=current_user(request).customer())
             except:
                 counter = models.Trades()
+                counter.id = generate_trade_id()
                 counter.offer = offer
                 counter.vendor = current_user(request).customer()
             counter.price = request.POST.get('price')
