@@ -23,7 +23,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth.hashers import make_password, check_password
 from django.db.models import Q, Sum, Count, F
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
+from .models import Token
 from rest_framework.response import Response
 
 from raplev import settings
@@ -32,9 +32,10 @@ from django.core.files.storage import FileSystemStorage
 
 class CustomObtainAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        response = super(CustomObtainAuthToken, self).post(request, *args, **kwargs)
-        token = Token.objects.get(key=response.data['token'])
-        user = models.Users.objects.get(id=token.user_id)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user, name=request.POST.get('sname'))
         return Response({'token': token.key, 'id': token.user_id, 'username': user.username, 'fullname': user.get_fullname(), 'email': user.email})
 
 
@@ -80,7 +81,7 @@ class Logout(APIView):
     permission_classes = (IsAuthenticated,)
     
     def get(self, request):
-        request.user.auth_token.delete()
+        request.auth.delete()
         return Response('success', status=status.HTTP_200_OK)
 
 
