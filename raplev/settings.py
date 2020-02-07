@@ -27,8 +27,17 @@ SECRET_KEY = '-ftl$49mojhozrjk)ue7$1uq!-td)hn+qvrrp(6nod7#d**q*u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEV_SERVER = 'localhost'
 
-ALLOWED_HOSTS = ['unstable-v.raplev.com', 'affiliates.raplev.com']
+# site domains
+RAPLEV_URL = 'unstable-v.raplev.com'
+AFFILIATES_URL = 'affiliates.raplev.com'
+COMMUNITY_URL = 'community.raplev.com'
+SCREENRECODER_URL = 'srecoder.raplev.com'
+
+ALLOWED_HOSTS = [RAPLEV_URL, AFFILIATES_URL, COMMUNITY_URL, SCREENRECODER_URL, DEV_SERVER]
+# for api server
+HOSTNAME = 'http://unstable-v.raplev.com'
 
 # Application definition
 
@@ -74,12 +83,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',  # <-- And here
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 2
+    'PAGE_SIZE': 100
 }
 
 CORS_ORIGIN_WHITELIST = [
-    "http://community.raplev.com",
-    "http://affiliates.raplev.com",
+    "http://" + COMMUNITY_URL,
+    "http://" + AFFILIATES_URL,
 ]
 
 ROOT_URLCONF = 'raplev.urls'
@@ -212,8 +221,6 @@ REDIS_PORT = 6379
 COMMENTO_HOST = 'commento.raplev.com'
 #COMMENTO_HMAC_KEY = '5d79349b1dd90900c4132fe9b117f033e196c8f4b60b61b5ed0e41ceeaf8001d'
 COMMENTO_HMAC_KEY = 'd260f51245e6efe3a6efc913b181dd2f72c482b6100a725603b82cdd8f1ec837'
-
-
 
 # Google Maps API key
 GOOGLE_API_KEY = 'AIzaSyDjN61hLnxRZJtMWWf_E-r7MThLVRPtgj0'

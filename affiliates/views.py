@@ -25,8 +25,7 @@ from django.contrib.auth import (login as auth_login, logout as auth_logout)
 
 logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
-# app_url = '/affiliates'
-app_url = ''
+app_url = '/affiliates'
 
 
 def get_client_ip(request):

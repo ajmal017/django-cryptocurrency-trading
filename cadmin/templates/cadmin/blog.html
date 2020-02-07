@@ -44,7 +44,7 @@
                                 <a class="table-actions__item table-actions__view" href="javascript: window.open('{{ cadmin_url }}/post-preview?item_id={{ item.id }}');">View</a>
                             </div>
                         </td>
-                        <td><span class="table__mobile-heading">Title</span><span>{{ item.title }}</span></td>
+                        <td><span class="table__mobile-heading">Title</span><span>{{ item.title|slice:':50' }}</span></td>
                         <td><span class="table__mobile-heading">Posted by</span><a href="#">{{ item.posted_by }}</a></td>
                         <td><span class="table__mobile-heading">Updated on</span><span>{{ item.updated_on }}</span></td>
                         <td><span class="table__mobile-heading">Status</span><span class="post_status">{{ item.status }}ed</span></td>

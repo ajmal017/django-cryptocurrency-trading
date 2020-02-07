@@ -36,6 +36,7 @@
             </ul><a class="dashboard__view-profile" href="{{ them_url }}/customer?item_id={{ user.customer.id }}">VIEW PUBLIC PROFILE</a>
         </div>
         <div class="dashboard__form">
+            {% if user.id_cards_list %}
             <fieldset class="dashboard__section" id="cards_list">
                 <legend class="dashboard__heading">Saved Cards</legend>
                 {% for item in user.id_cards_list %}
@@ -55,6 +56,7 @@
                 </div>
                 {% endfor %}
             </fieldset>
+            {% endif %}
             <form class="js-form-toggle" action="{{ theme_url }}/funding/" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="mode" value="add_card" />
@@ -122,7 +124,7 @@
                         </div>
                         <div class="page__field form-group">
                             <div class="form-group__field-group">
-                                <input class="form-group__field" name="amount" placeholder="Amount" required>
+                                <input class="form-group__field" name="amount" type="number" placeholder="Amount" required>
                                 <svg class="form-group__required">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
                                 </svg>

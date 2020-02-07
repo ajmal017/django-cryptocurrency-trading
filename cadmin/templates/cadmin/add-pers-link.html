@@ -87,8 +87,8 @@
                                             <option value="{{ user.username }}" {% if user.username == item.assigned_to_user %}selected{% endif %}>{{ user.username }}</option>
                                             {% endfor %}
                                         </select>
-                                        <button class="add-field__btn btn btn--accent" type="submit">{% if item.id %}Edit{% else %}Add{% endif %}</button>
                                     </div>
+                                    <button class="add-field__btn btn btn--accent" type="submit">{% if item.id %}Edit{% else %}Add{% endif %}</button>
                                 </div>
                             </div>
                         </div>

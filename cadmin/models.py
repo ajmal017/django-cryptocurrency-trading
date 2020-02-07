@@ -272,6 +272,18 @@ class Medias(MyModel):
     def __str__(self):
         return self.file.url
 
+    @property
+    def created_by_name(self):
+        return self.created_by.username
+
+    @property
+    def file_url(self):
+        return self.file.url
+
+    @property
+    def file_name(self):
+        return self.file.name
+
 
 class Reviews(MyModel):
     to_customer = models.ForeignKey('Customers', on_delete=models.CASCADE, related_name='review_for')
@@ -432,6 +444,7 @@ class Offers(MyModel):
 
 
 class Trades(MyModel):
+    id = models.CharField(max_length=255, unique=True, primary_key=True)
     offer = models.ForeignKey('Offers', on_delete=models.CASCADE)
     trade_initiator = models.ForeignKey('Customers', on_delete=models.CASCADE, null=True, related_name='trade_initiator_customer')
     vendor = models.ForeignKey('Customers', on_delete=models.CASCADE, related_name='vendor_customer')
@@ -818,15 +831,23 @@ class Campaigns(MyModel):
         lists = self.creative_materials.split(',') if self.creative_materials else []
         return Medias.objects.filter(id__in=lists)
 
+    @property
+    def owner_name(self):
+        return self.owner.user.username
+
+    @property
     def get_name(self):
         return self.campaign_name + (' ['+self.target_location+']' if self.target_location else '')
 
+    @property
     def total_payouts(self):
-        return Reports.objects.filter(campaign=self).aggregate(Sum('payout'))['payout__sum']
+        return Reports.objects.filter(campaign=self).aggregate(Sum('payout'))['payout__sum'] or 0
 
+    @property
     def total_clicks(self):
         return Reports.objects.filter(campaign=self, report_field='click').count()
 
+    @property
     def total_conversions(self):
         return Reports.objects.filter(campaign=self, report_field='conversion').count()
 

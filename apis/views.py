@@ -1,6 +1,6 @@
 import json
 import random
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 from django.shortcuts import render
 
@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
-from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView, RetrieveAPIView, CreateAPIView
 from django.utils.crypto import get_random_string
 from rest_framework.serializers import ValidationError
 
@@ -18,10 +18,68 @@ from cadmin import models, serializers
 from django.http import JsonResponse, HttpResponse
 from loremipsum import get_sentence
 from slugify import slugify
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.contrib.auth.hashers import make_password, check_password
+from django.db.models import Q, Sum, Count, F
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
 
+from raplev import settings
+from django.core.files.storage import FileSystemStorage
+
+
+class CustomObtainAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super(CustomObtainAuthToken, self).post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        user = models.Users.objects.get(id=token.user_id)
+        return Response({'token': token.key, 'id': token.user_id, 'username': user.username, 'fullname': user.get_fullname(), 'email': user.email})
+
+
+class Password(APIView):
+    def post(self, request, format=None):
+        email = request.POST.get('email', '').strip()
+        AFFILIATES_URL = settings.AFFILIATES_URL
+        try:
+            user = models.Users.objects.get(email=email)
+            token = user.token if user.token is not None else get_random_string(length=100)
+            user.token = token
+            user.save()
+            result = send_mail(
+                subject='Recovery password verification Email',
+                message = 'Click here: {}'.format(AFFILIATES_URL+'/reset/'+token),
+                html_message = render_to_string('affiliates/emails/email-3.html', {'affiliates_url': AFFILIATES_URL, 'token': token}),
+                from_email='admin@raplev.com',
+                recipient_list=[email],
+            )
+            return JsonResponse({'success': True}, status = 200)
+        except Exception as e:
+            return JsonResponse({'success': True}, status = 200)
+            # return JsonResponse({'non_field_errors': 'Please provide correct credential info.'}, status=500)
+
+
+class Reset(APIView):
+    def post(self, request):
+        password = request.POST.get('password', '').strip()
+        token = request.POST.get('token', '').strip()
+
+        try:
+            user = models.Users.objects.get(token=token)
+            user.email_verified = True
+            user.password = make_password(password)
+            user.save()
+            return JsonResponse({'success': True}, status = 200)
+        except Exception as e:
+            print(e)
+            return JsonResponse({'non_field_errors': 'Please provide correnct credential info.'}, status=500)
+        
 
 class Logout(APIView):
-    def get(self, request, format=None):
+    permission_classes = (IsAuthenticated,)
+    
+    def get(self, request):
         request.user.auth_token.delete()
         return Response('success', status=status.HTTP_200_OK)
 
@@ -57,7 +115,7 @@ class FakeComment(APIView):
         return JsonResponse({'id': item.id, 'post_id': item.post.id, 'comment': item.comment.id if item.comment else '', 'message': item.message})
 
 
-class CustomPagination(PageNumberPagination):
+class CommunityPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 1000
@@ -77,7 +135,7 @@ class PostList(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     serializer_class = serializers.PostsSerializer
-    pagination_class = CustomPagination
+    pagination_class = CommunityPagination
     search = None
     type = None
     user = None
@@ -124,7 +182,7 @@ class PostDetail(RetrieveUpdateDestroyAPIView):
         return self.update(request, *args, **kwargs)
 
 
-class CustomLimitOffset(LimitOffsetPagination):
+class CommunityLimitOffset(LimitOffsetPagination):
     default_limit = 10
     max_limit = 1000
     # template = 'apis/pagination/numbers.html'
@@ -134,7 +192,7 @@ class CommentList(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     serializer_class = serializers.CommentsSerializer
-    pagination_class = CustomLimitOffset
+    pagination_class = CommunityLimitOffset
     post_id = None
 
     def get(self, request, *args, **kwargs):
@@ -158,3 +216,223 @@ class CommentList(ListCreateAPIView):
 class CommentDetail(RetrieveUpdateDestroyAPIView):
     queryset = models.Comments.objects.all()
     serializer_class = serializers.CommentsSerializer
+
+
+class AffiliatesPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+    template = 'affiliates/pagination/numbers.html'
+
+    def get_paginated_response(self, data):
+        return Response({
+            'get_html_context': self.get_html_context(),
+            'to_html': self.to_html(),
+            'count': self.page.paginator.count,
+            'page_size': self.page_size,
+            'results': data
+        })
+
+
+class ListCampaign(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.CampaignsSerializer
+    user = None
+
+    def get(self, request, *args, **kwargs):
+        self.user = request.user.affiliate()
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return models.Campaigns.objects.filter(owner=self.user)
+
+
+class CampaignList(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = serializers.CampaignsSerializer
+    pagination_class = AffiliatesPagination
+    start_date = None
+    end_date = None
+    user = None
+
+    def get(self, request, *args, **kwargs):
+        self.start_date = request.GET.get('start_date', '')
+        self.end_date = request.GET.get('end_date', '')
+        self.user = request.user.affiliate()
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return models.Campaigns.objects.filter(owner=self.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            if self.start_date and self.end_date:
+                for item in serializer.data:
+                    item_id = item['id']
+                    item.update({'payouts': models.Reports.objects.filter(campaign_id=item_id, created_at__range=(self.start_date, self.end_date)).aggregate(Sum('payout'))['payout__sum'] or 0})
+                    item.update({'clicks': models.Reports.objects.filter(campaign_id=item_id, report_field='click', created_at__range=(self.start_date, self.end_date)).count()})
+                    item.update({'conversions': models.Reports.objects.filter(campaign_id=item_id, report_field='conversion', created_at__range=(self.start_date, self.end_date)).count()})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class CampaignDetail(RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    queryset = models.Campaigns.objects.all()
+    serializer_class = serializers.CampaignsSerializer
+
+
+class ReportList(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = serializers.ReportsSerializer
+    pagination_class = AffiliatesPagination
+    start_date = None
+    end_date = None
+    user = None
+    campaign = None
+
+    def get(self, request, *args, **kwargs):
+        self.start_date = request.GET.get('start_date', '')
+        self.end_date = request.GET.get('end_date', '')
+        self.user = request.user.affiliate()
+        self.campaign = request.GET.get('campaign', '')
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        if self.campaign:
+            items = models.Reports.objects.filter(campaign_id=self.campaign, created_at__range=(self.start_date, self.end_date))
+        else:
+            items = models.Reports.objects.filter(campaign__owner=self.user, created_at__range=(self.start_date, self.end_date))
+        return items
+
+
+class AffiliatesDashboard(ListAPIView):
+
+    def get(self, request):
+        search = request.GET.get('search', '').strip()
+        startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
+        start_date = request.GET.get('start_date', startweek).strip()
+        end_date = request.GET.get('end_date', endweek).strip()
+        yesterday = (date.today() - timedelta(days=1))
+        yesterday = yesterday.strftime('%Y-%m-%d')
+        today = models.Reports.objects.filter(campaign__owner=request.user.affiliate(), created_at__date=date.today()).aggregate(Sum('payout'))['payout__sum'] or 0
+        yesterday = models.Reports.objects.filter(campaign__owner=request.user.affiliate(), created_at__date=yesterday).aggregate(Sum('payout'))['payout__sum'] or 0
+        week = models.Reports.objects.filter(campaign__owner=request.user.affiliate(), created_at__range=(start_date, end_date)).aggregate(Sum('payout'))['payout__sum'] or 0
+        total = models.Reports.objects.filter(campaign__owner=request.user.affiliate()).aggregate(Sum('payout'))['payout__sum'] or 0
+        return Response({'today_earned': today, 'yesterday_earned': yesterday, 'week_earned': week, 'total_earned': total})
+
+
+def get_weekdate(day):
+    dt = datetime.strptime(day, '%Y-%m-%d')
+    start = dt - timedelta(days=dt.weekday())
+    end = start + timedelta(days=6)
+    return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
+
+
+class Contact(CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = serializers.ContactsSerializer
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        serializer.save(created_at=datetime.now())
+        serializer.save(subject='Affiliates Contact')
+        serializer.save(fullname=user.fullname)
+        serializer.save(ip_address=get_client_ip(self.request))
+        serializer.save(user=user)
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+
+class Request(CreateAPIView):
+    serializer_class = serializers.UsersSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(username=serializer.validated_data['first_name'].lower()+'_'+serializer.validated_data['last_name'].lower())
+        serializer.save(password=make_password('123!@#123'))
+        serializer.save(created_at=datetime.now())
+
+    def create(self, validated_data):
+        res = super().create(validated_data)
+        if res.data['id']:
+            models.Affiliates(
+                user_id = res.data['id']
+            ).save()
+        return res
+
+
+class Profile(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = serializers.UsersSerializer
+    queryset = models.Users.objects.all()
+
+    def get_object(self):
+        self.kwargs['pk'] = self.request.user.id
+
+        return super(Profile, self).get_object()
+
+    def perform_update(self, serializer):
+        if 'checkbox' in self.request.data and self.request.data['checkbox'] == 'on':
+            serializer.save(password=make_password(serializer.validated_data['password']))
+
+
+class TradeToken(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        trade_id = request.POST.get('trade_id')
+        try:
+            trade = models.Trades.objects.get(id=trade_id)
+            if trade.seller().user == request.user or trade.buyer().user == request.user:
+                new_file = models.Medias(
+                    created_by=request.user,
+                    created_at=datetime.now()
+                )
+                new_file.save()
+                proof_documents = trade.proof_documents if trade.proof_documents else ''
+                proof_documents = [x.strip() for x in (proof_documents + str(new_file.pk)).split(',')]
+                trade.proof_documents = ','.join(proof_documents)
+                trade.save()
+                return Response({'file_id': new_file.pk})
+            else:
+                return Response({'non_field_errors': 'Invalid trade permission.'}, status=500)
+        except Exception as e:
+            print(e)
+            return Response({'non_field_errors': 'Please provide correct Trade info.'}, status=400)
+
+
+class SRecorderUpload(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        if request.FILES:
+            file_id = request.POST.get('file_id')
+            media = models.Medias.objects.get(id=file_id)
+
+            recoder_file = request.FILES['file']
+            fs = FileSystemStorage()
+            filename = fs.save(recoder_file.name, recoder_file)
+            media.file = filename
+            media.save()
+            # uploaded_file_url = fs.url(filename)
+            return Response({'is_valid': True, 'name': media.file.name, 'url': media.file.url, 'id': media.pk})
+        else:
+            return Response({'is_valid': False, 'non_field_errors': 'Invalid file upload request.'}, status=500)
