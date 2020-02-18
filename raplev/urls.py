@@ -9,6 +9,7 @@ urlpatterns = [
     path('super-admin/', admin.site.urls),
     path('', include('theme.urls')),
     path('api/', include('apis.urls')),
+    path('crypto/', include('crypto.urls')),
     path('i18n/', include('django.conf.urls.i18n')),
     path('<slug:link>/', cadmin_views.go_page),
 ]
