@@ -30,6 +30,7 @@ urlpatterns = [
     path('contact/', views.Contact.as_view(), name='contact'),
 
     # screen recoder api
+    path('trade-list/', views.TradeList.as_view(), name='trade-list'),
     path('trade-token/', views.TradeToken.as_view(), name='trade-token'),
     path('srecorder-upload/', views.SRecorderUpload.as_view(), name='srecorder-upload'),
 ]

@@ -10,6 +10,7 @@ from raplev import settings
 from django.db.models import Q, Sum, Count, F
 from django.contrib.auth.models import AbstractUser
 from bs4 import BeautifulSoup as bs
+from crypto.models import BTC, ETH, XRP
 
 
 class MyModelBase( models.base.ModelBase ):
@@ -170,6 +171,7 @@ class Customers(MyModel):
     customer_type = models.CharField(max_length=10, choices=CUSTOMER_TYPES, null=True)
     seller_level = models.IntegerField(null=True)
 
+    @property
     def __str__(self):
         return self.user.username
 
@@ -242,6 +244,23 @@ class Customers(MyModel):
     def deposits(self):
         return DrawLists.objects.filter(created_by=self, draw_type='fund')[:20]
         
+    def btc_wallet(self):
+        try:
+            return BTC.objects.get(customer=self)
+        except:
+            return None
+        
+    def eth_wallet(self):
+        try:
+            return ETH.objects.get(customer=self)
+        except:
+            return None
+        
+    def xrp_wallet(self):
+        try:
+            return XRP.objects.get(customer=self)
+        except:
+            return None
 
 
 class Balance(MyModel):
@@ -477,8 +496,16 @@ class Trades(MyModel):
     def seller(self):
         return self.offer.created_by if self.offer.trade_type == 'sell' else self.vendor
 
+    @property
+    def seller_name(self):
+        return self.seller().__str__
+    
     def buyer(self):
         return self.offer.created_by if self.offer.trade_type == 'buy' else self.vendor
+
+    @property
+    def buyer_name(self):
+        return self.buyer().__str__
 
     def offerer_review(self):
         try:
@@ -506,12 +533,15 @@ class Trades(MyModel):
         except:
             return False
 
+    @property
     def trade_price(self):
         return self.price if self.price else self.offer.get_trade_price()
 
+    @property
     def trade_flat(self):
         return self.flat if self.flat else self.offer.flat
 
+    @property
     def trade_payment(self):
         return self.payment_method
 
@@ -575,6 +605,7 @@ class Escrows(MyModel):
     confirmed = models.CharField(max_length=10, default='opened', choices=ESCROWS_STATUS_TYPES)
     amount = models.FloatField()
     currency = models.CharField(max_length=100, null=True)
+    transaction = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField()
 
     def trade_price(self):

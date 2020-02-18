@@ -395,6 +395,16 @@ class Profile(RetrieveUpdateDestroyAPIView):
             serializer.save(password=make_password(serializer.validated_data['password']))
 
 
+class TradeList(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = serializers.TradesSerializer
+
+    def get_queryset(self):
+        customer = self.request.user.customer()
+        return models.Trades.objects.filter(Q(status="archived"), Q(proof_opened=False), Q(payment_method__icontains="_gc"), Q(Q(vendor=customer) | Q(offer__created_by=customer)))
+
+
 class TradeToken(APIView):
     permission_classes = (IsAuthenticated,)
 
