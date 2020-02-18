@@ -78,3 +78,10 @@ class ContactsSerializer(serializers.ModelSerializer):
         model = models.Contacts
         fields = '__all__'
         extra_kwargs = {'created_at': {'required': False}, 'subject': {'required': False}, 'ip_address': {'required': False}}
+
+
+class TradesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Trades
+        fields = ['id', 'message', 'amount', 'created_at', 'trade_price', 'trade_flat', 'trade_payment', 'seller_name', 'buyer_name']
