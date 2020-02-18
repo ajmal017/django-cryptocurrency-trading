@@ -1129,13 +1129,41 @@ class VendorProofOfTransaction(View):
     def post(self, request):
         item_id = request.POST.get('item_id', '')
         try:
-            item = models.Trades.objects.get(id=item_id)
-            item.status = 'completed'
-            item.trade_date = datetime.now()
-            item.save()
+            trade = models.Trades.objects.get(id=item_id)
+            escrow = models.Escrows.objects.get(trade=trade, held_from=current_user(request).customer())
+            target_addr = escrow.held_for.btc_wallet().addr
+
+            currency = escrow.currency
+
+            if currency == "BTC":
+                btc_processor = BTCProcessor(current_user(request).customer())
+                res = btc_processor.send_tx(target_addr, escrow.amount)
+                transaction = res.tx_id
+            if currency == "ETH":
+                eth_processor = ETHProcessor(current_user(request).customer())
+                res = eth_processor.send_tx(target_addr, escrow.amount)
+                transaction = res.tx_id
+            if currency == "XRP":
+                xrp_processor = XRPProcessor(current_user(request).customer())
+                res = xrp_processor.send_tx(target_addr, escrow.amount)
+                transaction = res.tx_id
+
+            if currency == "USD":
+                paypal = None
+                transaction = None
+
+            escrow.transaction = transaction
+            escrow.status = True
+            escrow.confirmed = 'closed'
+            escrow.save()
+
+            trade.status = 'completed'
+            trade.trade_date = datetime.now()
+            trade.save()
             return self.get(request, {'item_id': item_id, 'alert' : {'success': 'Trade Approved.'}})
-        except:
-            return self.get(request, {'item_id': item_id, 'alert' : {'warning': 'Error!. Try later.'}})
+        except Exception as e:
+            print(e)
+            return self.get(request, {'item_id': item_id, 'alert' : {'warning': e}})
 
 
 
@@ -1239,10 +1267,19 @@ class SavedWallet(View):
             return JsonResponse({'error': 'Try again.'})
 
 
+from crypto.btc import BTCProcessor
+from crypto.eth import ETHProcessor
+from crypto.xrp import XRPProcessor
+
 @method_decorator(customer_user_login_required, name='dispatch')
 class MyBalance(View):
 
     def get(self, request, more={}):
+        print(current_user(request).customer())
+        btc_processor = BTCProcessor(current_user(request).customer()).get_balance()
+        eth_processor = ETHProcessor(current_user(request).customer()).get_balance()
+        xrp_processor = XRPProcessor(current_user(request).customer()).get_balance()
+
         return render(request, 'theme/my-balance.html', {**more})
 
 
