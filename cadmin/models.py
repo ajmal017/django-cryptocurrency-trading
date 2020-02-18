@@ -171,7 +171,6 @@ class Customers(MyModel):
     customer_type = models.CharField(max_length=10, choices=CUSTOMER_TYPES, null=True)
     seller_level = models.IntegerField(null=True)
 
-    @property
     def __str__(self):
         return self.user.username
 
