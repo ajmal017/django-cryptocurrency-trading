@@ -1582,7 +1582,7 @@ input[disabled] ~ .checkbox__text {
 .cookie-alert {
   width: 100%;
   padding: 12px 0;
-  background: #e126cd;
+  background: #26cde1;
   color: white;
   font-size: 12px;
 }
