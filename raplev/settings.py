@@ -188,7 +188,7 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/var/www/v-raplev/media'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600
 
 
 DATE_INPUT_FORMATS = ('%d-%m-%Y', '%Y-%m-%d', '%a %B %m %Y')
