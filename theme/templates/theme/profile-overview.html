@@ -181,10 +181,10 @@
                 <textarea hidden id="js_editor_primary" name="overview">{{ user.overview|default_if_none:'' }}</textarea>
             </fieldset>
             <div class="dashboard__controls">
-                <label class="dashboard__checkbox checkbox">
+                <!-- <label class="dashboard__checkbox checkbox">
                     <input type="checkbox" name="use_2factor_authentication" {% if user.use_2factor_authentication %}checked{% endif %} hidden><span class="checkbox__field"></span>
                     <span class="checkbox__text">Enable 2 factor authentication</span>
-                </label>
+                </label> -->
                 <div class="dashboard__buttons">
                     <label class="dashboard__btn btn btn--round btn--theme-4" for="fileupload">Upload photo</label>
                     <input id="fileupload" type="file" name="file" hidden data-url="{{ theme_url }}/upload/" data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
