@@ -18,7 +18,8 @@
                     <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
                 </svg>
                 <select class="form-group__field" name="trade_type">
-                    <option value="sell" selected>Buy</option>
+                    <option value="">- Trade Type -</option>
+                    <option value="sell">Buy</option>
                     <option value="buy">Sell</option>
                 </select>
             </div>
@@ -34,6 +35,7 @@
                     <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
                 </svg>
                 <select class="form-group__field" name="what_crypto">
+                    <option value="">- Crypto -</option>
                     {% for key, value in CRYPTO_CHOICES %}
                         <option value="{{ key }}">{{ value }}</option>
                     {% endfor %}
@@ -47,6 +49,7 @@
                     <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
                 </svg>
                 <select class="form-group__field" name="flat">
+                    <option value="">- Flat -</option>
                     {% for key, value in FLAT_CHOICES %}
                         <option value="{{ key }}">{{ value }}</option>
                     {% endfor %}
@@ -58,6 +61,7 @@
                     <use xlink:href="{% static 'theme/images/icons.svg' %}#arrow-down-mod"></use>
                 </svg>
                 <select class="form-group__field" name="payment_method">
+                    <option value="">- Payment -</option>
                     {% for key, value in PAYMENT_METHODS %}
                         <option value="{{ key }}">{{ value }}</option>
                     {% endfor %}
@@ -69,18 +73,18 @@
     </form>
 </section>
 <div class="select-currency">
-    <form action="{{ theme_url }}/offer-listing/" method="GET">
+    <form action="{{ theme_url }}/" method="GET">
         <input name="crypto_filter" type="hidden" value="true" />
         <div class="select-currency__items">
             <div class="select-currency__item">
                 <h2 class="select-currency__heading">All</h2>
                 <div class="select-currency__buttons">
                     <label class="select-currency__btn-wrapper">
-                        <input type="checkbox" name="crypto_all_buy" hidden>
+                        <input type="checkbox" name="crypto_all_buy" {%if crypto_all_buy%}checked{%endif%} hidden>
                         <span class="select-currency__btn">BUY</span>
                     </label>
                     <label class="select-currency__btn-wrapper">
-                        <input type="checkbox" name="crypto_all_sell" hidden>
+                        <input type="checkbox" name="crypto_all_sell" {%if crypto_all_sell%}checked{%endif%} hidden>
                         <span class="select-currency__btn">SELL</span>
                     </label>
                 </div>
@@ -89,11 +93,11 @@
                 <h2 class="select-currency__heading">BTC</h2>
                 <div class="select-currency__buttons">
                     <label class="select-currency__btn-wrapper">
-                        <input type="checkbox" name="crypto_BTC_buy" hidden>
+                        <input type="checkbox" name="crypto_BTC_buy" {%if crypto_BTC_buy%}checked{%endif%} hidden>
                         <span class="select-currency__btn">BUY</span>
                     </label>
                     <label class="select-currency__btn-wrapper">
-                        <input type="checkbox" name="crypto_BTC_sell" hidden>
+                        <input type="checkbox" name="crypto_BTC_sell" {%if crypto_BTC_sell%}checked{%endif%} hidden>
                         <span class="select-currency__btn">SELL</span>
                     </label>
                 </div>
@@ -102,11 +106,11 @@
                 <h2 class="select-currency__heading">ETH</h2>
                 <div class="select-currency__buttons">
                     <label class="select-currency__btn-wrapper">
-                        <input type="checkbox" name="crypto_ETH_buy" hidden>
+                        <input type="checkbox" name="crypto_ETH_buy" {%if crypto_ETH_buy%}checked{%endif%} hidden>
                         <span class="select-currency__btn">BUY</span>
                     </label>
                     <label class="select-currency__btn-wrapper">
-                        <input type="checkbox" name="crypto_ETH_sell" hidden>
+                        <input type="checkbox" name="crypto_ETH_sell" {%if crypto_ETH_sell%}checked{%endif%} hidden>
                         <span class="select-currency__btn">SELL</span>
                     </label>
                 </div>
@@ -115,11 +119,11 @@
                 <h2 class="select-currency__heading">XRP</h2>
                 <div class="select-currency__buttons">
                     <label class="select-currency__btn-wrapper">
-                        <input type="checkbox" name="crypto_XRP_buy" hidden>
+                        <input type="checkbox" name="crypto_XRP_buy" {%if crypto_XRP_buy%}checked{%endif%} hidden>
                         <span class="select-currency__btn">BUY</span>
                     </label>
                     <label class="select-currency__btn-wrapper">
-                        <input type="checkbox" name="crypto_XRP_sell" hidden>
+                        <input type="checkbox" name="crypto_XRP_sell" {%if crypto_XRP_sell%}checked{%endif%} hidden>
                         <span class="select-currency__btn">SELL</span>
                     </label>
                 </div>
@@ -154,12 +158,11 @@
                         <th class="table-new__th">Listed by</th>
                         <th class="table-new__th">Payment method</th>
                         <th class="table-new__th">Short description</th>
-                        <th class="table-new__th">Price/BTC</th>
+                        <th class="table-new__th">Price ({{SET_CSYMBOL}} / BTC)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in BTC_items %}
-                    {% if not item.is_completed %}
                     <tr class="table-new__row">
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Method</span>
                             <div class="table-new__rate">
@@ -178,12 +181,13 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="table-new__cell"><span class="table-new__mobile-heading">Listed by</span><a href="#">{{ item.created_by }}</a></td>
+                        <td class="table-new__cell"><span class="table-new__mobile-heading">Listed by</span><a href="#">{{ item.created_by.get_public_url|safe }}</a></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Payment method</span><span>{{ item.get_flat_display }}</span></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Short description</span><span class="table-new__text">{{ item.trade_overview }}</span></td>
-                        <td class="table-new__cell"><span class="table-new__mobile-heading">Price/BTC</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
+                        <td class="table-new__cell"><span class="table-new__mobile-heading">Price/BTC</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price|cconv:SET_CURRENCY }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
                     </tr>
-                    {% endif %}
+                    {% empty %}
+                    <tr><td colspan="5" style="padding: 10px 15px;">There are no offers to show</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -199,12 +203,11 @@
                         <th class="table-new__th">Listed by</th>
                         <th class="table-new__th">Payment method</th>
                         <th class="table-new__th">Short description</th>
-                        <th class="table-new__th">Price/ETH</th>
+                        <th class="table-new__th">Price ({{SET_CSYMBOL}} / ETH)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in ETH_items %}
-                    {% if not item.is_completed %}
                     <tr class="table-new__row">
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Method</span>
                             <div class="table-new__rate">
@@ -223,12 +226,13 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="table-new__cell"><span class="table-new__mobile-heading">Listed by</span><a href="#">{{ item.created_by }}</a></td>
+                        <td class="table-new__cell"><span class="table-new__mobile-heading">Listed by</span><a href="#">{{ item.created_by.get_public_url|safe }}</a></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Payment method</span><span>{{ item.get_flat_display }}</span></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Short description</span><span class="table-new__text">{{ item.trade_overview }}</span></td>
-                        <td class="table-new__cell"><span class="table-new__mobile-heading">Price/ETH</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
+                        <td class="table-new__cell"><span class="table-new__mobile-heading">Price/ETH</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price|cconv:SET_CURRENCY }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
                     </tr>
-                    {% endif %}
+                    {% empty %}
+                    <tr><td colspan="5" style="padding: 10px 15px;">There are no offers to show</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -244,12 +248,11 @@
                         <th class="table-new__th">Listed by</th>
                         <th class="table-new__th">Payment method</th>
                         <th class="table-new__th">Short description</th>
-                        <th class="table-new__th">Price/XRP</th>
+                        <th class="table-new__th">Price ({{SET_CSYMBOL}} / XRP)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in XRP_items %}
-                    {% if not item.is_completed %}
                     <tr class="table-new__row">
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Method</span>
                             <div class="table-new__rate">
@@ -268,12 +271,13 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="table-new__cell"><span class="table-new__mobile-heading">Listed by</span><a href="#">{{ item.created_by }}</a></td>
+                        <td class="table-new__cell"><span class="table-new__mobile-heading">Listed by</span><a href="#">{{ item.created_by.get_public_url|safe }}</a></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Payment method</span><span>{{ item.get_flat_display }}</span></td>
                         <td class="table-new__cell"><span class="table-new__mobile-heading">Short description</span><span class="table-new__text">{{ item.trade_overview }}</span></td>
-                        <td class="table-new__cell"><span class="table-new__mobile-heading">Price/XRP</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
+                        <td class="table-new__cell"><span class="table-new__mobile-heading">Price/XRP</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ item.get_trade_price|cconv:SET_CURRENCY }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ item.id }}">SEE OFFER</a></span></td>
                     </tr>
-                    {% endif %}
+                    {% empty %}
+                    <tr><td colspan="5" style="padding: 10px 15px;">There are no offers to show</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

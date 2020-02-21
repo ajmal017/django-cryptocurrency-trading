@@ -4,6 +4,9 @@ from . import views
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
 app_name = 'theme'
 urlpatterns = [
+    path('pages/', views.Pages.as_view(), name='pages'),
+    path('set-country/', views.SetCountry.as_view(), name='set-country'),
+
     # Login Not Required
     path('', views.Index.as_view(), name='index'),
     path('index/', views.Index.as_view()),
@@ -80,5 +83,7 @@ urlpatterns = [
     path('buy/', views.Buy.as_view(), name='buy'), #landing page as multi language.
     path('add-message/', views.AddMessage.as_view(), name='buy'), 
     path('upload/', views.UploadView.as_view(), name='upload'),
+
+    path('mft/', views.makeing_fake_trade, name='make-fake-transaction'),
 
 ]

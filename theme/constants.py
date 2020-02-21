@@ -141,6 +141,13 @@ PAGESTATUS_TYPES = (
     ('Trash', 'Trash'),
 )
 
+CURRENCY_SYMBOL = {
+    'GB': { 'currency': 'GBP', 'csymbol': '£' },
+    'US': { 'currency': 'USD', 'csymbol': '$' },
+    'RU': { 'currency': 'RUB', 'csymbol': '₽' },
+    'JP': { 'currency': 'JPY', 'csymbol': '¥' },
+    'CN': { 'currency': 'CNY', 'csymbol': '¥' },
+}
 
 COUNTRY_CODE = (
     ('AF', 'Afghanistan'),

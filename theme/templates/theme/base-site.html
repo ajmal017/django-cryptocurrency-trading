@@ -5,16 +5,22 @@
 {% block content %}
 <aside class="top-bar">
     <div class="top-bar__container">
-        <form class="top-bar__select" action="{% url 'set_language' %}" method="post">{% csrf_token %}
+        <form class="top-bar__select" action="{% url 'theme:set-country' %}" method="post">{% csrf_token %}
+            <!-- action="{% url 'set_language' %}" -->
             <div class="top-bar__select-wrapper"><span class="top-bar__select-triangle"></span>
                 <input name="next" type="hidden" value="{{ redirect_to }}">
                 <select name="language" class="top-bar__select-field" required>
-                    {% get_current_language as LANGUAGE_CODE %}
+                    <!-- {% get_current_language as LANGUAGE_CODE %}
                     {% get_available_languages as LANGUAGES %}
                     {% get_language_info_list for LANGUAGES as languages %}
                     {% for language in languages %}
                         <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
                             {{ language.name_local }} ({{ language.name }})
+                        </option>
+                    {% endfor %} -->
+                    {% for code, country in COUNTRY_CODE %}
+                        <option value="{{ code }}"{% if code == SET_COUNTRY %} selected{% endif %}>
+                            {{ country }}
                         </option>
                     {% endfor %}
                 </select>
@@ -22,9 +28,9 @@
             <button class="top-bar__select-btn btn btn--theme-2 btn--round" type="submit">{% trans 'APPLY' %}</button>
         </form>
         <ul class="top-bar__items">
-            <li class="top-bar__item"> <span class="top-bar__currency">BTC/USD</span>{{ pricing|keyvalue:'BTC_USD'|safe }}</li>
-            <li class="top-bar__item"> <span class="top-bar__currency">ETH/USD</span>{{ pricing|keyvalue:'ETH_USD'|safe }}</li>
-            <li class="top-bar__item"> <span class="top-bar__currency">XRP/USD</span>{{ pricing|keyvalue:'XRP_USD'|safe }}</li>
+            <li class="top-bar__item"> <span class="top-bar__currency">BTC/{{SET_CURRENCY}}</span>{{ pricing|keyvalue:'BTC_STRING'|safe }}</li>
+            <li class="top-bar__item"> <span class="top-bar__currency">ETH/{{SET_CURRENCY}}</span>{{ pricing|keyvalue:'ETH_STRING'|safe }}</li>
+            <li class="top-bar__item"> <span class="top-bar__currency">XRP/{{SET_CURRENCY}}</span>{{ pricing|keyvalue:'XRP_STRING'|safe }}</li>
         </ul>
     </div>
 </aside>

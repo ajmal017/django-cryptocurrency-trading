@@ -63,6 +63,12 @@ def current_user(request):
         None
 
 
+class Pages(View):
+    
+    def get(self, request, more={}):
+        return render(request, 'cadmin/pages.html', {**more})
+
+
 @method_decorator(user_not_logged_in, name='dispatch')
 class LoginView(View):
 

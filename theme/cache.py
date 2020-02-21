@@ -17,36 +17,103 @@ logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
 from cadmin.models import Pricing
 
+from requests import Request, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+import json
+from forex_python.converter import CurrencyRates
+
 class CurrencyExchangeData:
     """
     Class used for storing currency exchange rates for 10 minutes
     """
-    # @staticmethod
-    def get_or_set_rate(currency_one, currency_two):
-        current_rate = r.get('{}-{}'.format(currency_one, currency_two))
-        try:
-            if current_rate:
-                current_rate = json.loads(current_rate.decode())
-                print(current_rate)
-                return current_rate
-            else:
-                new_rate = requests.get('https://api.cryptonator.com/api/ticker/{}-{}'.format(currency_one, currency_two))
-                print(new_rate.text)
-                r.set('{}-{}'.format(currency_one, currency_two), new_rate.text)
-                r.expire('{}-{}'.format(currency_one, currency_two), 600)
-                return json.loads(new_rate.text)
-        except:
-            price = Pricing()
-            return price.get_rate(currency_one, currency_two)
 
-    def auto_store():
-        valid_currencies = ('usd', 'eur', 'gbp', 'jpy', 'btc', 'eth', 'xrp')
-        c1 = currencies[:3]
-        c2 = currencies[4:]
-        if c1 not in valid_currencies or c2 not in valid_currencies:
-            return JsonResponse({'error': 'Invalid currency'})
+    def generate(self):
+        # coinmarketcap = Market()
+        current_rate_time = r.get('current_rate_time')
+        try:
+            if current_rate_time is None:
+                self.set_pricing()
+                r.set('current_rate_time', "Good")
+                r.expire('current_rate_time', 600)
+        except Exception as e:
+            print(e)
+
+    def get_price(self, crypto, flat, place='market_price'):
+        current_rate = r.get(crypto+"-"+flat)
+        if current_rate:
+            return float("{:.3f}".format(float(current_rate)))
         else:
-            return JsonResponse(self.get_or_set_rate(c1, c2))
+            return Pricing().get_price(crypto, flat, place)
+
+    def get_rate(self, crypto, flat, place='market_price'):
+        current_rate = r.get(crypto+"-"+flat+"-rate")
+        if current_rate:
+            return float("{:.3f}".format(float(current_rate)))
+        else:
+            return Pricing().get_rate(crypto, flat, place)
+    
+    def get_price_rate_string(self, crypto, flat):
+        price = self.get_price(crypto, "USD")*self.get_price("USD", flat)
+        rate = self.get_rate(crypto, "USD")*self.get_price("USD", flat)
+        return '<span class="top-bar__value">' + str('{:.3f}'.format(price)) + ('</span><span class="top-bar__change is-positive"> +' if rate > 0 else '<span class="top-bar__change is-negative"> ') + str('{:.3f}'.format(rate)) + '%</span>'
+
+    def set_pricing(self):
+        data = self.get_market()
+        for symbol in data['data']:
+            crypto = data['data'][symbol]['symbol']
+            flat = "USD"
+            pricing = data['data'][symbol]
+            price = pricing['quote'][flat]['price']
+            rate = pricing['quote'][flat]['percent_change_1h']
+            self.add_pricing(crypto, flat, price, rate)
+
+        data = self.get_converter()
+        for symbol in data:
+            crypto = 'USD'
+            flat = symbol
+            price = data[symbol]
+            if symbol in ['USD', 'EUR', 'GBP', 'JPY']:
+                self.add_pricing(crypto, flat, price)
+        
+    def get_market(self):
+        url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
+        parameters = {
+            'id':'1,1027,52'
+        }
+        headers = {
+            'Accepts': 'application/json',
+            'X-CMC_PRO_API_KEY': 'b2f9d679-ed43-4973-a454-28b00c741b22',
+        }
+
+        session = Session()
+        session.headers.update(headers)
+
+        try:
+            response = session.get(url, params=parameters)
+            data = json.loads(response.text)
+            return data
+        except (ConnectionError, Timeout, TooManyRedirects) as e:
+            return e
+
+    def get_converter(self):
+        c = CurrencyRates()
+        try:
+            return c.get_rates('USD')
+        except Exception as e:
+            return e
+
+    def add_pricing(self, crypto, flat, price, rate=0):
+        Pricing(
+            price_type = "market_price",
+            crypto = crypto,
+            flat = flat,
+            price = price,
+            rate = rate
+        ).save()
+        r.set(crypto+"-"+flat, price)
+        r.expire(crypto+"-"+flat, 600)
+        r.set(crypto+"-"+flat+"-rate", rate)
+        r.expire(crypto+"-"+flat, 600)
 
 
 class GoogleMapsGeocoding:

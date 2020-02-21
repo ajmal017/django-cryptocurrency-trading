@@ -6,6 +6,8 @@ from . import views
 
 app_name = 'cadmin'
 urlpatterns = [
+    path('pages/', views.Pages.as_view(), name='pages'),
+
     path('', views.IndexView.as_view(), name='index'),
     path('index/', views.IndexView.as_view()),
     path('add-user/', views.AddUserView.as_view(), name='add-user'),

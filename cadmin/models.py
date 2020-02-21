@@ -174,6 +174,9 @@ class Customers(MyModel):
     def __str__(self):
         return self.user.username
 
+    def get_public_url(self):
+        return '<a href="/user-public-profile/?item_id='+str(self.pk)+'">'+self.user.username+'</a>'
+
     def review_list(self):
         return Reviews.objects.filter(to_customer=self)
 
@@ -383,17 +386,17 @@ class Offers(MyModel):
             return None
 
     def get_trade_price(self):
-        if self.use_market_price:
-            return Pricing.get_rate(self.what_crypto, self.flat, 'market_price')
-        if self.trail_market_price:
-            return Pricing.get_rate(self.what_crypto, self.flat, 'trail_market_price')
-        return self.trade_price
+        # if self.use_market_price:
+        #     return Pricing.get_price(self.what_crypto, self.flat, 'market_price')
+        # if self.trail_market_price:
+        #     return Pricing.get_price(self.what_crypto, self.flat, 'trail_market_price')
+        return "{:.3f}".format(self.trade_price)
 
     def payment_method(self):
         return 'All'
 
     def payment_risk(self):
-        if self.get_trade_price() > 10000:
+        if self.trade_price > 10000:
             return 'High Risk'
         else:
             return 'Low Risk'
@@ -534,7 +537,7 @@ class Trades(MyModel):
 
     @property
     def trade_price(self):
-        return self.price if self.price else self.offer.get_trade_price()
+        return self.price if self.price else self.offer.trade_price
 
     @property
     def trade_flat(self):
@@ -556,7 +559,7 @@ class Trades(MyModel):
         return self.trade_price()*self.amount if self.status == 'completed' else 0
 
     def flat_amount(self):
-        return float(self.trade_price()) * float(self.amount)
+        return float(self.trade_price) * float(self.amount)
 
 
 class Pricing(MyModel):
@@ -568,31 +571,17 @@ class Pricing(MyModel):
     created_by = models.ForeignKey('Users', on_delete=models.CASCADE, null=True)
     date = models.DateTimeField(auto_now=True)
 
-    def BTC_USD(self):
-        item = Pricing.objects.filter(crypto='BTC', flat='USD').order_by('-created_by', 'price_type')
-        try:
-            return '<span class="top-bar__value">' + str(item[0].price) + ('</span><span class="top-bar__change is-positive"> +' if item[0].rate > 0 else '<span class="top-bar__change is-negative"> ') + str(item[0].rate) + '%</span>'
-        except:
-            return '---'
-
-    def ETH_USD(self):
-        item = Pricing.objects.filter(crypto='ETH', flat='USD').order_by('-created_by', 'price_type')
-        try:
-            return '<span class="top-bar__value">' + str(item[0].price) + ('</span><span class="top-bar__change is-positive"> +' if item[0].rate > 0 else '<span class="top-bar__change is-negative"> ') + str(item[0].rate) + '%</span>'
-        except:
-            return '---'
-
-    def XRP_USD(self):
-        item = Pricing.objects.filter(crypto='XRP', flat='USD').order_by('-created_by', 'price_type')
-        try:
-            return '<span class="top-bar__value">' + str(item[0].price) + ('</span><span class="top-bar__change is-positive"> +' if item[0].rate > 0 else '<span class="top-bar__change is-negative"> ') + str(item[0].rate) + '%</span>'
-        except:
-            return '---'
-
-    def get_rate(crypto, flat, price_type='market_price'):
+    def get_price(self, crypto, flat, price_type='market_price'):
         item = Pricing.objects.filter(crypto=crypto, flat=flat, price_type=price_type).order_by('-created_by')
         try:
-            return item[0].price
+            return float("{:.3f}".format(item[0].price))
+        except:
+            return 0
+
+    def get_rate(self, crypto, flat, price_type='market_price'):
+        item = Pricing.objects.filter(crypto=crypto, flat=flat, price_type=price_type).order_by('-created_by')
+        try:
+            return float("{:.3f}".format(item[0].rate))
         except:
             return 0
 
@@ -655,7 +644,7 @@ class Messages(MyModel):
         return Messages.objects.filter(message_type='sub_message', message=self)
 
 
-class UserRelations(MyModel):
+class UserRelations(MyModel): #for message
     user = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='relation_user')
     partner = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='relation_partner')
     status = models.BooleanField(default=True, choices=BLOCK_TYPES)

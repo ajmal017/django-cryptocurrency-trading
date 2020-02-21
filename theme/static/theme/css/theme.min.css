@@ -694,7 +694,6 @@ a {
 
 a:hover {
   text-decoration: underline;
-  color: #00ccc9;
 }
 
 img {
@@ -1582,7 +1581,7 @@ input[disabled] ~ .checkbox__text {
 .cookie-alert {
   width: 100%;
   padding: 12px 0;
-  background: #26cde1;
+  background: #e126cd;
   color: white;
   font-size: 12px;
 }

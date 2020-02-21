@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from django.utils.decorators import method_decorator
 
-from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils.crypto import get_random_string
 from django.db.models import Q, Sum, Count, F
@@ -14,11 +14,13 @@ from django.shortcuts import render, redirect
 from django.core import serializers
 
 from cadmin import models
+from .constants import CURRENCY_SYMBOL
 from .decorators import customer_user_login_required, user_not_logged_in
 from .context_processors import theme_decorators
-# from .cache import CurrencyExchangeData, GoogleMapsGeocoding
+from .cache import CurrencyExchangeData, GoogleMapsGeocoding
 from django.template.defaulttags import register
 from django.contrib.auth import (login as auth_login, logout as auth_logout)
+import string, random
 
 logger = logging.getLogger('raplev')
 logger.setLevel(logging.INFO)
@@ -29,6 +31,12 @@ app_url = ''
 def multiple3(num):    
     ret = True if num % 3 == 0 else False
     return ret
+
+
+@register.filter
+def cconv(price, flat):
+    price = float(price) * CurrencyExchangeData().get_price("USD", flat)
+    return "{:.3f}".format(price)
 
 
 def get_client_ip(request):
@@ -49,14 +57,91 @@ def current_user(request):
         None
 
 
+class Pages(View):
+    
+    def get(self, request, more={}):
+        return render(request, 'theme/pages.html', {**more})
+
+
+class SetCountry(View):
+    
+    def post(self, request, more={}):
+        country_code = request.POST.get('language')
+        request.session['set_country'] = country_code
+        request.session['set_currency'] = CURRENCY_SYMBOL[country_code]['currency']
+        request.session['set_csymbol'] = CURRENCY_SYMBOL[country_code]['csymbol']
+        return redirect('/')
+
+
+def get_permission_value(request, column):
+    if column == 'identified_user_required':
+        try:
+            return request.user.id_verified
+        except:
+            return False
+    if column == 'sms_verification_required':
+        try:
+            return request.user.phone_verified
+        except:
+            return False
+    if column == 'minimum_successful_trades':
+        try:
+            return request.user.customer().successful_trade_count()
+        except:
+            return 0
+    if column == 'minimum_complete_trade_rate':
+        try:
+            return request.user.customer().successful_trade_rate()
+        except:
+            return 0
+
 
 class Index(View):
     
     def get(self, request, more={}):
-        BTC_items = models.Offers.objects.filter(what_crypto='BTC', admin_confirmed=True).order_by('-created_at')[:5]
-        ETH_items = models.Offers.objects.filter(what_crypto='ETH', admin_confirmed=True).order_by('-created_at')[:5]
-        XRP_items = models.Offers.objects.filter(what_crypto='XRP', admin_confirmed=True).order_by('-created_at')[:5]
-        return render(request, 'theme/index.html', {'BTC_items': BTC_items, 'ETH_items': ETH_items, 'XRP_items': XRP_items, **more})
+        crypto_filter = request.GET.get('crypto_filter', '')
+        type_all = ['buy'] if  request.GET.get('crypto_all_buy', 'no') == 'on' else []
+        type_BTC = ['buy'] if  request.GET.get('crypto_BTC_buy', 'no') == 'on' else []
+        type_ETH = ['buy'] if  request.GET.get('crypto_ETH_buy', 'no') == 'on' else []
+        type_XRP = ['buy'] if  request.GET.get('crypto_XRP_buy', 'no') == 'on' else []
+        type_all.append('sell' if request.GET.get('crypto_all_sell', 'no') == 'on' else 'nooooo')
+        type_BTC.append('sell' if request.GET.get('crypto_BTC_sell', 'no') == 'on' else 'nooooo')
+        type_ETH.append('sell' if request.GET.get('crypto_ETH_sell', 'no') == 'on' else 'nooooo')
+        type_XRP.append('sell' if request.GET.get('crypto_XRP_sell', 'no') == 'on' else 'nooooo')
+
+        items = {}
+        for item in ['BTC', 'ETH', 'XRP']:
+            if crypto_filter == 'true':
+                items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=request.session['set_country']),
+                    Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
+                    Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
+                    Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
+                    Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate')),
+                    Q(Q(trade_type__in=type_BTC) | Q(trade_type__in=type_all))).order_by('-created_at')[:5]})
+            else:
+                items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=request.session['set_country']),
+                    Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
+                    Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
+                    Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
+                    Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))).order_by('-created_at')[:5]})
+
+
+        crypto_all_buy = True if request.GET.get('crypto_all_buy', 'no') == 'on' else False
+        crypto_BTC_buy = True if request.GET.get('crypto_BTC_buy', 'no') == 'on' else False
+        crypto_ETH_buy = True if request.GET.get('crypto_ETH_buy', 'no') == 'on' else False
+        crypto_XRP_buy = True if request.GET.get('crypto_XRP_buy', 'no') == 'on' else False
+
+        crypto_all_sell = True if request.GET.get('crypto_all_sell', 'no') == 'on' else False
+        crypto_BTC_sell = True if request.GET.get('crypto_BTC_sell', 'no') == 'on' else False
+        crypto_ETH_sell = True if request.GET.get('crypto_ETH_sell', 'no') == 'on' else False
+        crypto_XRP_sell = True if request.GET.get('crypto_XRP_sell', 'no') == 'on' else False
+
+        return render(request, 'theme/index.html', {'BTC_items': items['BTC'], 'ETH_items': items['ETH'], 'XRP_items': items['XRP'], 
+            'crypto_all_buy': crypto_all_buy, 'crypto_all_sell': crypto_all_sell, 
+            'crypto_BTC_buy': crypto_BTC_buy, 'crypto_BTC_sell': crypto_BTC_sell, 
+            'crypto_ETH_buy': crypto_ETH_buy, 'crypto_ETH_sell': crypto_ETH_sell, 
+            'crypto_XRP_buy': crypto_XRP_buy, 'crypto_XRP_sell': crypto_XRP_sell, 
+            **more})
 
 
 @method_decorator(user_not_logged_in, name='dispatch')
@@ -72,7 +157,7 @@ class Login(View):
         next_to = request.POST.get('next', '').strip()
 
         try:
-            user = models.Users.objects.get(Q(email=email_or_username) | Q(username=email_or_username))
+            user = models.Users.objects.get(Q(email=email_or_username))# | Q(username=email_or_username)
             if user and check_password(password, user.password) and user.is_customer:
                 token = user.token if user.token else get_random_string(length=100)
                 user.token = token
@@ -431,9 +516,9 @@ class NewOffer(View):
         item_id = request.POST.get('item_id', '')
         trade_price = float(request.POST.get('trade_price', 0))
         if request.POST.get('useMarketPrice', '').strip() == 'on':
-            trade_price = models.Pricing.get_rate(request.POST.get('what_crypto'), request.POST.get('flat'), 'market_price')
+            trade_price = CurrencyExchangeData().get_price(request.POST.get('what_crypto'), request.POST.get('flat'), 'market_price')
         if request.POST.get('trailMarketPrice', '').strip() == 'on':
-            trade_price = models.Pricing.get_rate(request.POST.get('what_crypto'), request.POST.get('flat'), 'trail_market_price')
+            trade_price = CurrencyExchangeData().get_price(request.POST.get('what_crypto'), request.POST.get('flat'), 'trail_market_price')
 
         object_data = {
             'trade_type': request.POST.get('trade_type'),
@@ -456,14 +541,14 @@ class NewOffer(View):
             'restrict_hours_start': request.POST.get('restrict_hours_start'),
             'restrict_hours_end': request.POST.get('restrict_hours_end'),
             'proof_times': request.POST.get('proof_times'),
-            'supported_location': request.POST.getlist('supported_location[]'),
+            'supported_location': request.POST.getlist('supported_location[]') if request.POST.getlist('supported_location[]') else ['US'],
             'trade_overview': request.POST.get('trade_overview', '').strip(),
             'message_for_proof': request.POST.get('message_for_proof', '').strip(),
             'identified_user_required': True if request.POST.get('identified_user_required') == 'on' else False,
             'sms_verification_required': True if request.POST.get('sms_verification_required') == 'on' else False,
             'minimum_successful_trades': request.POST.get('minimum_successful_trades'),
             'minimum_complete_trade_rate': request.POST.get('minimum_complete_trade_rate'),
-            'admin_confirmed': False,
+            'admin_confirmed': True,#False
             'created_at': datetime.now(),
         }
 
@@ -697,9 +782,9 @@ class EditOffer(View):
         item_id = request.POST.get('item_id', '')
         trade_price = float(request.POST.get('trade_price', 0))
         if request.POST.get('useMarketPrice', '').strip() == 'on':
-            trade_price = models.Pricing.get_rate(request.POST.get('what_crypto'), request.POST.get('flat'), 'market_price')
+            trade_price = CurrencyExchangeData().get_price(request.POST.get('what_crypto'), request.POST.get('flat'), 'market_price')
         if request.POST.get('trailMarketPrice', '').strip() == 'on':
-            trade_price = models.Pricing.get_rate(request.POST.get('what_crypto'), request.POST.get('flat'), 'trail_market_price')
+            trade_price = CurrencyExchangeData().get_price(request.POST.get('what_crypto'), request.POST.get('flat'), 'trail_market_price')
 
         object_data = {
             'trade_type': request.POST.get('trade_type'),
@@ -763,7 +848,6 @@ class OfferDetail(View):
         return render(request, 'theme/offer-details.html', {'item': item, **more})
 
 
-@method_decorator(customer_user_login_required, name='dispatch')
 class OfferListing(View):
 
     def get(self, request, more={}):
@@ -773,32 +857,20 @@ class OfferListing(View):
         flat = request.GET.get('flat', '')
         payment_method = request.GET.get('payment_method', '')
         
-        crypto_filter = request.GET.get('crypto_filter', '')
-        type_all = []
-        type_BTC = []
-        type_ETH = []
-        type_XRP = []
-        type_all.append('buy' if  request.GET.get('crypto_all_buy', 'no') == 'on' else 'no')
-        type_BTC.append('buy' if  request.GET.get('crypto_BTC_buy', 'no') == 'on' else 'no')
-        type_ETH.append('buy' if  request.GET.get('crypto_ETH_buy', 'no') == 'on' else 'no')
-        type_XRP.append('buy' if  request.GET.get('crypto_XRP_buy', 'no') == 'on' else 'no')
-        type_all.append('sell' if request.GET.get('crypto_all_sell', 'no') == 'on' else 'no')
-        type_BTC.append('sell' if request.GET.get('crypto_BTC_sell', 'no') == 'on' else 'no')
-        type_ETH.append('sell' if request.GET.get('crypto_ETH_sell', 'no') == 'on' else 'no')
-        type_XRP.append('sell' if request.GET.get('crypto_XRP_sell', 'no') == 'on' else 'no')
-        if crypto_filter == 'true':
-            items = models.Offers.objects.filter(
-                Q(what_crypto='BTC', trade_type__in=type_BTC) | 
-                Q(what_crypto='ETH', trade_type__in=type_ETH) | 
-                Q(what_crypto='XRP', trade_type__in=type_XRP) | 
-                Q(trade_type__in=type_all)
-                ).order_by('-created_at')
+        if int(trade_price) > 0:
+            items = models.Offers.objects.filter(Q(admin_confirmed=True, supported_location__icontains=request.session['set_country'], trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat, 
+                minimum_transaction_limit__lte=trade_price, maximum_transaction_limit__gte=trade_price),
+                Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
+                Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
+                Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
+                Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))).order_by('-created_at')
         else:
-            if int(trade_price) > 0:
-                items = models.Offers.objects.filter(admin_confirmed=True, trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat, 
-                minimum_transaction_limit__lte=trade_price, maximum_transaction_limit__gte=trade_price).order_by('-created_at')
-            else:
-                items = models.Offers.objects.filter(admin_confirmed=True, trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat).order_by('-created_at')
+            items = models.Offers.objects.filter(Q(admin_confirmed=True, supported_location__icontains=request.session['set_country'], 
+                trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat),
+                Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
+                Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
+                Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
+                Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))).order_by('-created_at')
 
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
@@ -843,8 +915,6 @@ class SingleOfferDetail(View):
             list.save()
             return self.get(request, {'item_id': item_id, 'alert': {'success': 'Added to your list.'}})
 
-
-import string, random
 
 def generate_trade_id():
     return random.choice(string.ascii_letters).upper() + str(random.randrange(9)) + str(round(datetime.now().timestamp()))
@@ -1532,3 +1602,154 @@ class UploadView(View):
 
 def calculate_escrow(escrow_id):
     return True
+
+
+from loremipsum import get_sentence
+def makeing_fake_trade(request):
+    crypto = ['BTC', 'ETH', 'XRP'][random.randrange(3)]
+    flat_index = random.randrange(4)
+    flats = ['USD', 'EUR', 'GBP', 'JPY']
+    flat = flats[flat_index]
+    country = ['GB', 'US', 'RU', 'JP', 'CN'][random.randrange(5)]
+    cities = {
+        'GB': ['London', 'Manchester', 'Liverpool', 'Bristol', 'Oxford'],
+        'US': ['New York', 'Washinton', 'Chicago', 'San Francisco', 'Los Angeles'],
+        'RU': ['Ruxenburg', 'Moscrow', 'Sibiri', 'Samara', 'Omsk'],
+        'JP': ['Tokyo', 'Hirosima', 'Nagasakki', 'Yokohama', 'Sapporo'],
+        'CN': ['Beijing', 'Wuhan', 'HongKong', 'Taiwan', 'ShangHai']
+    }
+    city = cities[country][random.randrange(5)]
+    rate = CurrencyExchangeData().get_price(crypto, 'USD')
+    trade_price = rate + rate*(random.randrange(200)-100)/10000
+    times = 400 if crypto == "ETH" else 40000 if crypto == "XRP" else 1
+    supported_location = []
+    for i in range(random.randrange(5)):
+        supported_location.append(['GB', 'US', 'RU', 'JP', 'CN'][random.randrange(5)])
+    supported_location = [country] if supported_location == [] else supported_location
+    created_at = datetime.now() - timedelta(days=random.randrange(90))
+    customers = models.Customers.objects.all()
+    customers_array = [k for k in range(customers.count())]
+    cus_index = random.randrange(len(customers_array))
+    created_by = customers[cus_index]
+
+    offer_data = {
+        'trade_type': ['buy', 'sell'][random.randrange(2)],
+        'what_crypto': crypto,
+        'flat': flat,
+        'postal_code': random.randrange(10000, 99999),
+        'show_postcode': [True, False][random.randrange(2)],
+        'country': country,
+        'city': city,
+        'trade_price': trade_price,
+        'use_market_price': [True, False][random.randrange(2)],
+        'trail_market_price': False,
+        'profit_start': None,
+        'profit_end': None,
+        'profit_time': 0,
+        'minimum_transaction_limit': random.randrange(3*times),
+        'maximum_transaction_limit': random.randrange(3*times, 10*times),
+        'operating_hours_start': '{:%H:%M}'.format(datetime(2000, 1, 1, random.randrange(8, 15), random.randrange(60))),
+        'operating_hours_end': '{:%H:%M}'.format(datetime(2000, 1, 1, random.randrange(15, 20), random.randrange(60))),
+        'restrict_hours_start': '{:%H:%M}'.format(datetime(2000, 1, 1, random.randrange(12, 13), random.randrange(60))),
+        'restrict_hours_end': '{:%H:%M}'.format(datetime(2000, 1, 1, random.randrange(13, 14), random.randrange(60))),
+        'proof_times': random.randrange(6),
+        'supported_location': supported_location,
+        'trade_overview': get_sentence(random.randrange(10)),
+        'message_for_proof': get_sentence(random.randrange(3)),
+        'identified_user_required': [True, False][random.randrange(2)],
+        'sms_verification_required': [True, False][random.randrange(2)],
+        'minimum_successful_trades': [0, 0, 0, random.randrange(20)][random.randrange(4)],
+        'minimum_complete_trade_rate': [0, 0, 0, random.randrange(50, 90)][random.randrange(4)],
+        'admin_confirmed': True,#False
+        'created_at': created_at
+    }
+
+    offer = models.Offers()
+    try:
+        offer.__dict__.update(offer_data)
+        offer.created_by = created_by
+        offer.save()
+    except Exception as e:
+        return JsonResponse(e)
+
+    return_data = {}
+    return_data.update({'offer': "[{}] {} => {} ({})".format(offer.created_by, offer.what_crypto if offer.trade_type == "sell" else offer.flat, 
+        offer.flat if offer.trade_type == "sell" else offer.what_crypto, offer.trade_price)})
+
+    customers_array.pop(cus_index)
+    flats = flats.pop(flat_index)
+
+    for i in range(3):
+        if [True, False, True, False, False, False, False][random.randrange(i-1, 2*i)]:
+            try:
+                cus_array_index = random.randrange(len(customers_array))
+                cus_index = customers_array[cus_array_index]
+                vendor = customers[cus_index]
+                customers_array.pop(cus_array_index)
+
+                trade_created_at = created_at + timedelta(days=random.randrange(30))
+                trade_date = trade_created_at + timedelta(days=random.randrange(5))
+
+                trade = models.Trades()
+                trade.id = generate_trade_id()
+                trade.vendor = vendor
+                trade.offer = offer
+                trade.payment_method = ['cash_deposit', 'bank_transfer', 'paypal', 'pingit', 'cash_in_person', 'amazon_gc', 'itunes_gc', 'steam_gc', 'other'][random.randrange(9)]
+                trade.amount = (offer.maximum_transaction_limit - offer.minimum_transaction_limit)*random.randrange(100)/100 + offer.minimum_transaction_limit
+                trade.status = ['waiting', 'waiting', 'waiting', 'archived', 'archived', 'completed', 'cancelled'][round(random.randrange(560)/100)]
+                trade.trade_initiator = [created_by, vendor][random.randrange(2)]
+                
+                if trade.status in ['archived', 'completed', 'cancelled']:
+                    trade.trade_date = trade_date
+
+                if trade.status == 'completed':
+                    if '_gc' in trade.payment_method:
+                        trade.proof_gift_code = get_random_string(20)
+                        trade.proof_opened = True
+                    else:
+                        trade.reference_number = random.randrange(1000000, 9999999)
+
+                if 90 < random.randrange(100):
+                    trade.flat = flats[random.randrange(3)]
+                    trade.price = offer.trade_price - rate*(random.randrange(100))/10000
+                    trade.message = get_sentence(random.randrange(5)),
+                
+                trade.created_at = trade_created_at
+                trade.save()
+
+
+                escrow1 = models.Escrows()
+                escrow1.trade = trade
+                escrow1.held_for = trade.buyer()
+                escrow1.held_from = trade.seller()
+                escrow1.created_at = trade_created_at
+                escrow1.amount = trade.amount
+                escrow1.status = False
+                escrow1.currency = trade.offer.what_crypto
+
+                escrow2 = models.Escrows()
+                escrow2.trade = trade
+                escrow2.held_for = trade.seller()
+                escrow2.held_from = trade.buyer()
+                escrow2.created_at = trade_created_at
+                escrow2.amount = trade.flat_amount()
+                escrow2.status = False
+                escrow2.currency = trade.trade_flat
+
+                if trade.status == 'completed':
+                    escrow1.confirmed = 'closed'
+                    escrow1.status = True
+                    escrow2.confirmed = 'closed'
+                    escrow2.status = True
+
+                escrow1.save()
+                escrow2.save()
+
+                userrel1, created3 = models.UserRelations.objects.get_or_create(user=trade.buyer().user, partner=trade.seller().user, defaults={'created_at': datetime.now()})
+                userrel2, created4 = models.UserRelations.objects.get_or_create(user=trade.seller().user, partner=trade.buyer().user, defaults={'created_at': datetime.now()})
+            except Exception as e:
+                return JsonResponse(e)
+
+            return_data.update({'trade'+str(i): "[{}] {} '{}'".format(trade.vendor, trade.payment_method, trade.amount)})
+    
+    return JsonResponse(return_data)

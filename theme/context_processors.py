@@ -5,14 +5,34 @@ from . import cache
 
 def theme_decorators(request):
 
-    price = Pricing()
+    cce = cache.CurrencyExchangeData()
+    cce.generate()
+    
+    if 'set_country' in request.session:
+        set_country = request.session['set_country']
+    else:
+        request.session['set_country'] = 'US'
+        set_country = 'US'
+
+    if 'set_csymbol' in request.session:
+        set_csymbol = request.session['set_csymbol']
+    else:
+        request.session['set_csymbol'] = '$'
+        set_csymbol = '$'
+
+    if 'set_currency' in request.session:
+        set_currency = request.session['set_currency']
+    else:
+        request.session['set_currency'] = 'USD'
+        set_currency = 'USD'
+
     pricing = {
-        # 'BTC_USD': cache.CurrencyExchangeData.get_or_set_rate('BTC', 'USD'),
-        # 'ETH_USD': cache.CurrencyExchangeData.get_or_set_rate('ETH', 'USD'),
-        # 'XRP_USD': cache.CurrencyExchangeData.get_or_set_rate('XRP', 'USD'),
+        'BTC_STRING': cce.get_price_rate_string("BTC", set_currency),
+        'ETH_STRING': cce.get_price_rate_string("ETH", set_currency),
+        'XRP_STRING': cce.get_price_rate_string("XRP", set_currency),
     } 
 
-    return { 'pricing': pricing, 'theme_url': '', **global_setting() }
+    return { 'pricing': pricing, 'theme_url': '', 'SET_COUNTRY': set_country, 'SET_CURRENCY': set_currency, 'SET_CSYMBOL': set_csymbol, **global_setting() }
 
 
 def global_setting():

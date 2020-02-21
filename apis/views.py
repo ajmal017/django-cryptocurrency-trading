@@ -364,18 +364,22 @@ def get_client_ip(request):
 
 class Request(CreateAPIView):
     serializer_class = serializers.UsersSerializer
+    rand_password = ''
 
     def perform_create(self, serializer):
-        serializer.save(username=serializer.validated_data['first_name'].lower()+'_'+serializer.validated_data['last_name'].lower())
-        serializer.save(password=make_password('123!@#123'))
+        serializer.save(username="user" + str(round(datetime.now().timestamp())))
+        self.rand_password = get_random_string(length=10)
+        serializer.save(password=make_password(self.rand_password))
         serializer.save(created_at=datetime.now())
 
     def create(self, validated_data):
         res = super().create(validated_data)
         if res.data['id']:
-            models.Affiliates(
+            affiliate = models.Affiliates(
                 user_id = res.data['id']
-            ).save()
+            )
+            affiliate.save()
+            affiliate.send_success_email(self.password)
         return res
 
 

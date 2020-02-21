@@ -155,24 +155,24 @@ USE_L10N = True
 
 USE_TZ = True
 
-LANGUAGES = [
-  ('en', _('English')),
-  ('ru', _('Русский')),
-  ('io', _('Nigeria')),
-  ('zh-hans', _('简体中文')),
-]
+# LANGUAGES = [
+#   ('en', _('English')),
+#   ('ru', _('Русский')),
+#   ('io', _('Nigeria')),
+#   ('zh-hans', _('简体中文')),
+# ]
 
 
-# Add custom languages not provided by Django (io => ng)
-import django.conf.locale
-from django.conf import global_settings
-global_settings.LANGUAGES = [(x[0], x[1]) if x[0] != 'io' else ('io', 'Nigeria') for x in global_settings.LANGUAGES]
-django.conf.locale.LANG_INFO['io']['name'] = 'English'
-django.conf.locale.LANG_INFO['io']['name_local'] = u'Nigeria'
+# # Add custom languages not provided by Django (io => ng)
+# import django.conf.locale
+# from django.conf import global_settings
+# global_settings.LANGUAGES = [(x[0], x[1]) if x[0] != 'io' else ('io', 'Nigeria') for x in global_settings.LANGUAGES]
+# django.conf.locale.LANG_INFO['io']['name'] = 'English'
+# django.conf.locale.LANG_INFO['io']['name_local'] = u'Nigeria'
 
-LOCALE_PATHS = (
-    os.path.join(BASE_DIR, 'locale'),
-)
+# LOCALE_PATHS = (
+#     os.path.join(BASE_DIR, 'locale'),
+# )
 
 
 # Static files (CSS, JavaScript, Images)

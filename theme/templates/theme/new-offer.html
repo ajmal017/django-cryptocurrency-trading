@@ -95,7 +95,7 @@
 			<div class="form-group__field-group"><span class="form-group__triangle"></span>
                 <select class="form-group__field" name="country" required>
                     {% for key, value in COUNTRY_CODE %}
-                        <option value="{{ key }}" {%if key == user.customer.last_country%}selected{%endif%}>{{ value }}</option>
+                        <option value="{{ key }}" {%if key == SET_COUNTRY%}selected{%endif%}>{{ value }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -112,7 +112,7 @@
 	<div class="page__field">
 		<div class="new-offer__market-price-inner form-group">
 			<div class="form-group__field-group js-trade-price-field">
-				<input class="form-group__field" name="trade_price" type="number" placeholder="Asking Price? Current Market Price 3885 USD">
+				<input class="form-group__field" name="trade_price" type="number" placeholder="Asking Price? Current Market Price 3885 USD" required>
 				<svg class="form-group__required">
 					<use xlink:href="{% static 'theme/images/icons.svg' %}#exclamation-circle"></use>
 				</svg>
@@ -252,11 +252,11 @@
             <input type="checkbox" name="sms_verification_required" hidden><span class="new-offer__option-box checkbox__field"></span><span class="checkbox__text">SMS Verified</span></label>
         <div class="">
             <span class="new-offer__option new-offer__option-text">Minimum Successful Trades</span>
-            <input class="new-offer__input" name="minimum_successful_trades" type="number" value="10">
+            <input class="new-offer__input" name="minimum_successful_trades" type="number" value="0">
         </div>
         <div class="">
             <span class="new-offer__option new-offer__option-text">Trade initiate to completion rate </span>
-            <input class="new-offer__input" name="minimum_complete_trade_rate" type="number">
+            <input class="new-offer__input" name="minimum_complete_trade_rate" value="0" type="number">
         </div>
     </div>
 	<button class="new-offer__post btn btn--round btn--theme-2" type="submit">Post New Offer</button>

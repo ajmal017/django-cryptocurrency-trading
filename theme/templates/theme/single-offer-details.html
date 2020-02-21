@@ -164,6 +164,8 @@
                 <td class="table-new__cell"><span class="table-new__mobile-heading">Short description</span><span class="table-new__text">{{ offer.trade_overview }}</span></td>
                 <td class="table-new__cell"><span class="table-new__mobile-heading">Price/BTC</span><span class="table-new__price-action"><span class="table-new__price-action-sum">{{ offer.trade_price }}</span><a class="table-new__price-action-btn" href="{{ theme_url }}/single-offer-detail?item_id={{ offer.id }}">SEE OFFER</a></span></td>
             </tr>
+            {% empty %}
+            <tr><td colspan="5" style="padding: 10px 15px;">There are no offers to show</td></tr>
             {% endfor %}
         </tbody>
     </table>
