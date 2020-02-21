@@ -73,6 +73,13 @@ class SetCountry(View):
         return redirect('/')
 
 
+def get_set_country(request):
+    try:
+        return request.session['set_country']
+    except: 
+        return 'US'
+
+
 def get_permission_value(request, column):
     if column == 'identified_user_required':
         try:
@@ -112,14 +119,14 @@ class Index(View):
         items = {}
         for item in ['BTC', 'ETH', 'XRP']:
             if crypto_filter == 'true':
-                items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=request.session['set_country']),
+                items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=get_set_country(request)),
                     Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
                     Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
                     Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
                     Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate')),
                     Q(Q(trade_type__in=type_BTC) | Q(trade_type__in=type_all))).order_by('-created_at')[:5]})
             else:
-                items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=request.session['set_country']),
+                items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=get_set_country(request)),
                     Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
                     Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
                     Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
@@ -858,14 +865,14 @@ class OfferListing(View):
         payment_method = request.GET.get('payment_method', '')
         
         if int(trade_price) > 0:
-            items = models.Offers.objects.filter(Q(admin_confirmed=True, supported_location__icontains=request.session['set_country'], trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat, 
+            items = models.Offers.objects.filter(Q(admin_confirmed=True, supported_location__icontains=get_set_country(request), trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat, 
                 minimum_transaction_limit__lte=trade_price, maximum_transaction_limit__gte=trade_price),
                 Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
                 Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
                 Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
                 Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))).order_by('-created_at')
         else:
-            items = models.Offers.objects.filter(Q(admin_confirmed=True, supported_location__icontains=request.session['set_country'], 
+            items = models.Offers.objects.filter(Q(admin_confirmed=True, supported_location__icontains=get_set_country(request), 
                 trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat),
                 Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
                 Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
