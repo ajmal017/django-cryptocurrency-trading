@@ -108,23 +108,21 @@ class Index(View):
     def get(self, request, more={}):
         crypto_filter = request.GET.get('crypto_filter', '')
         type_all = ['buy'] if  request.GET.get('crypto_all_buy', 'no') == 'on' else []
-        type_BTC = ['buy'] if  request.GET.get('crypto_BTC_buy', 'no') == 'on' else []
-        type_ETH = ['buy'] if  request.GET.get('crypto_ETH_buy', 'no') == 'on' else []
-        type_XRP = ['buy'] if  request.GET.get('crypto_XRP_buy', 'no') == 'on' else []
         type_all.append('sell' if request.GET.get('crypto_all_sell', 'no') == 'on' else 'nooooo')
-        type_BTC.append('sell' if request.GET.get('crypto_BTC_sell', 'no') == 'on' else 'nooooo')
-        type_ETH.append('sell' if request.GET.get('crypto_ETH_sell', 'no') == 'on' else 'nooooo')
-        type_XRP.append('sell' if request.GET.get('crypto_XRP_sell', 'no') == 'on' else 'nooooo')
 
+        types = {}
         items = {}
         for item in ['BTC', 'ETH', 'XRP']:
+            types[item] = ['buy'] if  request.GET.get('crypto_'+item+'_buy', 'no') == 'on' else []
+            types[item].append('sell' if request.GET.get('crypto_'+item+'_sell', 'no') == 'on' else 'nooooo')
+
             if crypto_filter == 'true':
                 items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=get_set_country(request)),
                     Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
                     Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
                     Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
                     Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate')),
-                    Q(Q(trade_type__in=type_BTC) | Q(trade_type__in=type_all))).order_by('-created_at')[:5]})
+                    Q(Q(trade_type__in=types[item]) | Q(trade_type__in=type_all))).order_by('-created_at')[:5]})
             else:
                 items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=get_set_country(request)),
                     Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
