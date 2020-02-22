@@ -30,6 +30,7 @@ class BTC(MyModel):
     customer = models.ForeignKey('cadmin.Customers', on_delete=models.CASCADE)
     addr = models.CharField(max_length=255, unique=True)
     label = models.CharField(max_length=255, null=True)
+    password = models.CharField(max_length=255, null=True)
     addrs = models.TextField(null=True)
 
 

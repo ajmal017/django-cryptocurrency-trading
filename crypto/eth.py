@@ -47,7 +47,7 @@ class ETHProcessor:
         return reward_object
 
     def get_balance(self):
-        get_balance = self.account.get_balance()
+        get_balance = float(self.account.get_balance())/1000000000000000000
         obj, created = models.Balance.objects.get_or_create(customer=self.customer, currency='ETH')
         obj.amount = get_balance
         obj.save()
@@ -58,7 +58,7 @@ class ETHProcessor:
         return get_balances
 
     def send_tx(self, target_addr, amount, prv_key = None):
-        prv_key = prv_key if prv_key is not None else self.wallet_info()['prv_key']
+        prv_key = prv_key if prv_key is not None else self.wallet_info()['prv_key'][2:]
         gasPrice = self.gas_price()
         txCount = self.get_transaction_count()
         transaction = {
@@ -66,10 +66,10 @@ class ETHProcessor:
             'value': int(amount * 1000000000000000000),
             'gas': 100000,
             'gasPrice': gasPrice,
-            'nonce': txCount,
+            'nonce': txCount,   
             # 'chainId': 1
         }
-        tx_hash = eaAccount.sign_transaction(transaction, prv_key)['hash'].hex()
+        tx_hash = eaAccount.sign_transaction(transaction, prv_key)['rawTransaction'].hex()
         api = Proxies(api_key=ETHERSCAN_API_KEY)
         payment = api.send_tx(tx_hash)
         return payment
@@ -154,3 +154,11 @@ class ETHProcessor:
         api = Blocks(api_key=ETHERSCAN_API_KEY)
         reward_object = api.get_block_reward(block)
         return reward_object
+
+    def get_target_wallet_addr(self, customer=None, email=None):
+        if customer is not None:
+            return customer.eth_wallet().addr
+        if email is not None:
+            user = models.Users.objects.get(email=email)
+            return user.customer().eth_wallet().addr
+        return None

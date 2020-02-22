@@ -3,30 +3,33 @@ import json
 
 from cadmin import models
 from .models import BTC
+from django.utils.crypto import get_random_string
 from blockchain import createwallet, exchangerates, pushtx, statistics, blockexplorer
 from blockchain.wallet import Wallet
 
-NODE_WALLET_SERVICES = 'http://localhost:3000/'
+NODE_WALLET_SERVICES = 'http://127.0.0.1:3000/'
 API_CODE = '58ck39ajuiw'
 
 
 class BTCProcessor:
     def __init__(self, customer):
         self.customer = customer#models.Customers.objects.get(id=1) #customer
-        self.password = self.customer.user.password
         if self.customer.btc_wallet() is None:
             self.wallet_generation()
+        self.password = self.customer.btc_wallet().password
         self.wallet_id = self.customer.btc_wallet().id
         self.wallet = Wallet(self.wallet_id, self.password, NODE_WALLET_SERVICES)
 
     def wallet_generation(self, label = None):
         label = label if label is not None else self.customer.user.get_fullname() + ' wallet'
-        new_wallet = createwallet.create_wallet(self.password, API_CODE, NODE_WALLET_SERVICES, label = label)
+        user_password = get_random_string(60)
+        new_wallet = createwallet.create_wallet(user_password, API_CODE, NODE_WALLET_SERVICES, label = label)
         btc_wallet = BTC(
             id = new_wallet.identifier,
             addr = new_wallet.address,
             label = new_wallet.label,
-            customer = self.customer
+            customer = self.customer,
+            password = user_password
         )
         btc_wallet.save()
         return new_wallet.__dict__
@@ -44,22 +47,22 @@ class BTCProcessor:
         return addresses
 
     def get_balance(self):
-        get_balance = self.wallet.get_balance()
+        get_balance = float(self.wallet.get_balance()/100000000)
         obj, created = models.Balance.objects.get_or_create(customer=self.customer, currency='BTC')
         obj.amount = get_balance
         obj.save()
         return get_balance
 
     def send_tx(self, target_addr, amount, from_address = None):
-        from_address = from_address if from_address is not None else self.customer.btc_wallet().addr
-        payment = self.wallet.send(target_addr, amount, from_address = from_address)
-        return payment
+        amount = amount*100000000
+        payment = self.wallet.send(target_addr, amount, fee=500)#min fee=220
+        return payment.__dict__['tx_hash']
 
     def send_many_tx(self, recipients):
         # recipients = { '1NAF7GbdyRg3miHNrw2bGxrd63tfMEmJob' : 1428300,
 		# 		'1A8JiWcwvpY7tAopUkSnGuEYHmzGYfZPiq' : 234522117 }
         payment_many = self.wallet.send_many(recipients)
-        return payment_many
+        return payment_many.tx_id
 
     def get_address(self, addr, confirmations = 2):
         addr = self.wallet.get_address(addr, confirmations = confirmations)
@@ -97,3 +100,11 @@ class BTCProcessor:
         latest_block = blockexplorer.get_latest_block()
         txs = blockexplorer.get_unconfirmed_tx()
         blocks_by_name = None #blockexplorer.get_blocks(pool_name = 'Discus Fish')
+    
+    def get_target_wallet_addr(self, customer=None, email=None):
+        if customer is not None:
+            return customer.btc_wallet().addr
+        if email is not None:
+            user = models.Users.objects.get(email=email)
+            return user.customer().btc_wallet().addr
+        return None

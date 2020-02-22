@@ -1286,8 +1286,25 @@ class Send(View):
             item.currency = request.POST.get('currency')
             item.description = request.POST.get('description')
             item.created_by = current_user(request).customer()
+
+            if item.currency == "BTC":
+                btc_processor = BTCProcessor(current_user(request).customer())
+                target_addr = btc_processor.get_target_wallet_addr(None, item.receiver_email)
+                res = btc_processor.send_tx(target_addr, item.crypto_amount)
+
+            if item.currency == "ETH":
+                eth_processor = ETHProcessor(current_user(request).customer())
+                target_addr = eth_processor.get_target_wallet_addr(None, item.receiver_email)
+                res = eth_processor.send_tx(target_addr, item.crypto_amount)
+
+            # if item.currency == "XRP":
+            #     xrp_processor = XRPProcessor(current_user(request).customer())
+            #     res = xrp_processor.send_tx(target_addr, item.crypto_amount)
+            #     transaction = res.tx_id
+
+            item.transaction_hash = res
             item.save()
-            return self.get(request, {'alert' : {'success': 'Sended.'}})
+            return self.get(request, {'alert' : {'success': 'Sent.'}})
         except Exception as e:
             print(e)
             return self.get(request, {'alert' : {'warning': 'Error!. Try later.'}})
@@ -1691,6 +1708,7 @@ def makeing_fake_trade(request):
                 cus_index = customers_array[cus_array_index]
                 vendor = customers[cus_index]
                 customers_array.pop(cus_array_index)
+                vendor = models.Users.objects.get(username="dev_srecorder").customer() if request.GET.get('m', '') == 'screen' and created_by != 'dev_srecorder' else vendor
 
                 trade_created_at = created_at + timedelta(days=random.randrange(30))
                 trade_date = trade_created_at + timedelta(days=random.randrange(5))
@@ -1699,9 +1717,10 @@ def makeing_fake_trade(request):
                 trade.id = generate_trade_id()
                 trade.vendor = vendor
                 trade.offer = offer
-                trade.payment_method = ['cash_deposit', 'bank_transfer', 'paypal', 'pingit', 'cash_in_person', 'amazon_gc', 'itunes_gc', 'steam_gc', 'other'][random.randrange(9)]
+                trade.payment_method = ['cash_deposit', 'bank_transfer', 'paypal', 'pingit', 'cash_in_person', 'amazon_gc', 
+                    'itunes_gc', 'steam_gc', 'other'][random.randrange(9)] if request.GET.get('m', '') != 'screen' else ['amazon_gc', 'itunes_gc', 'steam_gc'][random.randrange(3)]
                 trade.amount = (offer.maximum_transaction_limit - offer.minimum_transaction_limit)*random.randrange(100)/100 + offer.minimum_transaction_limit
-                trade.status = ['waiting', 'waiting', 'waiting', 'archived', 'archived', 'completed', 'cancelled'][round(random.randrange(560)/100)]
+                trade.status = ['waiting', 'waiting', 'waiting', 'archived', 'archived', 'completed', 'cancelled'][round(random.randrange(560)/100)] if request.GET.get('m', '') != 'screen' else 'archived'
                 trade.trade_initiator = [created_by, vendor][random.randrange(2)]
                 
                 if trade.status in ['archived', 'completed', 'cancelled']:

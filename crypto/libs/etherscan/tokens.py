@@ -1,4 +1,4 @@
-from .client_ropsten import Client
+from .client import Client
 
 
 class Tokens(Client):
