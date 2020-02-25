@@ -6,7 +6,6 @@ from .models import XRP
 from eth_account import Account as eaAccount
 # from django.core import serializers
 from ripple_api import RippleRPCClient
-from ripple.sign import sign_transaction, create_signing_hash
 
 # RIPPLE_SERVER = 'http://r.ripple.com:51235/' # local
 RIPPLE_SERVER = 'http://s.altnet.ripple.com:51235/' # testnet local
