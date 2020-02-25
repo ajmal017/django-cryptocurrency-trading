@@ -17,11 +17,11 @@ RIPPLE_SERVER = 'http://s.altnet.ripple.com:51235/' # testnet local
 class XRPProcessor:
     def __init__(self, customer):
         self.customer = customer#models.Customers.objects.get(id=1) #customer
+        self.client = RippleRPCClient(RIPPLE_SERVER)#, username='<username>', password='<password>'
         if self.customer.xrp_wallet() is None:
             self.wallet_generation()
         self.password = self.customer.btc_wallet().password
         self.addr = self.customer.xrp_wallet().addr
-        self.client = RippleRPCClient(RIPPLE_SERVER)#, username='<username>', password='<password>'
 
     def wallet_generation(self, label = None):
         label = label if label is not None else self.customer.user.get_fullname() + ' wallet'
