@@ -6,30 +6,35 @@ from .models import XRP
 from eth_account import Account as eaAccount
 # from django.core import serializers
 from ripple_api import RippleRPCClient
+from ripple.sign import sign_transaction, create_signing_hash
 
-# RIPPLE_SERVER = 'http://s1.ripple.com:51234/'
-RIPPLE_SERVER = 'https://s.altnet.rippletest.net:51234/'
+# RIPPLE_SERVER = 'http://r.ripple.com:51235/' # local
+RIPPLE_SERVER = 'http://s.altnet.ripple.com:51235/' # testnet local
+# RIPPLE_SERVER = 'http://s1.ripple.com:51234/' # public
+# RIPPLE_SERVER = 'https://s.altnet.rippletest.net:51234/' # testnet public
 
 
 class XRPProcessor:
     def __init__(self, customer):
         self.customer = customer#models.Customers.objects.get(id=1) #customer
-        self.password = self.customer.user.password
         if self.customer.xrp_wallet() is None:
             self.wallet_generation()
+        self.password = self.customer.btc_wallet().password
         self.addr = self.customer.xrp_wallet().addr
         self.client = RippleRPCClient(RIPPLE_SERVER)#, username='<username>', password='<password>'
 
     def wallet_generation(self, label = None):
         label = label if label is not None else self.customer.user.get_fullname() + ' wallet'
-        # acct = self.client.wallet_propose(seed='snoPBrXtMeMyMHUVTgbuqAfg1SUTb', passphrase = self.password)
-        acct = json.loads(requests.post('https://faucet.altnet.rippletest.net/accounts').content)['account']
+        user_password = get_random_string(60)
+        acct = self.client.wallet_propose(passphrase = user_password)
+        # acct = json.loads(requests.post('https://faucet.altnet.rippletest.net/accounts').content)['account']
         xrp_wallet = XRP(
-            id = acct['address'],
+            id = acct['account_id'],
             addr = acct['address'],
             label = label,
             customer = self.customer,
             secret = acct['secret'],
+            password = user_password
         )
         xrp_wallet.save()
         return acct
@@ -40,7 +45,6 @@ class XRPProcessor:
 
     def get_balance(self):
         get_balance = self.wallet_info()['account_data']['Balance']
-        print(get_balance)
         obj, created = models.Balance.objects.get_or_create(customer=self.customer, currency='XRP')
         obj.amount = get_balance
         obj.save()
@@ -89,7 +93,7 @@ class XRPProcessor:
         return self.client.ledger_entry()
 
     def sign(self, tx_json, secret=""):
-        return self.client.sign(tx_json, secret)
+        return self.client.sign(tx_json, secret, True)
 
     def sign_for(self, account, seed, key_type, tx_json):
         return self.client.sign_for(self.addr, seed, key_type, tx_json)
@@ -116,10 +120,18 @@ class XRPProcessor:
                 "issuer" : self.addr
             }
         }
-        tx_hash = self.sign(transaction, secret)
-        return tx_hash
-        payment = self.submit(tx_hash)
+        tx_hash = self.sign(transaction)
+        # return tx_hash
+        payment = self.submit(tx_hash['TxnSignature'])
         return payment
 
     def tx_fee(self):
         return self.client.fee()
+
+    def get_target_wallet_addr(self, customer=None, email=None):
+        if customer is not None:
+            return customer.xrp_wallet().addr
+        if email is not None:
+            user = models.Users.objects.get(email=email)
+            return user.customer().xrp_wallet().addr
+        return None

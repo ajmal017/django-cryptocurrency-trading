@@ -3,6 +3,7 @@ import json
 
 from cadmin import models
 from .models import ETH
+from django.utils.crypto import get_random_string
 from .libs.etherscan.accounts import Account
 from .libs.etherscan.blocks import Blocks
 from .libs.etherscan.proxies import Proxies
@@ -17,21 +18,23 @@ ETHERSCAN_API_KEY = 'AH56YE6FZWX7QHMR6JFV3FGHCNWCXCVKCV'
 class ETHProcessor:
     def __init__(self, customer):
         self.customer = customer#models.Customers.objects.get(id=1) #customer
-        self.password = self.customer.user.password
         if self.customer.eth_wallet() is None:
             self.wallet_generation()
+        self.password = self.customer.btc_wallet().password
         self.addr = self.customer.eth_wallet().addr
         self.account = Account(address=self.addr, api_key=ETHERSCAN_API_KEY)
 
     def wallet_generation(self, label = None):
         label = label if label is not None else self.customer.user.get_fullname() + ' wallet'
-        acct = eaAccount.create(self.password)
+        user_password = get_random_string(60)
+        acct = eaAccount.create(user_password)
         eth_wallet = ETH(
             id = acct.address,
             addr = acct.address,
             label = label,
             customer = self.customer,
-            prv_key = acct.key.hex()
+            prv_key = acct.key.hex(),
+            password = user_password
         )
         eth_wallet.save()
         return eth_wallet.__dict__

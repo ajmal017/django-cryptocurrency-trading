@@ -1297,10 +1297,11 @@ class Send(View):
                 target_addr = eth_processor.get_target_wallet_addr(None, item.receiver_email)
                 res = eth_processor.send_tx(target_addr, item.crypto_amount)
 
-            # if item.currency == "XRP":
-            #     xrp_processor = XRPProcessor(current_user(request).customer())
-            #     res = xrp_processor.send_tx(target_addr, item.crypto_amount)
-            #     transaction = res.tx_id
+            if item.currency == "XRP":
+                xrp_processor = XRPProcessor(current_user(request).customer())
+                target_addr = xrp_processor.get_target_wallet_addr(None, item.receiver_email)
+                res = xrp_processor.send_tx(target_addr, item.crypto_amount)
+                print(res)
 
             item.transaction_hash = res
             item.save()
@@ -1367,7 +1368,6 @@ from crypto.xrp import XRPProcessor
 class MyBalance(View):
 
     def get(self, request, more={}):
-        print(current_user(request).customer())
         btc_processor = BTCProcessor(current_user(request).customer()).get_balance()
         eth_processor = ETHProcessor(current_user(request).customer()).get_balance()
         xrp_processor = XRPProcessor(current_user(request).customer()).get_balance()

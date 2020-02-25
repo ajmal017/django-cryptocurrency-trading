@@ -41,6 +41,7 @@ class ETH(MyModel):
     label = models.CharField(max_length=255, null=True)
     prv_key = models.CharField(max_length=255, null=True)
     addrs = models.TextField(null=True)
+    password = models.CharField(max_length=255, null=True)
 
 
 class XRP(MyModel):
@@ -50,3 +51,4 @@ class XRP(MyModel):
     label = models.CharField(max_length=255, null=True)
     addrs = models.TextField(null=True)
     secret = models.CharField(max_length=255, null=True)
+    password = models.CharField(max_length=255, null=True)

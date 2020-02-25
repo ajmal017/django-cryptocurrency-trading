@@ -948,9 +948,10 @@ class SavedWallets(MyModel):
     
 
 class SendCryptos(MyModel):
-    cryto_amount = models.FloatField(default=0)
+    crypto_amount = models.FloatField(default=0)
     flat_amount = models.FloatField(default=0)
     receiver_email = models.CharField(max_length=255)
+    transaction_hash = models.TextField(null=True)
     currency = models.CharField(max_length=10, null=True, choices=CURRENCY_CHOICES)
     description = models.TextField(null=True)
     created_by = models.ForeignKey('Customers', on_delete=models.PROTECT)
