@@ -7,7 +7,7 @@ from django.utils.crypto import get_random_string
 from blockchain import createwallet, exchangerates, pushtx, statistics, blockexplorer
 from blockchain.wallet import Wallet
 
-NODE_WALLET_SERVICES = 'http://127.0.0.1:3000/'
+NODE_WALLET_SERVICES = 'http://127.0.0.1:4001/'
 API_CODE = '58ck39ajuiw'
 
 
