@@ -1,5 +1,5 @@
 import unittest
-from blockchain.statistics import *
+from .libs.blockchain.statistics import *
 
 
 class TestGetChart(unittest.TestCase):

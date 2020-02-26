@@ -61,7 +61,7 @@ class ETHProcessor:
         return get_balances
 
     def send_tx(self, target_addr, amount, prv_key = None):
-        prv_key = prv_key if prv_key is not None else self.wallet_info()['prv_key'][2:]
+        prv_key = prv_key if prv_key is not None else self.wallet_info()['prv_key']
         gasPrice = self.gas_price()
         txCount = self.get_transaction_count()
         transaction = {

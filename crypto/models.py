@@ -50,5 +50,4 @@ class XRP(MyModel):
     addr = models.CharField(max_length=255, unique=True)
     label = models.CharField(max_length=255, null=True)
     addrs = models.TextField(null=True)
-    secret = models.CharField(max_length=255, null=True)
     password = models.CharField(max_length=255, null=True)

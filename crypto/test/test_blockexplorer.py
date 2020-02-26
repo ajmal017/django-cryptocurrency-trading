@@ -1,5 +1,5 @@
 import unittest
-from blockchain.blockexplorer import *
+from .libs.blockchain.blockexplorer import *
 
 
 class TestGetAddress(unittest.TestCase):
