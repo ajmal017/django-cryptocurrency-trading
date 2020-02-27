@@ -30,14 +30,14 @@ DEBUG = True
 DEV_SERVER = 'localhost'
 
 # site domains
-RAPLEV_URL = 'unstable-v.raplev.com'
+RAPLEV_URL = 'beta.raplev.com'
 AFFILIATES_URL = 'affiliates.raplev.com'
 COMMUNITY_URL = 'community.raplev.com'
 SCREENRECODER_URL = 'srecoder.raplev.com'
 
 ALLOWED_HOSTS = [RAPLEV_URL, AFFILIATES_URL, COMMUNITY_URL, SCREENRECODER_URL, DEV_SERVER]
 # for api server
-HOSTNAME = 'http://unstable-v.raplev.com'
+HOSTNAME = 'http://beta.raplev.com'
 
 # Application definition
 
