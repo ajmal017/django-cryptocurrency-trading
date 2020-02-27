@@ -26,9 +26,7 @@
 
     <body class="page {% block body %}{% endblock %}">
         <section class="alert-wrapper" style="background: #26cde1;">
-            <aside class="alert"><span>This is a beta release. Please excuse any errors, or, if you are generous, <a href="/submit-ticket/">report</a> them.</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
-                <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
-            </svg></button></aside>
+            <aside style="padding: 5px 42px;font-size: 15px;">This is a beta release. Please excuse any errors, or, if you are generous, <a href="/submit-ticket/" style="color: red;">report</a> them.</aside>
             <!-- {% if 'success' in global_alert or 'success' in alert %}
             <aside class="alert alert--success"><span>{{ global_alert.success|default:alert.success|safe }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
