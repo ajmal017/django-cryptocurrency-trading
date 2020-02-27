@@ -7,6 +7,18 @@
 {% block page-inner %}
 <form class="page__inner send js-form-toggle" action="{{ theme_url }}/send/" method="POST">
     {% csrf_token %}
+    <div class="alert-wrapper" style="margin-top: -50px;margin-bottom: 50px;">
+        {% if success %}
+        <aside class="alert alert--success"><span>{{ success|safe }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
+            <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
+        </svg></button></aside>
+        {% endif %}
+        {% if warning %}
+        <aside class="alert alert--warning" style="background: #9a535f;"><span>{{ warning|safe }}</span><button class="alert__close-btn" type="button" onclick="alertNote.close(this)"><svg class="alert__close-icon" width="30">
+            <use xlink:href="{% static 'cadmin/images/icons.svg' %}#times"></use>
+        </svg></button></aside>
+        {% endif %}
+    </div>
     <header class="content-header content-header--has-list">
         <ul class="content-header__list">
             <li class="content-header__item is-active"><a class="content-header__link" href="#">Send</a></li>

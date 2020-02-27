@@ -5,12 +5,14 @@ from django.core.mail import send_mail
 import random
 import string
 import timeago
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from raplev import settings
 from django.db.models import Q, Sum, Count, F
 from django.contrib.auth.models import AbstractUser
 from bs4 import BeautifulSoup as bs
 from crypto.models import BTC, ETH, XRP
+from django.utils.crypto import get_random_string
+from django.template.loader import render_to_string
 
 
 class MyModelBase( models.base.ModelBase ):
@@ -90,23 +92,53 @@ class Users(MyModel, AbstractUser):
     def supported_language(self):
         return 'English, Germany'
 
-    def send_info_email(self):
-        send_mail(
-            subject='Welcome to Raplev',
-            message='Your Info: \n - Fullname: {}\n - Username: {}\n - Email: {}\n - Role: {}'.format(
-                self.fullname, self.username, self.email, self.get_role_display()),
-            from_email='admin@raplev.com',
-            recipient_list=[self.email]
-        )
+    def send_recover_email(self, site='cadmin'):
+        expiration_token = get_random_string(80) + hex(int((datetime.utcnow() + timedelta(hours=1)).timestamp()*10000))
+        self.token = expiration_token
+        self.save()
+        unsubscribe_link = settings.AFFILIATES_URL + "/unsubscribe"
+        profile_link = settings.AFFILIATES_URL + "/profile"
+        if site == 'cadmin':
+            expiration_link = settings.RAPLEV_URL + '/cadmin/set-pw?t=' + expiration_token
+            template='emails/admin/index.html'
+        if site == 'affiliates':
+            expiration_link = settings.AFFILIATES_URL + '/reset/' + expiration_token
+            template='emails/affiliates/email-3.html'
 
-    def send_forgot_pw_email(self, next=''):
-        send_mail(
-            subject='Please verify your Email.',
-            message='Click <a href="'+settings.HOSTNAME+'/confirm-forgot-password-email?t='+self.token+next+'">here</a> to verify your email, or follow to this link.',
+        res = send_mail(
+            subject='Reset your password for Raplev',
+            message=render_to_string(template, { 'expiration_link': expiration_link, 'unsubscribe_link': unsubscribe_link, 'profile_link': profile_link }),
             from_email='admin@raplev.com',
             recipient_list=[self.email]
         )
-        return settings.HOSTNAME+'/confirm-forgot-password-email?t='+self.token+next
+        return res
+
+    def send_registered_email(self, site, password):
+        if site == 'affiliates':
+            login_link = settings.AFFILIATES_URL + '/login/'
+            password_link = settings.AFFILIATES_URL + '/password/'
+            contact_link = settings.AFFILIATES_URL + '/contact/'
+            template='emails/affiliates/email-2.html'
+
+        res = send_mail(
+            subject='Reset your password for Raplev',
+            message=render_to_string(template, { 'email': self.email, 'password': password,
+                'login_link': login_link, 'password_link': password_link, 
+                'contact_link': contact_link }),
+            from_email='admin@raplev.com',
+            recipient_list=[self.email]
+        )
+        return res
+
+    def send_requested_email(self, site='affiliates'):
+        template='emails/affiliates/email-1.html'
+        res = send_mail(
+            subject='Your Request is Pending for Raplev',
+            message=render_to_string(template, {}),
+            from_email='admin@raplev.com',
+            recipient_list=[self.email]
+        )
+        return res
 
     def send_confirm_email(self, next=''):
         send_mail(

@@ -68,8 +68,8 @@ class SetCountry(View):
     def post(self, request, more={}):
         country_code = request.POST.get('language')
         request.session['set_country'] = country_code
-        request.session['set_currency'] = CURRENCY_SYMBOL[country_code]['currency']
-        request.session['set_csymbol'] = CURRENCY_SYMBOL[country_code]['csymbol']
+        request.session['set_currency'] = CURRENCY_SYMBOL[country_code]['currency'] if country_code in CURRENCY_SYMBOL else 'USD'
+        request.session['set_csymbol'] = CURRENCY_SYMBOL[country_code]['csymbol'] if country_code in CURRENCY_SYMBOL else '$'
         return redirect('/')
 
 
@@ -1301,14 +1301,13 @@ class Send(View):
                 xrp_processor = XRPProcessor(current_user(request).customer())
                 target_addr = xrp_processor.get_target_wallet_addr(None, item.receiver_email)
                 res = xrp_processor.send_tx(target_addr, item.crypto_amount)
-                print(res)
 
             item.transaction_hash = res
             item.save()
-            return self.get(request, {'alert' : {'success': 'Sent.'}})
+            return self.get(request, {'success': 'Sent.'})
         except Exception as e:
             print(e)
-            return self.get(request, {'alert' : {'warning': 'Error!. Try later.'}})
+            return self.get(request, {'warning': 'Error!. Try later.'})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')

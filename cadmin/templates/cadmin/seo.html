@@ -53,7 +53,7 @@
                     <section class="seo__tab section">
                         <header class="section__header">
                             <h2 class="section__heading">Robots</h2>
-                            <div class="seo__page">
+                            <!-- <div class="seo__page">
                                 <h3 class="seo__page-heading">Page</h3>
                                 <div class="seo__select form-group">
                                     <div class="form-group__field-group">
@@ -66,13 +66,13 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </header>
                         <div class="section__inner">
                             <label class="seo__field form-group">
                                 <span class="form-group__caption">Robots.txt content</span>
                                 <span class="form-group__field-group">
-                                    <textarea class="form-group__field" name="seo.robots_txt.{{ page_id }}" rows="7" placeholder="Text field">{{ items.seo.robots_txt|keyvalue:page_id|safe }}</textarea>
+                                    <textarea class="form-group__field" name="seo.robots_txt" rows="7" placeholder="Text field">{{ items.seo.robots_txt }}</textarea>
                                 </span>
                             </label>
                         </div>

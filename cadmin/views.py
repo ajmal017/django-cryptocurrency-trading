@@ -215,29 +215,32 @@ class RecoverView(View):
         try:
             user = models.Users.objects.get(email=email)
             if user:
-                token = user.token if user.token is not None else get_random_string(length=100)
-                user.token = token
-                user.save()
-                send_mail(
-                    subject='Recovery password verification Email',
-                    message='Please verify if you are owner of this email by clicking <a href="/admin/recovery_verify/{}">here</a>.'.format(token),
-                    from_email='admin@raplev.com',
-                    recipient_list=[email]
-                )
+                user.send_recover_email('cadmin')
+                return render(request, 'cadmin/recover.html', {'success': 'Please check your email.'})
             else:
                 return render(request, 'cadmin/recover.html', {'error': 'Incorrect User'})
-        except:
+        except Exception as e:
+            print(e)
             return render(request, 'cadmin/recover.html', {'error': 'Sorry, Something wrong. Please try later.'})
         
-        return render(request, 'cadmin/recover.html', {'success': 'Please check your email.'})
-
 
 @method_decorator(user_not_logged_in, name='dispatch')
 class SetPWView(View):
 
     def get(self, request):
         token = request.GET.get('t', '').strip()
-        return render(request, 'cadmin/set-pw.html', {'token': token})
+        try:
+            user = models.Users.objects.get(token=token)
+            now = datetime.utcnow().timestamp()
+            expiration_time = int(token[80:], 0)/10000
+            if expiration_time >= now:
+                return render(request, 'cadmin/set-pw.html', {'token': token})
+            else:
+                return render(request, 'cadmin/error.html', {'error': 'Sorry this request is expired. Try again.'})
+        except Exception as e:
+            print(e)
+            return render(request, 'cadmin/error.html', {'error': 'Sorry this request is NOT available. Try again.'})
+
 
     def post(self, request):
         password = request.POST.get('password', '').strip()
@@ -1111,7 +1114,7 @@ class SeoView(View):
 
     def get(self, request, success='', error=''):
         page_id = request.GET.get('page_id', '').strip()
-        items = models.Options.objects.filter(Q(option_type='seo') | Q(option_type='robots_txt'), option_param1=page_id)
+        items = models.Options.objects.filter(Q(option_type='seo', option_param1=page_id) | Q(option_type='seo', option_field='robots_txt'))
         items = query_set_to_array_option(items)
         pages = models.Pages.objects.all()
         return render(request, 'cadmin/seo.html', {'items': items, 'pages': pages, 'page_id': page_id, 'success': success, 'error': error})
@@ -1286,7 +1289,7 @@ class AffiliatesView(View):
         startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
         start_date = request.GET.get('start_date', startweek).strip()
         end_date = request.GET.get('end_date', endweek).strip()
-        items = models.Affiliates.objects.filter(email_address__icontains=search, created_at__range=(start_date, end_date))
+        items = models.Affiliates.objects.filter(user__email__icontains=search, user__date_joined__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
         base_url = app_url+'/affiliates/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
@@ -1328,23 +1331,28 @@ class AddNewAffiliateView(View):
         send_login_details = request.POST.get('send_login_details', '').strip()
         try:
             item = models.Affiliates.objects.get(id=item_id)
+            user = item.user
         except:
-            item = models.Affiliates()
-            item.created_at = datetime.now()
-            item.password = make_password(password)
-        
-        item.first_name = first_name
-        item.last_name = last_name
-        item.organization = organization
-        item.address = address
-        item.postcode = postcode
-        item.country = country
-        item.email_address = email_address
+            user = models.Users()
+            user.joined_date = datetime.now()
+            item = models.Affiliates(
+                user = user.pk()
+            )
+        if password:
+            user.password = make_password(password)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.organization = organization
+        user.address = address
+        user.postcode = postcode
+        user.country = country
+        user.email = email_address
+        user.save()
         item.save()
         title = 'Edit Affiliate'
-        if send_login_details:
+        if send_login_details == 'on':
             # logger.info("Send user detail email to {}".format(temp_user.username))
-            item.send_info_email()
+            print(user.send_registered_email('affiliates', password))
 
         return render(request, 'cadmin/add-new-affiliate.html', {'item': item, 'title': title, 'success': 'This issue has been posted'})
 

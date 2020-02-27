@@ -21,25 +21,25 @@
                 {% endif %}
                 <div class="section__fields">
                     <div class="section__field form-group">
-                        <div class="form-group__field-group"><input class="form-group__field" name="first_name" value="{{ item.first_name }}" autocomplete="given-name" placeholder="First name" required></div>
+                        <div class="form-group__field-group"><input class="form-group__field" name="first_name" value="{{ item.user.first_name }}" autocomplete="given-name" placeholder="First name" required></div>
                     </div>
                     <div class="section__field form-group">
-                        <div class="form-group__field-group"><input class="form-group__field" name="last_name" value="{{ item.last_name }}" autocomplete="family-name" placeholder="Last name" required></div>
+                        <div class="form-group__field-group"><input class="form-group__field" name="last_name" value="{{ item.user.last_name }}" autocomplete="family-name" placeholder="Last name" required></div>
                     </div>
                 </div>
                 <div class="section__field form-group">
-                    <div class="form-group__field-group"><input class="form-group__field" name="organization" value="{{ item.organization }}" autocomplete="organization" placeholder="Organization" required></div>
+                    <div class="form-group__field-group"><input class="form-group__field" name="organization" value="{{ item.user.organization }}" autocomplete="organization" placeholder="Organization" required></div>
                 </div>
                 <div class="section__field form-group">
-                    <div class="form-group__field-group"><input class="form-group__field" name="address" value="{{ item.address }}" autocomplete="address-line1" placeholder="Address" required></div>
+                    <div class="form-group__field-group"><input class="form-group__field" name="address" value="{{ item.user.billing_address }}" autocomplete="address-line1" placeholder="Address" required></div>
                 </div>
                 <div class="section__fields">
                     <div class="section__field form-group">
-                        <div class="form-group__field-group"><input class="form-group__field" name="postcode" value="{{ item.postcode }}" autocomplete="postal-code" placeholder="Postcode" required></div>
+                        <div class="form-group__field-group"><input class="form-group__field" name="postcode" value="{{ item.user.postcode }}" autocomplete="postal-code" placeholder="Postcode" required></div>
                     </div>
                     <div class="section__field form-group">
                         <div class="form-group__field-group"><span class="form-group__triangle"></span>
-                            <select class="form-group__field" name="country" value="{{ item.country }}" required>
+                            <select class="form-group__field" name="country" value="{{ item.user.country }}" required>
                                 <option value="" disabled>Country</option>
                                 <option value="a" {% if 'a' in item.country %}selected{% endif %} >Country A</option>
                                 <option value="b" {% if 'b' in item.country %}selected{% endif %} >Country B</option>
@@ -47,13 +47,13 @@
                             </select></div>
                     </div>
                     <div class="section__field form-group">
-                        <div class="form-group__field-group"><input class="form-group__field" name="email_address" value="{{ item.email_address }}" type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Email address" required></div>
+                        <div class="form-group__field-group"><input class="form-group__field" name="email_address" value="{{ item.user.email }}" type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}" placeholder="Email address" required></div>
                     </div>
                 </div>
                 <div class="section__field form-group pw-generator js-pw-generator-toggle">
                     <div class="form-group__field-group"><button class="pw-generator__visibility" type="button"><svg class="pw-generator__visibility-icon" width="30">
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#eye"></use>
-                            </svg></button><button class="pw-generator__generate" type="button"> <span>Generate </span><span>password</span></button><input class="form-group__field" name="password" type="password" autocomplete="new-password" placeholder="Password" value="{{ item.password }}" required></div>
+                            </svg></button><button class="pw-generator__generate" type="button"> <span>Generate </span><span>password</span></button><input class="form-group__field" name="password" type="password" autocomplete="new-password" placeholder="Password" value=""></div>
                 </div><label class="section__field checkbox">
                     <input type="checkbox" name="send_login_details" hidden><span class="checkbox__field"></span><span class="checkbox__text">Send login details to affiliate’s email address.</span></label>
             </div>

@@ -45,16 +45,7 @@ class Password(APIView):
         AFFILIATES_URL = settings.AFFILIATES_URL
         try:
             user = models.Users.objects.get(email=email)
-            token = user.token if user.token is not None else get_random_string(length=100)
-            user.token = token
-            user.save()
-            result = send_mail(
-                subject='Recovery password verification Email',
-                message = 'Click here: {}'.format(AFFILIATES_URL+'/reset/'+token),
-                html_message = render_to_string('affiliates/emails/email-3.html', {'affiliates_url': AFFILIATES_URL, 'token': token}),
-                from_email='admin@raplev.com',
-                recipient_list=[email],
-            )
+            user.send_recover_email("affiliates")
             return JsonResponse({'success': True}, status = 200)
         except Exception as e:
             return JsonResponse({'success': True}, status = 200)
@@ -68,6 +59,11 @@ class Reset(APIView):
 
         try:
             user = models.Users.objects.get(token=token)
+            now = datetime.utcnow().timestamp()
+            expiration_time = int(token[80:], 0)/10000
+            if expiration_time < now:
+                return JsonResponse({'non_field_errors': 'Sorry this request is expired. Try again.'}, status=500)
+
             user.email_verified = True
             user.password = make_password(password)
             user.save()
@@ -379,7 +375,7 @@ class Request(CreateAPIView):
                 user_id = res.data['id']
             )
             affiliate.save()
-            affiliate.send_success_email(self.password)
+            affiliate.send_requested_email('affiliates')
         return res
 
 
