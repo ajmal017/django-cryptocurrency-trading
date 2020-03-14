@@ -1540,7 +1540,6 @@ class Messages(View):
         relation_id = request.POST.get('relation_id')
         relation = models.UserRelations.objects.get(id=relation_id)
         message_html = render_to_string('theme/message-container.html', { 'relation': relation, 'user': current_user(request) })
-        print(message_html)
         return HttpResponse(message_html)
 
 
