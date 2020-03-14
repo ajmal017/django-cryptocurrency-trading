@@ -73,7 +73,7 @@
                         </ul>
                         <ul class="nav__desktop-list nav__list--desktop">
                             <!-- Logged-in menu items which appears on desktop.-->
-                            <li class="nav__item nav__user-desktop" onclick="userMenu.open()">
+                            <li class="nav__item nav__user-desktop" onclick="twoFactorAuth.close(), support.close(),userMenu.open()">
                                 <div class="nav__user-inner"><img class="nav__user-picture" src="{% if user.avatar %}{{ user.avatar.file.url }}{% else %}{% static 'theme/images/userpic.png' %}{% endif %}" alt=""></div>
                             </li>
                             <li class="nav__item"><svg class="nav__icon">
@@ -82,10 +82,10 @@
                             <li class="nav__item"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#sign-out-alt"></use>
                                 </svg><a class="nav__link" href="{{ theme_url }}/logout">Sign out</a></li>
-                            <li class="nav__item js-two-factor-auth-trigger" onclick="twoFactorAuth.open()"><svg class="nav__icon">
+                            <li class="nav__item js-two-factor-auth-trigger" onclick="location.href='/messages'" onclicks="userMenu.close(), support.close(),twoFactorAuth.open()"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#inbox"></use>
-                                </svg><span class="nav__message-counter">2</span><button class="nav__link" type="button">Messages</button></li>
-                            <li class="nav__item js-support-trigger" onclick="support.open()"><svg class="nav__icon">
+                                </svg><span class="nav__message-counter novalue messages-badge"></span><button class="nav__link" type="button">Messages</button></li>
+                            <li class="nav__item js-support-trigger" onclick="twoFactorAuth.close(), userMenu.close(),support.open()"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#ticket-alt"></use>
                                 </svg><button class="nav__link" type="button">Support</button></li>
                             <li class="nav__item"><button class="scroll-btn" data-toggle="scrollBtn"><svg class="scroll-btn__icon">
@@ -99,13 +99,13 @@
                             <li class="nav__item"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#home"></use>
                                 </svg><a class="nav__link" href="{{ theme_url }}/index">Home</a></li>
-                            <li class="nav__item" onclick="login.open()"><svg class="nav__icon">
+                            <li class="nav__item" onclick="register.close(),support.close(),login.open()"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#sign-in-alt"></use>
                                 </svg><button class="nav__link" type="button">Login</button></li>
-                            <li class="nav__item" onclick="register.open()"><svg class="nav__icon">
+                            <li class="nav__item" onclick="login.close(),support.close(),register.open()"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#user-plus"></use>
                                 </svg><button class="nav__link" type="button">Register</button></li>
-                            <li class="nav__item" onclick="support.open()"><svg class="nav__icon">
+                            <li class="nav__item" onclick="login.close(),register.close(),support.open()"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#ticket-alt"></use>
                                 </svg><button class="nav__link" type="button">Support</button></li>
                         </ul>
@@ -114,13 +114,13 @@
                             <li class="nav__item"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#home"></use>
                                 </svg><a class="nav__link" href="{{ theme_url }}/index">Home</a></li>
-                            <li class="nav__item js-login-trigger" onclick="login.open()"><svg class="nav__icon">
+                            <li class="nav__item js-login-trigger" onclick="register.close(),support.close(),login.open()"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#sign-in-alt"></use>
                                 </svg><button class="nav__link" type="button">Login</button></li>
-                            <li class="nav__item js-register-trigger" onclick="register.open()"><svg class="nav__icon">
+                            <li class="nav__item js-register-trigger" onclick="login.close(),support.close(),register.open()"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#user-plus"></use>
                                 </svg><button class="nav__link" type="button">Register</button></li>
-                            <li class="nav__item js-support-trigger" onclick="support.open()"><svg class="nav__icon">
+                            <li class="nav__item js-support-trigger" onclick="register.close(),login.close(),support.open()"><svg class="nav__icon">
                                     <use xlink:href="{% static 'theme/images/icons.svg' %}#ticket-alt"></use>
                                 </svg><button class="nav__link" type="button">Support</button></li>
                             <li class="nav__item"><button class="scroll-btn" data-toggle="scrollBtn"><svg class="scroll-btn__icon">
@@ -342,9 +342,9 @@
                     </li>
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/profile-overview">Dashboard</a></li>
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/all-offers">All Offers</a></li>
-                    <li class="dropdown__menu-item"><span class="dropdown__counter">3</span><a class="dropdown__link" href="{{ theme_url }}/received-offers">Received Offers</a></li>
-                    <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/notifications">Transactions</a></li>
-                    <li class="dropdown__menu-item"><span class="dropdown__counter">2</span><a class="dropdown__link" href="{{ theme_url }}/messages">Messages</a></li>
+                    <li class="dropdown__menu-item"><span class="dropdown__counter novalue received-offers-badge"></span><a class="dropdown__link" href="{{ theme_url }}/received-offers">Received Offers</a></li>
+                    <li class="dropdown__menu-item"><span class="dropdown__counter novalue transactions-badge"></span><a class="dropdown__link" href="{{ theme_url }}/notifications">Transactions</a></li>
+                    <li class="dropdown__menu-item"><span class="dropdown__counter novalue messages-badge"></span><a class="dropdown__link" href="{{ theme_url }}/messages">Messages</a></li>
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/funding">Funding</a></li>
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/trade-history">Trade History</a></li>
                     <li class="dropdown__menu-item"><a class="dropdown__link" href="{{ theme_url }}/[[[?]]]">Affiliates</a></li>
@@ -559,8 +559,41 @@
                     console.log( errorThrown );
                 }
             })
-        })
+        });
+
+        gen_badges()
+        setInterval(function() {
+            gen_badges()
+        }, 5000);
     })
+
+    function gen_badges() {
+        $.ajax({
+            url: '/get-badges/',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function(data) {
+                $('.received-offers-badge').removeClass('novalue').html(data.received_offers);
+                $('.transactions-badge').removeClass('novalue').html(data.transactions);
+                $('.messages-badge').removeClass('novalue').html(data.messages);
+                if (data.received_offers == 0) {
+                    $('.received-offers-badge').addClass('novalue');
+                }
+                if (data.transactions == 0) {
+                    $('.transactions-badge').addClass('novalue');
+                }
+                if (data.messages == 0) {
+                    $('.messages-badge').addClass('novalue');
+                }
+            },
+            error: function( jqXhr, textStatus, errorThrown ){
+                console.log( errorThrown );
+            }
+        })
+    }
 
     function resendConfirmEmail(e) {
         $.ajax({

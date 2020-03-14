@@ -12,7 +12,10 @@
         <a class="proof-transaction__approve btn btn--theme-2 btn--round" href="{{ theme_url }}/trade-complete?item_id={{ item.id }}">Complete</a>
         {% endif %}
         {% if not item.is_completed %}
-        <button class="proof-transaction__approve btn btn--theme-2 btn--round" form="form1" type="submit">Approve trade</button>
+        <div>
+            <a class="btn btn--theme-1 btn--round" href="{{ theme_url }}/trade-processed?item_id={{ item.id }}">Go to trade</a>
+            <button class="proof-transaction__approve btn btn--theme-2 btn--round" form="form1" type="submit">Approve trade</button>
+        </div>
         {% endif %}
     </header>
     <h2 class="proof-transaction__subheading">Trade {{ item.id }}</h2>

@@ -103,10 +103,13 @@ CAMPAIGN_STATUS_TYPES = (
 )
 
 TRADE_STATUS_TYPES = (
-    ('waiting', 'Waing for the intiation'),
+    ('counting', 'Sent count offer'),
+    ('accepted', 'Counter Offer accepted'),
+    ('declined', 'Counter Offer declined'),
+    ('waiting', 'Started'),
     ('archived', 'Archived'),
     ('completed', 'Completed'),
-    ('cancelled', 'cancelled'),
+    ('cancelled', 'Cancelled'),
 )
 
 ESCROWS_STATUS_TYPES = (

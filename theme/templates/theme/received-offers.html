@@ -51,19 +51,26 @@
                         <li class="received-offer__item received-offer__item--score">Feedback score - {{ item.vendor.customer_rate }}/5<svg class="received-offer__icon">
                                 <use xlink:href="{% static 'theme/images/icons.svg' %}#{% if item.vendor.customer_rate >= 4 %}check{% else %}times{% endif %}-circle"></use>
                             </svg></li>
-                        {% if item.counter_status == 'accepted' %}
-                        <li class="received-offer__item received-offer__item--successful">Accepted by you<svg class="received-offer__icon">
-                            <use xlink:href="{% static 'theme/images/icons.svg' %}#{% if item.vendor.customer_rate >= 4 %}check{% else %}times{% endif %}-circle"></use>
-                        </svg></li>
+                        {% if item.status == 'accepted' %}
+                            {% if item.vendor.user == user %}
+                            <li class="received-offer__item received-offer__item--successful">Accepted by Offerer</li>
+                            {% else %}
+                            <li class="received-offer__item received-offer__item--successful">Accepted by you</li>
+                            {% endif %}
                         {% endif %}
                     </ul>
                     <div class="received-offer__bottom">
-                        {% if item.counter_status == 'accepted' %}
-                        <button class="received-offer__btn btn btn--theme-1" type="button" onclick="location.href='{{ theme_url }}/initiate-trade?trade_id={{ item.id }}'">INIT TRADE</button>
+                        {% if item.status == 'accepted' %}
+                            {% if item.vendor.user == user %}
+                            <button class="received-offer__btn btn btn--theme-1" type="button" onclick="location.href='{{ theme_url }}/initiate-trade?trade_id={{ item.id }}'">INIT TRADE</button>
+                            {% else %}
+                            <button class="received-offer__btn btn btn--theme-3" disabled type="button" onclick="location.href='{{ theme_url }}/initiate-trade?trade_id={{ item.id }}'">INIT TRADE</button>
+                            {% endif %}
+                            <button class="received-offer__btn btn btn--theme-4" type="button" onclick="location.href='{{ theme_url }}/messages?for={{ item.vendor.user.id }}'">MESSAGE</button>
                         {% else %}
-                        <button class="received-offer__btn btn btn--theme-2" onclick="postAction({'item_id': '{{item.id}}', 'mode': 'accepted'}, 'Are you sure to accept this offer?', '{{ theme_url }}/received-offers/', function(message) {location.href='{{ theme_url }}/initiate-trade?trade_id={{ item.id }}'});">ACCEPT</button>
-                        {% endif %}
+                        <button class="received-offer__btn btn btn--theme-2" onclick="postAction({'item_id': '{{item.id}}', 'mode': 'accepted'}, 'Are you sure to accepted this offer?', '{{ theme_url }}/received-offers/', function(message) {location.href='{{ theme_url }}/messages?for={{ item.vendor.user.id }}'});">ACCEPT</button>
                         <button class="received-offer__btn btn btn--theme-4" type="button" onclick="postAction({'item_id': '{{item.id}}', 'mode': 'declined'}, 'Are you sure to decline this offer?', '{{ theme_url }}/received-offers/', function(message) {$('#{{ item.id }}').remove()});">DECLINE</button>
+                        {% endif %}
                         <button class="received-offer__btn btn btn--theme-1" style="display: none; height: 10px;" type="button">COUNTER OFFER</button>
                     </div>
                 </div>
@@ -78,14 +85,58 @@
             </div>
         </div>
         {% endfor %}
-        <button class="dashboard__load" type="button" onclick="this.nextElementSibling.classList.add('is-active'); this.style.display = 'none';">LOAD MORE</button>
-        <div class="dashboard__loader loader">
-            <div class="lds-css ng-scope">
-                <div class="lds-spinner" style="width: 100%; height: 100%">
-                    <div></div>
-                </div>
-            </div><span class="loader__text">LOADING</span>
+        <div id="more_loader">
+            <button class="dashboard__load" type="button" onclick="loadMore();">LOAD MORE</button>
+            <div class="dashboard__loader loader">
+                <div class="lds-css ng-scope">
+                    <div class="lds-spinner" style="width: 100%; height: 100%">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div><span class="loader__text">LOADING</span>
+            </div>
         </div>
     </section>
 </div>
+{% endblock %}
+
+{% block bottom-script %}
+{{ block.super }}
+<script>
+    function loadMore() {
+        var loadmore = [];
+        $('.dashboard__offer').each(function(i, e) {
+            loadmore.push($(e).attr('id'));
+        })
+        $('#more_loader .loader').addClass('is-active');
+        $('#more_loader button').hide();
+        console.log(loadmore)
+        $.ajax({
+            url: '{{ theme_url }}/received-offers/',
+            type: 'GET',
+            data: {
+                loadmore: loadmore
+            },
+            success: function(data) {
+                $('#more_loader').before(data);
+                $('#more_loader .loader').removeClass('is-active');
+                $('#more_loader button').show();
+            },
+            error: function( jqXhr, textStatus, errorThrown ){
+                console.log( errorThrown );
+            }
+        })
+    }
+
+</script>
 {% endblock %}

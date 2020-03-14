@@ -32,6 +32,11 @@ class BTC(MyModel):
     label = models.CharField(max_length=255, null=True)
     password = models.CharField(max_length=255, null=True)
     addrs = models.TextField(null=True)
+    status = models.CharField(max_length=255, default='main')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.addr
 
 
 class ETH(MyModel):
@@ -42,6 +47,11 @@ class ETH(MyModel):
     prv_key = models.CharField(max_length=255, null=True)
     addrs = models.TextField(null=True)
     password = models.CharField(max_length=255, null=True)
+    status = models.CharField(max_length=255, default='main')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.addr
 
 
 class XRP(MyModel):
@@ -51,3 +61,8 @@ class XRP(MyModel):
     label = models.CharField(max_length=255, null=True)
     addrs = models.TextField(null=True)
     password = models.CharField(max_length=255, null=True)
+    status = models.CharField(max_length=255, default='main')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.addr

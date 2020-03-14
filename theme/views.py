@@ -12,6 +12,7 @@ from django.contrib.auth import logout, authenticate, login
 from django.views import View
 from django.shortcuts import render, redirect
 from django.core import serializers
+from django.template.loader import render_to_string
 
 from cadmin import models
 from .constants import CURRENCY_SYMBOL
@@ -118,17 +119,18 @@ class Index(View):
 
             if crypto_filter == 'true':
                 items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=get_set_country(request)),
-                    Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
-                    Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
-                    Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
-                    Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate')),
+                    # Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
+                    # Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
+                    # Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
+                    # Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate')),
                     Q(Q(trade_type__in=types[item]) | Q(trade_type__in=type_all))).order_by('-created_at')[:5]})
             else:
                 items.update({item: models.Offers.objects.filter(Q(what_crypto=item, admin_confirmed=True, supported_location__icontains=get_set_country(request)),
-                    Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
-                    Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
-                    Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
-                    Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))).order_by('-created_at')[:5]})
+                    # Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
+                    # Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
+                    # Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
+                    # Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))
+                    ).order_by('-created_at')[:5]})
 
 
         crypto_all_buy = True if request.GET.get('crypto_all_buy', 'no') == 'on' else False
@@ -203,6 +205,17 @@ def logout(request):
     auth_logout(request)
     # request.session['global_alert'] = {'success': "You are logged out."}
     return redirect('/'+app_url+'')
+
+
+@customer_user_login_required
+def get_badges(request):
+    received_offers = models.Trades.objects.filter(Q(offer__created_by=current_user(request).customer(), status__in=['counting', 'accepted']) | 
+            Q(vendor=current_user(request).customer(), status__in=['accepted'])).count()
+    transactions = models.Trades.objects.filter(
+        Q(Q(offer__created_by=current_user(request).customer()) | Q(vendor=current_user(request).customer()), Q(status__in=['waiting', 'archived'])) | 
+        Q(status='accepted', vendor=current_user(request).customer())).count()
+    messages = models.Messages.objects.filter(partner=current_user(request), readed=False).count()
+    return JsonResponse({'received_offers': received_offers, 'transactions': transactions, 'messages': messages})
 
 
 @method_decorator(user_not_logged_in, name='dispatch')
@@ -643,7 +656,7 @@ class ProfileOverview(View):
         # set avatar
         lists = avatars.split(',') if avatars else []
         if len(lists) > 0:
-            print(lists)
+            # print(lists)
             avatar = models.Medias.objects.get(id=lists[-1])
             user.avatar = avatar
 
@@ -654,7 +667,14 @@ class ProfileOverview(View):
 class ReceivedOffers(View):
 
     def get(self, request, more={}):
-        items = models.Trades.objects.filter(Q(offer__created_by=current_user(request).customer()), Q(status='waiting'), Q(Q(counter_status='accepted') | Q(counter_status=None))).order_by('-created_at')[:3]
+        loadmore = request.GET.getlist('loadmore[]', [])
+        items = models.Trades.objects.filter(
+            Q(offer__created_by=current_user(request).customer(), status__in=['counting', 'accepted']) | 
+            Q(vendor=current_user(request).customer(), status__in=['accepted']), 
+            ~Q(id__in=loadmore)
+            ).order_by('-created_at')[:3]
+        if loadmore:
+            return render(request, 'theme/received-offers-more.html', {'items': items})
         return render(request, 'theme/received-offers.html', {'items': items, **more})
 
     def post(self, request):
@@ -662,9 +682,13 @@ class ReceivedOffers(View):
         mode = request.POST.get('mode', '')
         try:
             item = models.Trades.objects.get(id=item_id)
-            item.counter_status = mode
+            item.status = mode
             item.save()
-            return JsonResponse({'success': 'Declined!'})
+            
+            if mode == 'accepted':
+                userrel1, created3 = models.UserRelations.objects.get_or_create(user=trade.buyer().user, partner=trade.seller().user, defaults={'created_at': datetime.now()})
+                userrel2, created4 = models.UserRelations.objects.get_or_create(user=trade.seller().user, partner=trade.buyer().user, defaults={'created_at': datetime.now()})
+            return JsonResponse({'success': mode+'!'})
         except:
             return JsonResponse({'error': 'Error! Try again.'})
 
@@ -865,17 +889,19 @@ class OfferListing(View):
         if int(trade_price) > 0:
             items = models.Offers.objects.filter(Q(admin_confirmed=True, supported_location__icontains=get_set_country(request), trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat, 
                 minimum_transaction_limit__lte=trade_price, maximum_transaction_limit__gte=trade_price),
-                Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
-                Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
-                Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
-                Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))).order_by('-created_at')
+                # Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
+                # Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
+                # Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
+                # Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))
+                ).order_by('-created_at')
         else:
             items = models.Offers.objects.filter(Q(admin_confirmed=True, supported_location__icontains=get_set_country(request), 
                 trade_type__contains=trade_type, what_crypto__contains=what_crypto, flat__contains=flat),
-                Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
-                Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
-                Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
-                Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))).order_by('-created_at')
+                # Q(Q(identified_user_required=get_permission_value(request, 'identified_user_required')) | Q(identified_user_required=False)),
+                # Q(Q(sms_verification_required=get_permission_value(request, 'sms_verification_required')) | Q(sms_verification_required=False)),
+                # Q(minimum_successful_trades__lte=get_permission_value(request, 'minimum_successful_trades')),
+                # Q(minimum_complete_trade_rate__lte=get_permission_value(request, 'minimum_complete_trade_rate'))
+                ).order_by('-created_at')
 
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
@@ -941,26 +967,23 @@ class InitiateTrade(View):
         else:
             offer = models.Offers.objects.get(id=offer_id)
             try:
-                trade = models.Trades.objects.get(offer=offer, vendor=current_user(request).customer(), status='waiting')
-            except Exception as e:
                 trade = models.Trades()
                 trade.id = generate_trade_id()
                 trade.vendor = current_user(request).customer()
                 trade.offer = offer
-
-            if current_user(request).customer() == offer.created_by:
-                return self.get(request, {'item_id': offer_id, 'alert': {'warning': 'It`s your offer. '}})
-            if offer.is_started() and offer.status == 'archived':
-                return self.get(request, {'item_id': offer_id, 'alert': {'warning': 'Warning! Already started. ' + ('<a href="'+app_url+'/trade-processed?item_id='+str(offer.is_started().id)+'">go to trade.</a>' if offer.is_started() else '')}})
+                trade.status='waiting'
+                trade.save()
+            except Exception as e:
+                pass
 
         payment_method = request.POST.get('payment_method', '')
         amount = request.POST.get('amount', '')
         try:
             trade.payment_method = payment_method
             trade.amount = amount
-            trade.status = 'archived'
+            trade.status = 'waiting'
             trade.trade_initiator = current_user(request).customer()
-            trade.created_at = datetime.now()
+            trade.trade_date = datetime.now()
             trade.save()
 
             escrow1, craeted1 = models.Escrows.objects.get_or_create(trade=trade, held_from=trade.seller(), held_for=trade.buyer(), defaults={
@@ -970,15 +993,15 @@ class InitiateTrade(View):
             escrow1.currency = trade.offer.what_crypto
             escrow1.save()
 
-            escrow2, craeted2 = models.Escrows.objects.get_or_create(trade=trade, held_for=trade.seller(), held_from=trade.buyer(), defaults={
-                'created_at': datetime.now(), 'status': False, 'amount': trade.flat_amount(), 'currency': trade.trade_flat()
-            })
-            escrow2.amount = trade.flat_amount()
-            escrow2.currency = trade.trade_flat()
-            escrow2.save()
+            # escrow2, craeted2 = models.Escrows.objects.get_or_create(trade=trade, held_for=trade.seller(), held_from=trade.buyer(), defaults={
+            #     'created_at': datetime.now(), 'status': False, 'amount': trade.flat_amount(), 'currency': trade.trade_flat()
+            # })
+            # escrow2.amount = trade.flat_amount()
+            # escrow2.currency = trade.trade_flat()
+            # escrow2.save()
 
             userrel1, created3 = models.UserRelations.objects.get_or_create(user=trade.buyer().user, partner=trade.seller().user, defaults={'created_at': datetime.now()})
-            userrel2, created4 = models.UserRelations.objects.get_or_create(user=trade.seller().user, partner=trade.buyer().user, defaults={'created_at': datetime.now()})
+            # userrel2, created4 = models.UserRelations.objects.get_or_create(user=trade.seller().user, partner=trade.buyer().user, defaults={'created_at': datetime.now()})
 
             # calculate_escrow(escrow.pk)#[[[?]]]
             return redirect(app_url+'/trade-processed?item_id='+str(trade.pk))
@@ -992,17 +1015,45 @@ def caculateTrade(request):
     trade_id = request.POST.get('trade_id', '')
     if trade_id:
         trade = models.Trades.objects.get(id=trade_id)
+        price = trade.price
+        flat = trade.flat
+        crypto = trade.offer.what_crypto
+        mode = trade.offer.trade_type
     else:
         offer = models.Offers.objects.get(id=offer_id)
+        price = offer.trade_price
+        flat = offer.flat
+        crypto = offer.what_crypto
+        mode = offer.trade_type
+        
     payment_method = request.POST.get('payment_method', '')
-    amount = request.POST.get('amount', '')
+    amount = float(request.POST.get('amount'))
+    if mode == 'buy':
+        you_pay_amount = "{:.4f}".format(amount)
+        you_pay_flat = crypto
+        you_get_amount = "{:.1f}".format(amount*price * 0.95)
+        you_get_flat = flat
 
-    # [[[[?]]]]
+        offerer_pay_amount = "{:.1f}".format(amount*price)
+        offerer_pay_flat = flat
+        you_cover_amount = "{:.1f}".format(amount*price * 0.95)
+        you_cover_flat = flat
+    else:
+        you_get_amount = "{:.4f}".format(amount * 0.95)
+        you_get_flat = crypto
+        you_pay_amount = "{:.1f}".format(amount * price)
+        you_pay_flat = flat
+
+        offerer_pay_amount = "{:.4f}".format(amount)
+        offerer_pay_flat = crypto
+        you_cover_amount = "{:.4f}".format(amount * 0.95)
+        you_cover_flat = crypto
+
     return JsonResponse({
-        'you_pay_amount': 400, 'you_pay_flat': 'USD',
-        'you_get_amount': 1981, 'you_get_flat': 'XRP',
-        'offerer_pay_amount': 18, 'offerer_pay_flat': 'XRP',
-        'you_cover_amount': 9.5, 'you_cover_flat': 'XRP'
+        'you_pay_amount': you_get_amount, 'you_pay_flat': you_get_flat,
+        'you_get_amount': you_pay_amount, 'you_get_flat': you_pay_flat,
+        'offerer_pay_amount': offerer_pay_amount, 'offerer_pay_flat': offerer_pay_flat,
+        'you_cover_amount': you_cover_amount, 'you_cover_flat': you_cover_flat
     })
 
 
@@ -1034,6 +1085,7 @@ class ProofOfTransaction(View):
             trade.proof_gift_code = proof_gift_code
             trade.proof_documents = proof_documents
             trade.reference_number = reference_number
+            trade.status = 'archived'
             trade.save()
             return self.get(request, {'item_id': trade_id, 'success': True})
         except Exception as e:
@@ -1097,7 +1149,13 @@ class SendCounterOffer(View):
             counter.status = 'waiting'
             counter.save()
 
-            userrel1, created1 = models.UserRelations.objects.get_or_create(user=counter.offer.created_by.user, partner=counter.vendor.user, defaults={'created_at': datetime.now()})
+            message = models.Messages()
+            message.message_type = 'message'
+            message.content = counter.message
+            message.partner = counter.offer.created_by.user
+            message.writer = current_user(request)
+            message.created_at = datetime.now()
+            message.save()
 
             return self.get(request, {'item_id': offer_id, 'alert': {'success': 'Sent your offer.'}})
         except Exception as e:
@@ -1189,6 +1247,36 @@ class IndependentEscrow(View):
             items = models.Escrows.objects.filter(trade=trade, confirmed=confirmed, status=True)
         return render(request, 'theme/independent-escrow.html', {'items': items, 'trade_id': trade_id, 'status': status, 'confirmed': confirmed, **more})
 
+    def post(self, request):
+        escrow_id = request.POST.get('item_id')
+        try:
+            escrow = models.Escrows.objects.get(id=escrow_id)
+            currency = escrow.currency
+            crypto_amount = escrow.amount
+
+            if currency == "BTC":
+                btc_processor = BTCProcessor(current_user(request).customer())
+                target_addr = btc_processor.get_target_wallet_addr(customer=escrow.held_for)
+                res = btc_processor.send_tx(target_addr, crypto_amount)
+
+            if currency == "ETH":
+                eth_processor = ETHProcessor(current_user(request).customer())
+                target_addr = eth_processor.get_target_wallet_addr(customer=escrow.held_for)
+                res = eth_processor.send_tx(target_addr, crypto_amount)
+
+            if currency == "XRP":
+                xrp_processor = XRPProcessor(current_user(request).customer())
+                target_addr = xrp_processor.get_target_wallet_addr(customer=escrow.held_for)
+                res = xrp_processor.send_tx(target_addr, crypto_amount)
+            
+            if res:
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'failed': True})
+        except Exception as e:
+            return JsonResponse({'failed': True})
+
+
 
 @method_decorator(customer_user_login_required, name='dispatch')
 class VendorProofOfTransaction(View):
@@ -1205,34 +1293,40 @@ class VendorProofOfTransaction(View):
         item_id = request.POST.get('item_id', '')
         try:
             trade = models.Trades.objects.get(id=item_id)
-            escrow = models.Escrows.objects.get(trade=trade, held_from=current_user(request).customer())
-            target_addr = escrow.held_for.btc_wallet().addr
+            # escrow = models.Escrows.objects.get(trade=trade, held_from=current_user(request).customer())
+            # target_addr = escrow.held_for.btc_wallet().addr
 
-            currency = escrow.currency
+            # currency = escrow.currency
 
-            if currency == "BTC":
-                btc_processor = BTCProcessor(current_user(request).customer())
-                res = btc_processor.send_tx(target_addr, escrow.amount)
-                transaction = res.tx_id
-            if currency == "ETH":
-                eth_processor = ETHProcessor(current_user(request).customer())
-                res = eth_processor.send_tx(target_addr, escrow.amount)
-                transaction = res.tx_id
-            if currency == "XRP":
-                xrp_processor = XRPProcessor(current_user(request).customer())
-                res = xrp_processor.send_tx(target_addr, escrow.amount)
-                transaction = res.tx_id
+            # if currency == "BTC":
+            #     btc_processor = BTCProcessor(current_user(request).customer())
+            #     res = btc_processor.send_tx(target_addr, escrow.amount)
+            #     transaction = res.tx_id
+            # if currency == "ETH":
+            #     eth_processor = ETHProcessor(current_user(request).customer())
+            #     res = eth_processor.send_tx(target_addr, escrow.amount)
+            #     transaction = res.tx_id
+            # if currency == "XRP":
+            #     xrp_processor = XRPProcessor(current_user(request).customer())
+            #     res = xrp_processor.send_tx(target_addr, escrow.amount)
+            #     transaction = res.tx_id
 
-            if currency == "USD":
-                paypal = None
-                transaction = None
+            # if currency == "USD":
+            #     paypal = None
+            #     transaction = None
 
-            escrow.transaction = transaction
-            escrow.status = True
-            escrow.confirmed = 'closed'
-            escrow.save()
+            # escrow.transaction = transaction
+            # escrow.status = True
+            # escrow.confirmed = 'closed'
+            # escrow.save()
 
-            trade.status = 'completed'
+            
+            if trade.vendor == current_user(request).customer():
+                trade.vendor_confirm = True
+            if trade.offer.created_by == current_user(request).customer():
+                trade.offerer_confirm = True
+            if trade.vendor_confirm and trade.offerer_confirm:
+                trade.status = 'completed'
             trade.trade_date = datetime.now()
             trade.save()
             return self.get(request, {'item_id': item_id, 'alert' : {'success': 'Trade Approved.'}})
@@ -1266,7 +1360,7 @@ class VPOFGiftCardOpenCode(View):
             item.proof_opened = True
             item.trade_date = datetime.now()
             item.save()
-            return JsonResponse({'success': 'Gift Card Opend.'})
+            return JsonResponse({'success': 'Gift Card Opend.', 'proof_gift_code': item.proof_gift_code})
         except:
             return JsonResponse({'error': 'Sorry, Something Wrong. Try later.'})
 
@@ -1302,6 +1396,7 @@ class Send(View):
                 target_addr = xrp_processor.get_target_wallet_addr(None, item.receiver_email)
                 res = xrp_processor.send_tx(target_addr, item.crypto_amount)
 
+            item.receiver_attr = target_addr
             item.transaction_hash = res
             item.save()
             return self.get(request, {'success': 'Sent.'})
@@ -1345,16 +1440,24 @@ class TradeHistory(View):
 class SavedWallet(View):
 
     def get(self, request, more={}):
-        btc_items = models.SavedWallets.objects.filter(crypto='BTC')
-        eth_items = models.SavedWallets.objects.filter(crypto='ETH')
-        return render(request, 'theme/saved-wallet.html', {'btc_items': btc_items, 'eth_items': eth_items, **more})
+        return render(request, 'theme/saved-wallet.html', {**more})
 
     def post(self, request):
         item_id = request.POST.get('item_id', '')
+        status = request.POST.get('status', '')
+        crypto = request.POST.get('crypto', '')
         try:
-            savedwallet = models.SavedWallets.objects.get(id=item_id)
-            savedwallet.delete()
-            return JsonResponse({'success': 'Saved Wallet deleted.'})
+            if crypto == "BTC":
+                savedwallet = crypto.models.BTC.objects.get(id=item_id)
+            if crypto == "ETH":
+                savedwallet = crypto.models.ETH.objects.get(id=item_id)
+            if crypto == "XRP":
+                savedwallet = crypto.models.XRP.objects.get(id=item_id)
+
+            savedwallet.status = status
+            savedwallet.save()
+
+            return JsonResponse({'success': 'Success.'})
         except:
             return JsonResponse({'error': 'Try again.'})
 
@@ -1423,7 +1526,23 @@ class Withdrawals(View):
 class Messages(View):
     
     def get(self, request):
-        return render(request, 'theme/messages.html', {})
+        client_id = request.GET.get('for')
+        try:
+            partner = models.Users.objects.get(id=client_id)
+            relation = models.UserRelations.objects.get(user=current_user(request), partner=partner)
+        except:
+            partner = None
+            relation = None
+        return render(request, 'theme/messages.html', {'partner': partner, 'relation': relation})
+
+    def post(self, request):
+        page = request.POST.get('page')
+        relation_id = request.POST.get('relation_id')
+        relation = models.UserRelations.objects.get(id=relation_id)
+        message_html = render_to_string('theme/message-container.html', { 'relation': relation, 'user': current_user(request) })
+        print(message_html)
+        return HttpResponse(message_html)
+
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -1437,7 +1556,8 @@ class InvitationInMessage(View):
 class IdVerification(View):
 
     def get(self, request, more={}):
-        return render(request, 'theme/id-verification.html', {**more})
+        items = current_user(request).id_cards_list()
+        return render(request, 'theme/id-verification.html', { 'items': items, **more})
 
 
 @method_decorator(customer_user_login_required, name='dispatch')
@@ -1445,13 +1565,17 @@ class Notifications(View):
 
     def get(self, request, more={}):
         notifications = []
-        processed_trades = models.Trades.objects.filter(Q(Q(offer__created_by=current_user(request).customer()) | Q(vendor=current_user(request).customer())), Q(status='archived'))
+        processed_trades = models.Trades.objects.filter(Q(Q(offer__created_by=current_user(request).customer()) | Q(vendor=current_user(request).customer()), Q(status__in=['waiting', 'archived', 'completed'])) | Q(status='accepted', vendor=current_user(request).customer()))
         for trade in processed_trades:
             trade_id = str(trade.id)
-            notifications.append({'text': 'Trade No. '+trade_id+' has been processed.', 'url': app_url+'/trade-processed?item_id='+trade_id})
-            if trade.is_proofed():
-                notifications.append({'text': 'Review proof of transaction for Trade No. '+trade_id+'.', 'url': app_url+'/vendor-proof-of-transaction?item_id='+trade_id})
-        completed_trades = models.Trades.objects.filter(Q(Q(offer__created_by=current_user(request).customer()) | Q(vendor=current_user(request).customer())), Q(status='completed', ))
+            if trade.status == 'accepted':
+                notifications.append({'text': 'Your offer. '+trade_id+' has been accepted by offerer. <b>Start</b> your trade.', 'url': app_url+'/initiate-trade?item_id='+trade_id})
+            if trade.status == 'waiting':
+                notifications.append({'text': 'Trade No. '+trade_id+' has been processed. <b>Archive</b> your proof of transaction.', 'url': app_url+'/trade-processed?item_id='+trade_id})
+            if trade.status == 'archived':
+                notifications.append({'text': '<b>Review</b> proof of transaction for Trade No. '+trade_id+'.', 'url': app_url+'/vendor-proof-of-transaction?item_id='+trade_id})
+            if trade.status == 'completed' and not trade.reviewed_by(current_user(request).customer()):
+                notifications.append({'text': 'Trade No. '+trade_id+' completed. <b>Remain</b> your feedback.', 'url': app_url+'/trade-complete?item_id='+trade_id})
 
         return render(request, 'theme/notifications.html', {'items': notifications, **more})
 
@@ -1588,6 +1712,25 @@ class AddMessage(View):
             except Exception as e:
                 print(e)
                 return TicketDetails.get(TicketDetails, request, {'item_id': ticket_id, 'alert': {'warning': 'ERROR! Try again.'}})
+
+        if message_type == 'message':
+            partner_id = request.POST.get('partner_id', '')
+            partner = models.Users.objects.get(id=partner_id)
+            content = request.POST.get('content', '')
+            writer = current_user(request)
+
+            try:
+                message = models.Messages()
+                message.message_type = message_type
+                message.partner = partner
+                message.content = content
+                message.writer = writer
+                message.created_at = datetime.now()
+                message.save()
+                return JsonResponse({'success': True})
+            except Exception as e:
+                print(e)
+                return JsonResponse({'success': False})
         
 
 
@@ -1610,11 +1753,19 @@ from cadmin.form import MediasForm
 class UploadView(View):
 
     def post(self, request):
+        mode = request.POST.get('mode')
+            
         form = MediasForm(self.request.POST, self.request.FILES)
         if form.is_valid():
             media = form.save()
             media.created_by = current_user(request)
             media.save()
+            if mode == 'id_card':   
+                card_id = request.POST.get('card_id')
+                userids = models.UserIDs.objects.get(id=card_id)
+                userids.images = ",".join([str(im.id) for im in userids.images_list()]+[str(media.id)])
+                userids.save()
+
             data = {'is_valid': True, 'name': media.file.name, 'url': media.file.url, 'id': media.pk}
         else:
             data = {'is_valid': False}
@@ -1698,7 +1849,7 @@ def makeing_fake_trade(request):
         offer.flat if offer.trade_type == "sell" else offer.what_crypto, offer.trade_price)})
 
     customers_array.pop(cus_index)
-    flats = flats.pop(flat_index)
+    flats.pop(flat_index)
 
     for i in range(3):
         if [True, False, True, False, False, False, False][random.randrange(i-1, 2*i)]:
@@ -1719,7 +1870,7 @@ def makeing_fake_trade(request):
                 trade.payment_method = ['cash_deposit', 'bank_transfer', 'paypal', 'pingit', 'cash_in_person', 'amazon_gc', 
                     'itunes_gc', 'steam_gc', 'other'][random.randrange(9)] if request.GET.get('m', '') != 'screen' else ['amazon_gc', 'itunes_gc', 'steam_gc'][random.randrange(3)]
                 trade.amount = (offer.maximum_transaction_limit - offer.minimum_transaction_limit)*random.randrange(100)/100 + offer.minimum_transaction_limit
-                trade.status = ['waiting', 'waiting', 'waiting', 'archived', 'archived', 'completed', 'cancelled'][round(random.randrange(560)/100)] if request.GET.get('m', '') != 'screen' else 'archived'
+                trade.status = ['counting', 'declined', 'waiting', 'archived', 'archived', 'completed', 'cancelled'][round(random.randrange(560)/100)] if request.GET.get('m', '') != 'screen' else 'archived'
                 trade.trade_initiator = [created_by, vendor][random.randrange(2)]
                 
                 if trade.status in ['archived', 'completed', 'cancelled']:
@@ -1732,10 +1883,9 @@ def makeing_fake_trade(request):
                     else:
                         trade.reference_number = random.randrange(1000000, 9999999)
 
-                if 90 < random.randrange(100):
-                    trade.flat = flats[random.randrange(3)]
-                    trade.price = offer.trade_price - rate*(random.randrange(100))/10000
-                    trade.message = get_sentence(random.randrange(5)),
+                trade.flat = flats[random.randrange(3)]
+                trade.price = offer.trade_price - rate*(random.randrange(100))/10000
+                trade.message = get_sentence(random.randrange(5))
                 
                 trade.created_at = trade_created_at
                 trade.save()
@@ -1750,29 +1900,53 @@ def makeing_fake_trade(request):
                 escrow1.status = False
                 escrow1.currency = trade.offer.what_crypto
 
-                escrow2 = models.Escrows()
-                escrow2.trade = trade
-                escrow2.held_for = trade.seller()
-                escrow2.held_from = trade.buyer()
-                escrow2.created_at = trade_created_at
-                escrow2.amount = trade.flat_amount()
-                escrow2.status = False
-                escrow2.currency = trade.trade_flat
+                # escrow2 = models.Escrows()
+                # escrow2.trade = trade
+                # escrow2.held_for = trade.seller()
+                # escrow2.held_from = trade.buyer()
+                # escrow2.created_at = trade_created_at
+                # escrow2.amount = trade.flat_amount()
+                # escrow2.status = False
+                # escrow2.currency = trade.trade_flat
 
                 if trade.status == 'completed':
                     escrow1.confirmed = 'closed'
                     escrow1.status = True
-                    escrow2.confirmed = 'closed'
-                    escrow2.status = True
+                    # escrow2.confirmed = 'closed'
+                    # escrow2.status = True
+
+                    review1 = models.Reviews()
+                    review1.as_role = 'buyer'
+                    review1.review_rate = [3, 4, 5, 5, 5][random.randrange(5)]
+                    review1.feedback = get_sentence(random.randrange(5))
+                    review1.created_at = trade_created_at
+                    review1.created_by = trade.seller()
+                    review1.to_customer = trade.buyer()
+                    review1.trade = trade
+                    review1.save()
+
+                    review2 = models.Reviews()
+                    review2.as_role = 'seller'
+                    review2.review_rate = [3, 4, 5, 5, 5][random.randrange(5)]
+                    review2.feedback = get_sentence(random.randrange(5))
+                    review2.created_at = trade_created_at
+                    review2.created_by = trade.buyer()
+                    review2.to_customer = trade.seller()
+                    review2.trade = trade
+                    review2.save()
+
 
                 escrow1.save()
-                escrow2.save()
+                # escrow2.save()
 
-                userrel1, created3 = models.UserRelations.objects.get_or_create(user=trade.buyer().user, partner=trade.seller().user, defaults={'created_at': datetime.now()})
-                userrel2, created4 = models.UserRelations.objects.get_or_create(user=trade.seller().user, partner=trade.buyer().user, defaults={'created_at': datetime.now()})
+                userrel1, created3 = models.UserRelations.objects.get_or_create(user=trade.buyer().user, partner=trade.seller().user, defaults={ 'blocked_at': datetime.now() if random.randrange(10) > 2 else None, 'created_at': datetime.now()})
+                userrel2, created4 = models.UserRelations.objects.get_or_create(user=trade.seller().user, partner=trade.buyer().user, defaults={ 'trusted_at': datetime.now() if random.randrange(10) > 2 else None, 'created_at': datetime.now()})
             except Exception as e:
+                print(e)
                 return JsonResponse(e)
 
             return_data.update({'trade'+str(i): "[{}] {} '{}'".format(trade.vendor, trade.payment_method, trade.amount)})
     
     return JsonResponse(return_data)
+
+

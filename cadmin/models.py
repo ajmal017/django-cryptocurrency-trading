@@ -7,12 +7,13 @@ import string
 import timeago
 from datetime import datetime, timezone, timedelta
 from raplev import settings
-from django.db.models import Q, Sum, Count, F
+from django.db.models import Q, Sum, Count, F, Avg
 from django.contrib.auth.models import AbstractUser
 from bs4 import BeautifulSoup as bs
 from crypto.models import BTC, ETH, XRP
 from django.utils.crypto import get_random_string
 from django.template.loader import render_to_string
+from collections import Counter
 
 
 class MyModelBase( models.base.ModelBase ):
@@ -90,7 +91,10 @@ class Users(MyModel, AbstractUser):
         return UserIDs.objects.filter(user=self)
 
     def supported_language(self):
-        return 'English, Germany'
+        return self.country
+
+    def relation_partners(self):
+        return UserRelations.objects.filter(user=self)
 
     def send_recover_email(self, site='cadmin'):
         expiration_token = get_random_string(80) + hex(int((datetime.utcnow() + timedelta(hours=1)).timestamp()*10000))
@@ -230,41 +234,46 @@ class Customers(MyModel):
         except:
             return ''
 
+    def trade_list(self):
+        return Trades.objects.filter(Q(vendor=self) | Q(offer__created_by=self))
+
     def average_trade_complete_time(self):
         return 3
 
     def trade_partners(self):
-        return 3
+        partners = [one.offer.created_by if one.vendor == self else one.vendor for one in self.trade_list()]
+        return len(Counter(partners).keys())
 
     def trade_initiate_complete_rate(self):
-        return 80
+        finished_trades = Trades.objects.filter(Q(vendor=self) | Q(offer__created_by=self), Q(status__in=['completed', 'cancelled'])).count()
+        return round((finished_trades / self.trade_list().count())*100)
 
     def customer_rate(self):
-        return 4.9
+        return self.review_list().aggregate(Avg('review_rate'))['review_rate__avg']
 
     def review_count(self):
-        return 58
+        return self.review_list().count()
 
     def trade_count(self):
-        return 3
+        return self.trade_list().count()
 
     def successful_trade_count(self):
-        return 2
+        return Trades.objects.filter(Q(vendor=self) | Q(offer__created_by=self), Q(status__in=['completed'])).count()
 
     def successful_trade_rate(self):
         return round(self.successful_trade_count()/self.trade_count()*100)
 
     def unsuccessful_trade_count(self):
-        return 1
+        return Trades.objects.filter(Q(vendor=self) | Q(offer__created_by=self), Q(status__in=['cancelled'])).count()
 
     def trade_volumn(self):
         return 3
 
     def trusted_by_count(self):
-        return 3
+        return UserRelations.objects.filter(~Q(trusted_at=None), Q(partner=self.user)).count()
 
     def blocked_by_count(self):
-        return 3
+        return UserRelations.objects.filter(~Q(blocked_at=None), Q(partner=self.user)).count()
 
     def set_suspend(self):
         user = self.user
@@ -280,22 +289,40 @@ class Customers(MyModel):
         
     def btc_wallet(self):
         try:
-            return BTC.objects.get(customer=self)
-        except:
-            return None
-        
-    def eth_wallet(self):
-        try:
-            return ETH.objects.get(customer=self)
-        except:
-            return None
-        
-    def xrp_wallet(self):
-        try:
-            return XRP.objects.get(customer=self)
+            return BTC.objects.get(customer=self, status='main')
         except:
             return None
 
+    def btc_wallet_list(self):
+        return BTC.objects.filter(customer=self)
+
+    def received_btc(self):
+        return SendCryptos.objects.filter(receiver_email=self.user.email, currency="BTC")[:20]
+        
+    def eth_wallet(self):
+        try:
+            return ETH.objects.get(customer=self, status='main')
+        except:
+            return None
+        
+    def eth_wallet_list(self):
+        return ETH.objects.filter(customer=self)
+
+    def received_eth(self):
+        return SendCryptos.objects.filter(receiver_email=self.user.email, currency="ETH")[:20]
+        
+    def xrp_wallet(self):
+        try:
+            return XRP.objects.get(customer=self, status='main')
+        except:
+            return None
+
+    def xrp_wallet_list(self):
+        return XRP.objects.filter(customer=self)
+
+    def received_xrp(self):
+        return SendCryptos.objects.filter(receiver_email=self.user.email, currency="XRP")[:20]
+        
 
 class Balance(MyModel):
     customer = models.ForeignKey('Customers', on_delete=models.CASCADE)
@@ -436,12 +463,6 @@ class Offers(MyModel):
     def address(self):
         return self.city + ', ' + self.get_country_display() + (', ' + str(self.postal_code) if not self.show_postcode else '')
 
-    def is_started(self):
-        try:
-            return Trades.objects.get(Q(offer=self), ~Q(status='waiting'))
-        except:
-            return None
-
     def bought_amount(self):
         if self.trade_type == 'buy':
             try:
@@ -513,6 +534,9 @@ class Trades(MyModel):
     proof_gift_code = models.CharField(max_length=255, null=True)
     proof_opened = models.BooleanField(default=False)
     trade_date = models.DateTimeField(null=True)
+    offerer_confirm = models.BooleanField(default=False)
+    vendor_confirm = models.BooleanField(default=False)
+    trade_complete_date = models.DateTimeField(null=True)
     created_at = models.DateTimeField()
 
     def is_gift_card(self):
@@ -529,6 +553,9 @@ class Trades(MyModel):
 
     def seller(self):
         return self.offer.created_by if self.offer.trade_type == 'sell' else self.vendor
+
+    def reviewed_by(self, customer):
+        return True if Reviews.objects.filter(created_by=customer, trade=self).count() > 0 else False
 
     @property
     def seller_name(self):
@@ -680,18 +707,21 @@ class UserRelations(MyModel): #for message
     user = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='relation_user')
     partner = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='relation_partner')
     status = models.BooleanField(default=True, choices=BLOCK_TYPES)
-    viewed_at = models.DateTimeField(null=True)
+    trusted_at = models.DateTimeField(null=True)
     blocked_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField()
 
+    def messages(self):
+        return Messages.objects.filter(Q(Q(partner=self.user, writer=self.partner) | Q(partner=self.partner, writer=self.user)), Q(message_type='message')).order_by('created_at')
+
     def unreaded_messages(self):
-        return Messages.objects.filter(partner=self.user, writer=self.partner, readed=False)
+        return Messages.objects.filter(partner=self.user, writer=self.partner, readed=False, message_type='message').order_by('created_at')
 
     def unreaded_first_message(self):
         try:
-            return Messages.objects.filter(partner=self.user, writer=self.partner, readed=False).order_by('created_at')[0]
+            return self.unreaded_messages()[0]
         except:
-            return None
+            return ''
 
 
 class Contacts(MyModel):
@@ -988,3 +1018,6 @@ class SendCryptos(MyModel):
     description = models.TextField(null=True)
     created_by = models.ForeignKey('Customers', on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now=True)
+
+    def detail_description(self):
+        return self.description + ", amount: " + str(self.flat_amount) + " DETAIL"

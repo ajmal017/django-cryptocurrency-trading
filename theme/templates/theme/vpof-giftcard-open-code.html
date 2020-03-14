@@ -6,11 +6,13 @@
 
 {% block page-inner %}
 <div class="page__inner open-gift">
+    <div class="alert-wrapper"></div>
+
     <h1 class="open-gift__heading">Open Gift card</h1>
     <p class="open-gift__subheading">Your Gift card is unopened. Do you want to open it? We will know if you have opened it. Please keep screen recorder on before you proceed.</p>
     <div class="open-gift__field page__field" onclick="this.nextElementSibling.classList.add('is-active'); this.style = 'display: none'; send_opend_action('{{ item.id }}')">
-        <div class="open-gift__field-inner"
-        ><svg class="open-gift__field-icon">
+        <div class="open-gift__field-inner">
+            <svg class="open-gift__field-icon">
                 <use xlink:href="{% static 'theme/images/icons.svg' %}#dollar-sign"></use>
             </svg>
             <div class="open-gift__field-wrapper">
@@ -23,7 +25,7 @@
     </div>
     <div class="open-gift__copy page__field copy">
         <div class="copy__inner">
-            <input class="copy__output js-copy-target" type="text" value="213 668 789" readonly>
+            <input class="copy__output js-copy-target" type="text" value="XXXX" id="proof_gift_code" readonly>
             <span class="copy__message js-copy-message">Copied</span>
             <span class="copy__caption">Copy</span>
             <button class="copy__btn js-copy-trigger" type="button"><svg class="copy__icon">
@@ -47,6 +49,7 @@ function send_opend_action(item_id) {
         success: function( data, textStatus, jQxhr ){
             if (data.success) {
                 alertMessage(data.success)
+                $('#proof_gift_code').val(data.proof_gift_code)
             }
             if (data.error) {
                 alertMessage(data.error, 'warning')

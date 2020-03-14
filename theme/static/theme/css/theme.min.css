@@ -11695,19 +11695,20 @@ input:checked + .new-offer__mode-caption {
 
 @media (min-width: 1340px) {
   .wallets__col:nth-child(1) {
-    width: 130px;
+    width: 200px;
+    overflow-wrap: break-word;
   }
 }
 
 @media (min-width: 1340px) {
   .wallets__col:nth-child(2) {
-    width: 650px;
+    width: 570px;
   }
 }
 
 @media (min-width: 1440px) {
   .wallets__col:nth-child(2) {
-    width: 715px;
+    width: 650px;
   }
 }
 
@@ -11781,4 +11782,9 @@ input:checked + .new-offer__mode-caption {
 
 .file{
   background: #e6e6e64d;
+}
+
+.nav__message-counter.novalue,
+.dropdown__counter.novalue {
+  display: none;
 }

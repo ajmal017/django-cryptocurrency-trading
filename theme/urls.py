@@ -38,6 +38,8 @@ urlpatterns = [
     path('verify-email/', views.VerifyEmail.as_view(), name='verify-email'), #for verify email
     path('verify-phone/', views.VerifyPhone.as_view(), name='verify-phone'), #for verify phone
 
+    path('get-badges/', views.get_badges, name='get-badges'),
+
     path('new-offer/', views.NewOffer.as_view(), name='new-offer'),
     path('profile-overview/', views.ProfileOverview.as_view(), name='profile-overview'),
     path('received-offers/', views.ReceivedOffers.as_view(), name='received-offers'),
