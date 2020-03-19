@@ -22,7 +22,7 @@
                             <div class="seo__select form-group">
                                 <div class="form-group__field-group">
                                     <span class="form-group__triangle"></span>
-                                    <select class="form-group__field" name="page_id" onchange="location.href='/{{ app_url }}/seo?page_id='+this.value" required>
+                                    <select class="form-group__field" name="page_id" onchange="location.href='{{ cadmin_url }}/seo?page_id='+this.value" required>
                                         <option value="">Select</option>
                                         {% for page in pages %}
                                         <option value="{{ page.id }}" {% if page_id == page.id|stringformat:"i" %}selected{% endif %}>{{ page.title }}</option>
@@ -53,12 +53,12 @@
                     <section class="seo__tab section">
                         <header class="section__header">
                             <h2 class="section__heading">Robots</h2>
-                            <div class="seo__page">
+                            <!-- <div class="seo__page">
                                 <h3 class="seo__page-heading">Page</h3>
                                 <div class="seo__select form-group">
                                     <div class="form-group__field-group">
                                         <span class="form-group__triangle"></span>
-                                        <select class="form-group__field" onchange="location.href='/{{ app_url }}/seo?page_id='+this.value">
+                                        <select class="form-group__field" onchange="location.href='{{ cadmin_url }}/seo?page_id='+this.value">
                                             <option value="">Select </option>
                                             {% for page in pages %}
                                             <option value="{{ page.id }}" {% if page_id == page.id|stringformat:"i" %}selected{% endif %}>{{ page.title }}</option>
@@ -66,13 +66,13 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </header>
                         <div class="section__inner">
                             <label class="seo__field form-group">
                                 <span class="form-group__caption">Robots.txt content</span>
                                 <span class="form-group__field-group">
-                                    <textarea class="form-group__field" name="seo.robots_txt.{{ page_id }}" rows="7" placeholder="Text field">{{ items.seo.robots_txt|keyvalue:page_id|safe }}</textarea>
+                                    <textarea class="form-group__field" name="seo.robots_txt" rows="7" placeholder="Text field">{{ items.seo.robots_txt }}</textarea>
                                 </span>
                             </label>
                         </div>

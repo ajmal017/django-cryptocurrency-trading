@@ -24,11 +24,11 @@
             <div class="reports__control">
                 <div class="reports__selection form-group">
                     <div class="form-group__field-group"><span class="form-group__triangle"></span>
-                        <select class="form-group__field" name="report_field" onchange="this.form.submit()" required>
+                        <select class="form-group__field" name="campaign" onchange="this.form.submit()" required>
                             <option value="" disabled>Select field</option>
-                            <option value="re1" {% if report_field == 're1' %}selected{% endif %}>Option 1</option>
-                            <option value="re2" {% if report_field == 're2' %}selected{% endif %}>Option 2</option>
-                            <option value="re3" {% if report_field == 're3' %}selected{% endif %}>Option 3</option>
+                            {% for citem in campaigns %}
+                            <option value="{{ citem.id }}" {% if campaign == citem.id %}selected{% endif %}>{{ citem.capaign_name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div><a class="reports__export" href="#">Export CSV</a>
@@ -52,7 +52,7 @@
                         <td><span class="table__mobile-heading">Date &amp; time</span><span>{{ item.created_at }}</span></td>
                         <td><span class="table__mobile-heading">User joined</span><a href="#">{{ item.user_joined }}</a></td>
                         <td><span class="table__mobile-heading">Affiliate</span><a href="#">{{ item.affiliate.first_name }}</a></td>
-                        <td><span class="table__mobile-heading">Lead status</span><span class="lead_status">{{ item.lead_status|yesno:'Approved,Rejected' }}{% if item.lead_status %}<a class="table__action" style="color: #e77474;" href="#" onclick="postAction({'item_id': '{{item.id}}'}, 'Are you sure to reject this report?', '/{{ app_url }}/reports/', function(message) {$('#{{ item.id }}').find('.lead_status').text(message)});">Reject</a>{% endif %}</span></td>
+                        <td><span class="table__mobile-heading">Lead status</span><span class="lead_status">{{ item.lead_status|yesno:'Approved,Rejected' }}{% if item.lead_status %}<a class="table__action" style="color: #e77474;" href="#" onclick="postAction({'item_id': '{{item.id}}'}, 'Are you sure to reject this report?', '{{ cadmin_url }}/reports/', function(message) {$('#{{ item.id }}').find('.lead_status').text(message)});">Reject</a>{% endif %}</span></td>
                         <td><span class="table__mobile-heading">Earned payout</span><span>${{ item.earned_payout }}</span></td>
                         <td><span class="table__mobile-heading">Campaign name</span><span>{{ item.campaign.campaign_name }}</span></td>
                     </tr>

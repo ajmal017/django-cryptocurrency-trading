@@ -12,12 +12,7 @@ from django.views import View
 from django.shortcuts import render, redirect
 from django.db.models import Q, Sum, Count, F
 from django.db.models.functions import Extract
-# from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse, HttpResponseBadRequest, HttpResponse
-# from django.contrib.auth import logout, authenticate, login
-# from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
-# from django.contrib.auth import views as auth_views
-# from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.decorators import method_decorator   
@@ -28,12 +23,12 @@ from django.template.defaulttags import register
 from . import models
 from .models import COUNTRY_CODE
 from .form import MediasForm
-from .decorators import cadmin_user_login_required, cadmin_user_is_logged_in
-from .context_processors import cadmin_user
+from .decorators import admin_login_required, user_not_logged_in
+from django.contrib.auth import (login as auth_login, logout as auth_logout)
 
-logger = logging.getLogger('raplev')
+logger = logging.getLogger('cryptptrade')
 logger.setLevel(logging.INFO)
-app_url = 'cadmin'
+app_url = '/cadmin'
 
 @register.filter
 def keyvalue(dict, key):    
@@ -41,6 +36,7 @@ def keyvalue(dict, key):
         return dict[str(key)]
     except:
         return ''
+
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -50,7 +46,30 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-@method_decorator(cadmin_user_is_logged_in, name='dispatch')
+
+def super_admin_view(request):
+    if request.user.is_authenticated:
+        return redirect('/cadmin')
+    else:
+        return redirect('/super-admin/login')
+
+
+def current_user(request):
+    try:
+        # user = models.Users.objects.get(token=request.session['user'])
+        # return user
+        return request.user
+    except:
+        None
+
+
+class Pages(View):
+    
+    def get(self, request, more={}):
+        return render(request, 'cadmin/pages.html', {**more})
+
+
+@method_decorator(user_not_logged_in, name='dispatch')
 class LoginView(View):
 
     def get(self, request):
@@ -62,7 +81,7 @@ class LoginView(View):
 
         try:
             user = models.Users.objects.get(Q(username=email_or_username) | Q(email=email_or_username))
-            if user and check_password(password, user.password):
+            if user and check_password(password, user.password) and user.is_admin:
                 token = user.token if user.token else get_random_string(length=100)
                 user.token = token
                 user.save()
@@ -70,9 +89,8 @@ class LoginView(View):
                     user=user,
                     ip_address=get_client_ip(request)
                 ).save()
-                request.session['cadmin_user'] = token
-                if 'global_alert' in request.session:
-                    del request.session['global_alert']
+                auth_login(request, user)
+                # request.session['user'] = token
             else:
                 try:
                     models.SecurityStatus(
@@ -82,48 +100,68 @@ class LoginView(View):
                 except:
                     log = 'here it need to sys log for error user login.'
                 return render(request, 'cadmin/login.html', {'error': 'Incorrect Password'})
-        except:
+        except Exception as e:
+            print(e)
             return render(request, 'cadmin/login.html', {'error': 'Incorrect User'})
         
-        return redirect('/'+app_url+'')
+        return redirect(app_url+'')
 
 
-@cadmin_user_login_required
+@admin_login_required
 def logout(request):
-    del request.session['cadmin_user']
-    request.session['global_alert'] = {'success': "You are logged out."}
-    return redirect('/'+app_url+'')
+    # del request.session['user']
+    auth_logout(request)
+    # request.session['global_alert'] = {'success': "You are logged out."}
+    return redirect(app_url+'')
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class IndexView(View):
     
     def get(self, request):
-        return redirect('/'+app_url+'/revenue')
+        return redirect(app_url+'/revenue')
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AddUserView(View):
 
     def get(self, request):
-        return render(request, 'cadmin/add-user.html')
+        if current_user(request).is_superuser:
+            return render(request, 'cadmin/add-user.html')
+        else:
+            return redirect(app_url)
 
     def post(self, request):
         data=request.POST
-        temp_user = models.Users(
-                    fullname=data['fullname'],
-                    username=data['username'],
-                    email=data['email'],
-                    password=make_password(data['password']),
-                    role=data['role'],
-                )
-
+        if 'update' in data and data['update'] == 'on':
+            temp_user = models.Users.objects.get(email=data['email'])
+            temp_user.is_admin = True
+            temp_user.fullname=data['fullname']
+            temp_user.username=data['username']
+            temp_user.password=make_password(data['password'])
+            admin = models.Admins(
+                user = temp_user,
+                role=data['role']
+            )
+        else:
+            temp_user = models.Users(
+                fullname=data['fullname'],
+                username=data['username'],
+                email=data['email'],
+                password=make_password(data['password']),
+                is_admin=True
+            )
+            admin = models.Admins(
+                user=temp_user,
+                role=data['role']
+            )
         try:
             temp_user.save()
+            admin.save()
         except Exception as err:
             if 'duplicate key value' in str(err):
                 logger.info("User {} hasn't been added because of duplication.".format(temp_user.email))
-                return render(request, 'cadmin/add-user.html', {'error': temp_user.email + " is already exist."})
+                return render(request, 'cadmin/add-user.html', {'error': temp_user.email + " is already exist.", 'update': True})
             return render(request, 'cadmin/add-user.html', {'error': "Something wrong. Please try again later."})
         logger.info("User {} has been added".format(temp_user.username))
         if 'send_email' in data:
@@ -132,22 +170,22 @@ class AddUserView(View):
         return render(request, 'cadmin/add-user.html', {'success': "User {} has been added".format(temp_user.username)})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class UsersView(View):
 
     def get(self, request):
         username = request.GET.get('username', '').strip()
-        user_list = models.Users.objects.filter(username__icontains=username)
+        user_list = models.Admins.objects.filter(user__username__icontains=username, user__is_admin=True)
         page_number = request.GET.get('page', 1)
         user_list, paginator = do_paginate(user_list, page_number)
-        base_url = '/'+app_url+'/users/?username=' + username + "&"
+        base_url = app_url+'/users/?username=' + username + "&"
         return render(request, 'cadmin/users.html',
                       {'user_list': user_list, 'paginator' : paginator, 'base_url': base_url, 'search_user_name': username})
 
 
-def do_paginate(data_list, page_number):
+def do_paginate(data_list, page_number, per_page=10):
     ret_data_list = data_list
-    result_per_page = 10
+    result_per_page = per_page
     paginator = Paginator(data_list, result_per_page)
     try:
         ret_data_list = paginator.page(page_number)
@@ -165,7 +203,7 @@ def get_weekdate(day):
     return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
 
 
-@method_decorator(cadmin_user_is_logged_in, name='dispatch')
+@method_decorator(user_not_logged_in, name='dispatch')
 class RecoverView(View):
 
     def get(self, request):
@@ -177,29 +215,32 @@ class RecoverView(View):
         try:
             user = models.Users.objects.get(email=email)
             if user:
-                token = user.token if user.token is not None else get_random_string(length=100)
-                user.token = token
-                user.save()
-                # send_mail(
-                #     subject='Recovery password verification Email',
-                #     message='Please verify if you are owner of this email by clicking <a href="/admin/recovery_verify/{}">here</a>.'.format(token),
-                #     from_email='admin@raplev.com',
-                #     recipient_list=[email]
-                # )
+                user.send_recover_email('cadmin')
+                return render(request, 'cadmin/recover.html', {'success': 'Please check your email.'})
             else:
                 return render(request, 'cadmin/recover.html', {'error': 'Incorrect User'})
-        except:
+        except Exception as e:
+            print(e)
             return render(request, 'cadmin/recover.html', {'error': 'Sorry, Something wrong. Please try later.'})
         
-        return render(request, 'cadmin/recover.html', {'success': 'Please check your email.'})
 
-
-@method_decorator(cadmin_user_is_logged_in, name='dispatch')
+@method_decorator(user_not_logged_in, name='dispatch')
 class SetPWView(View):
 
     def get(self, request):
-        token = request.POST.get('token', '').strip()
-        return render(request, 'cadmin/set-pw.html', {'token': token})
+        token = request.GET.get('t', '').strip()
+        try:
+            user = models.Users.objects.get(token=token)
+            now = datetime.utcnow().timestamp()
+            expiration_time = int(token[80:], 0)/10000
+            if expiration_time >= now:
+                return render(request, 'cadmin/set-pw.html', {'token': token})
+            else:
+                return render(request, 'cadmin/error.html', {'error': 'Sorry this request is expired. Try again.'})
+        except Exception as e:
+            print(e)
+            return render(request, 'cadmin/error.html', {'error': 'Sorry this request is NOT available. Try again.'})
+
 
     def post(self, request):
         password = request.POST.get('password', '').strip()
@@ -218,10 +259,10 @@ class SetPWView(View):
         except:
             return render(request, 'cadmin/set-pw.html', {'error': 'Sorry, Something wrong. Please try later.'})
         
-        return redirect('/'+app_url+'')
+        return redirect(app_url+'')
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class RevenueView(View):
 
     def get(self, request):
@@ -232,13 +273,13 @@ class RevenueView(View):
         items = models.Revenue.objects.filter(source__icontains=search, date__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/revenue/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/revenue/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/revenue.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'start_date': start_date, 'end_date': end_date})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class RevenueDetailsView(View):
 
     def get(self, request):
@@ -254,7 +295,7 @@ class RevenueDetailsView(View):
         return render(request, 'cadmin/revenue-details.html', {'item': item, 'success': 'Refunded'})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class RevStatsView(View):
 
     def get(self, request):
@@ -273,15 +314,15 @@ class RevStatsView(View):
                       'start_date': start_date, 'end_date': end_date})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class OffersView(View):
 
     def get(self, request):
         search = request.GET.get('search', '').strip()
-        items = models.Offers.objects.filter(Q(id__icontains=search) | Q(address__icontains=search))
+        items = models.Offers.objects.filter(id__icontains=search)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/offers/?search=' + search + "&"
+        base_url = app_url+'/offers/?search=' + search + "&"
         return render(request, 'cadmin/offers.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
@@ -294,7 +335,7 @@ class OffersView(View):
     #     return JsonResponse({'success': 'Suspended'})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class OfferDetailsView(View):
 
     def get(self, request):
@@ -303,7 +344,7 @@ class OfferDetailsView(View):
         return render(request, 'cadmin/offer-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class TradesView(View):
 
     def get(self, request):
@@ -314,19 +355,19 @@ class TradesView(View):
         end_date = request.GET.get('end_date', endweek).strip()
         items = models.Trades.objects.filter(id__icontains=search, status__icontains=status, created_at__range=(start_date, end_date))
         count = {}
-        count['All'] = models.Trades.objects.filter(id__icontains=search, created_at__range=(start_date, end_date)).count()
-        count['Waiting for trade intiator'] = models.Trades.objects.filter(id__icontains=search, status__icontains='Waiting for trade intiator', created_at__range=(start_date, end_date)).count()
-        count['Archive'] = models.Trades.objects.filter(id__icontains=search, status__icontains='Archive', created_at__range=(start_date, end_date)).count()
-        count['Completed'] = models.Trades.objects.filter(id__icontains=search, status__icontains='Completed', created_at__range=(start_date, end_date)).count()
+        count['all'] = models.Trades.objects.filter(id__icontains=search, created_at__range=(start_date, end_date)).count()
+        count['waiting'] = models.Trades.objects.filter(id__icontains=search, status__icontains='waiting', created_at__range=(start_date, end_date)).count()
+        count['archived'] = models.Trades.objects.filter(id__icontains=search, status__icontains='archived', created_at__range=(start_date, end_date)).count()
+        count['completed'] = models.Trades.objects.filter(id__icontains=search, status__icontains='completed', created_at__range=(start_date, end_date)).count()
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/trades/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/trades/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/trades.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'status': status, 'count': count,
                       'start_date': start_date, 'end_date': end_date})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class TradeDetailsView(View):
 
     def get(self, request):
@@ -335,27 +376,26 @@ class TradeDetailsView(View):
         return render(request, 'cadmin/trade-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class CustomersView(View):
 
     def get(self, request):
         search = request.GET.get('search', '').strip()
-        items = models.Customers.objects.filter(Q(email__icontains=search) | Q(username__icontains=search))
+        items = models.Customers.objects.filter(Q(user__email__icontains=search) | Q(user__username__icontains=search))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/customers/?search=' + search + "&"
+        base_url = app_url+'/customers/?search=' + search + "&"
         return render(request, 'cadmin/customers.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
     def post(self, request):
         item_id = request.POST.get('item_id', '').strip()
         item = models.Customers.objects.get(id=item_id)
-        item.suspended = True
-        item.save()
+        item.set_suspend()
         return JsonResponse({'success': 'Suspended'})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class CustomerDetailsView(View):
 
     def get(self, request):
@@ -364,40 +404,40 @@ class CustomerDetailsView(View):
         return render(request, 'cadmin/customer-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class CustomerSuspend(View):
 
     def post(self, request):
         item_id = request.POST.get('item_id', '').strip()
         item = models.Customers.objects.get(id=item_id)
-        item.suspended = True
-        item.save()
+        item.set_suspend()
+
         return render(request, 'cadmin/customer-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class TransactionsView(View):
 
     def get(self, request):
         search = request.GET.get('search', '').strip()
-        items = models.Transactions.objects.filter(id__icontains=search)
+        items = models.Trades.objects.filter(id__icontains=search, status='completed')
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/transactions/?search=' + search + "&"
+        base_url = app_url+'/transactions/?search=' + search + "&"
         return render(request, 'cadmin/transactions.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class TransactionDetailsView(View):
 
     def get(self, request):
         item_id = request.GET.get('item_id', '').strip()
-        item = models.Transactions.objects.get(id=item_id)
+        item = models.Trades.objects.get(id=item_id, status='completed')
         return render(request, 'cadmin/transaction-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class EscrowsView(View):
 
     def get(self, request):
@@ -405,12 +445,12 @@ class EscrowsView(View):
         items = models.Escrows.objects.filter(id__icontains=search)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/escrows/?search=' + search + "&"
+        base_url = app_url+'/escrows/?search=' + search + "&"
         return render(request, 'cadmin/escrows.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class EscrowDetailsView(View):
 
     def get(self, request):
@@ -419,7 +459,7 @@ class EscrowDetailsView(View):
         return render(request, 'cadmin/escrow-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class EscrowRelease(View):
 
     def post(self, request):
@@ -430,7 +470,7 @@ class EscrowRelease(View):
         return render(request, 'cadmin/escrow-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class EscrowCancel(View):
 
     def post(self, request):
@@ -441,7 +481,7 @@ class EscrowCancel(View):
         return render(request, 'cadmin/escrow-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class SupportCenterView(View):
 
     def get(self, request):
@@ -454,19 +494,18 @@ class SupportCenterView(View):
         count['General'] = models.Tickets.objects.filter(id__icontains=search, is_dispute=False).count()
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/support-center/?search=' + search + "&"
+        base_url = app_url+'/support-center/?search=' + search + "&"
         return render(request, 'cadmin/support-center.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'count': count})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class TicketDetailsDisputeView(View):
 
     def get(self, request):
         item_id = request.GET.get('item_id', '').strip()
         item = models.Tickets.objects.get(id=item_id)
-        messages = models.Messages.objects.filter(ticket=item_id).order_by('-created_at')
-        return render(request, 'cadmin/ticket-details-dispute.html', {'item': item, 'messages': messages})
+        return render(request, 'cadmin/ticket-details-dispute.html', {'item': item})
 
     def post(self, request):
         item_id = request.POST.get('item_id', '').strip()
@@ -474,24 +513,24 @@ class TicketDetailsDisputeView(View):
         # attach_file = request.POST.attach_file
         item = models.Tickets.objects.get(id=item_id)
         mes = models.Messages()
+        mes.partner = item.created_by
+        mes.message_type = 'ticket'
         mes.ticket = item
-        mes.writer = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
+        mes.writer = current_user(request)
         mes.content = content
         # mes.attach_file = attach_file
         mes.created_at = datetime.now()
         mes.save()
-        messages = models.Messages.objects.filter(ticket=item_id).order_by('-created_at')
-        return render(request, 'cadmin/ticket-details-dispute.html', {'item': item, 'messages': messages})
+        return render(request, 'cadmin/ticket-details-dispute.html', {'item': item})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class TicketDetailsNoDisputeView(View):
 
     def get(self, request):
         item_id = request.GET.get('item_id', '').strip()
         item = models.Tickets.objects.get(id=item_id)
-        messages = models.Messages.objects.filter(ticket=item_id).order_by('-created_at')
-        return render(request, 'cadmin/ticket-details-no-dispute.html', {'item': item, 'messages': messages})
+        return render(request, 'cadmin/ticket-details-no-dispute.html', {'item': item})
 
     def post(self, request):
         item_id = request.POST.get('item_id', '').strip()
@@ -499,17 +538,18 @@ class TicketDetailsNoDisputeView(View):
         # attach_file = request.POST.attach_file
         item = models.Tickets.objects.get(id=item_id)
         mes = models.Messages()
+        mes.partner = item.created_by
+        mes.message_type = 'ticket'
         mes.ticket = item
-        mes.writer = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
+        mes.writer = current_user(request)
         mes.content = content
         # mes.attach_file = attach_file
         mes.created_at = datetime.now()
         mes.save()
-        messages = models.Messages.objects.filter(ticket=item_id).order_by('-created_at')
-        return render(request, 'cadmin/ticket-details-no-dispute.html', {'item': item, 'messages': messages})
+        return render(request, 'cadmin/ticket-details-no-dispute.html', {'item': item})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class TicketPriorityChange(View):
 
     def post(self, request):
@@ -519,51 +559,51 @@ class TicketPriorityChange(View):
         item.save()
         return JsonResponse({'success': 'Ticket priority changed.', 'content': item.ticket_priority})
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class IdVerifyAppView(View):
 
     def get(self, request):
         search = request.GET.get('search', '').strip()
-        items = models.Idcards.objects.filter(id__icontains=search)
+        items = models.UserIDs.objects.filter(id__icontains=search)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/id-verify-app/?search=' + search + "&"
+        base_url = app_url+'/id-verify-app/?search=' + search + "&"
         return render(request, 'cadmin/id-verify-app.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class IdVerifyAppDetailsView(View):
 
     def get(self, request):
         item_id = request.GET.get('item_id', '').strip()
-        item = models.Idcards.objects.get(id=item_id)
+        item = models.UserIDs.objects.get(id=item_id)
         return render(request, 'cadmin/id-verify-app-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class IdVerifyAppReject(View):
 
     def post(self, request):
         item_id = request.POST.get('item_id', '').strip()
-        item = models.Idcards.objects.get(id=item_id)
+        item = models.UserIDs.objects.get(id=item_id)
         item.status = False
         item.save()
         return render(request, 'cadmin/id-verify-app-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class IdVerifyAppAccept(View):
 
     def post(self, request):
         item_id = request.POST.get('item_id', '').strip()
-        item = models.Idcards.objects.get(id=item_id)
+        item = models.UserIDs.objects.get(id=item_id)
         item.status = True
         item.save()
         return render(request, 'cadmin/id-verify-app-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class ContactFormView(View):
 
     def get(self, request):
@@ -571,12 +611,12 @@ class ContactFormView(View):
         items = models.Contacts.objects.filter(email_address__icontains=search)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/contact-form/?search=' + search + "&"
+        base_url = app_url+'/contact-form/?search=' + search + "&"
         return render(request, 'cadmin/contact-form.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class ContactFormDetailsView(View):
 
     def get(self, request):
@@ -587,7 +627,7 @@ class ContactFormDetailsView(View):
         return render(request, 'cadmin/contact-form-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AdditionalPagesView(View):
 
     def get(self, request):
@@ -596,12 +636,12 @@ class AdditionalPagesView(View):
         items = models.Pages.objects.filter(title__icontains=search, status__icontains=search_status)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/additional-pages/?search=' + search + "&search_status=" + search_status + "&"
+        base_url = app_url+'/additional-pages/?search=' + search + "&search_status=" + search_status + "&"
         return render(request, 'cadmin/additional-pages.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'search_status': search_status})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AdditionalPagePreviewView(View):
 
     def get(self, request):
@@ -610,7 +650,7 @@ class AdditionalPagePreviewView(View):
         return return_custom_page(request, item)
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AddNewPageView(View):
 
     def get(self, request):
@@ -634,7 +674,7 @@ class AddNewPageView(View):
             item = models.Pages()
             item.created_at = datetime.now()
         
-        item.posted_by = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
+        item.posted_by = current_user(request)
         item.status = action
         item.title = title
         item.context = context
@@ -644,7 +684,7 @@ class AddNewPageView(View):
         return render(request, 'cadmin/add-new-page.html', {'item': item, 'title': title})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class MoveToTrashPage(View):
 
     def post(self, request):
@@ -655,7 +695,7 @@ class MoveToTrashPage(View):
         return JsonResponse({'success': 'Moved to trash.', 'content': 'Trashed'})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class BlogView(View):
 
     def get(self, request):
@@ -664,12 +704,12 @@ class BlogView(View):
         items = models.Posts.objects.filter(title__icontains=search, status__icontains=search_status)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/blog/?search=' + search + "&search_status=" + search_status + "&"
+        base_url = app_url+'/blog/?search=' + search + "&search_status=" + search_status + "&"
         return render(request, 'cadmin/blog.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 'search_status': search_status})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class PostPreviewView(View):
 
     def get(self, request):
@@ -678,7 +718,7 @@ class PostPreviewView(View):
         return render(request, 'cadmin/custom-post.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AddNewPostView(View):
 
     def get(self, request):
@@ -700,14 +740,14 @@ class AddNewPostView(View):
         featured_images = request.POST.get('featured_images', '').strip()
         featured_images = ','.join(featured_images.split(','))
         tags = request.POST.get('tags', '').strip()
-        add_tags(tags, cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None)
+        add_tags(tags, current_user(request))
         try:
             item = models.Posts.objects.get(id=item_id)
         except:
             item = models.Posts()
             item.created_at = datetime.now()
         
-        item.posted_by = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
+        item.posted_by = current_user(request)
         item.status = action
         item.title = title
         item.context = context
@@ -727,7 +767,7 @@ def add_tags(tags, username):
             models.Tags(name=tag, created_by=username).save()
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class BlogMoveToTrashPage(View):
 
     def post(self, request):
@@ -738,7 +778,7 @@ class BlogMoveToTrashPage(View):
         return JsonResponse({'success': 'Moved to trash.', 'content': 'Trashed'})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class TagsView(View):
 
     def get(self, request):
@@ -769,7 +809,7 @@ class TagsView(View):
         return JsonResponse({'success': success})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class MediaLibraryView(View):
 
     def get(self, request):
@@ -783,13 +823,13 @@ class MediaLibraryView(View):
         items = models.Medias.objects.filter(id__icontains=search, created_at__year=year, created_at__month=month)
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/media-library/?search=' + search + "&year=" + year + "&month=" + month + "&"
+        base_url = app_url+'/media-library/?search=' + search + "&year=" + year + "&month=" + month + "&"
         return render(request, 'cadmin/media-library.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'years': years, 'months': months, 'year': year, 'month': month})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class UploadView(View):
 
     def get(self, request):
@@ -799,7 +839,7 @@ class UploadView(View):
         form = MediasForm(self.request.POST, self.request.FILES)
         if form.is_valid():
             media = form.save()
-            media.created_by = cadmin_user(request)['cadmin_user'] if not cadmin_user(request)['cadmin_user'].is_superuser else None
+            media.created_by = current_user(request)
             media.save()
             data = {'is_valid': True, 'name': media.file.name, 'url': media.file.url, 'id': media.pk}
         else:
@@ -807,7 +847,7 @@ class UploadView(View):
         return JsonResponse(data)
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class LastLoginView(View):
 
     def get(self, request):
@@ -815,12 +855,12 @@ class LastLoginView(View):
         items = models.LoginLogs.objects.filter(ip_address__icontains=search).order_by('-created_at')
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/last-login/?search=' + search + "&"
+        base_url = app_url+'/last-login/?search=' + search + "&"
         return render(request, 'cadmin/last-login.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class FlaggedPostsView(View):
 
     def get(self, request):
@@ -828,12 +868,12 @@ class FlaggedPostsView(View):
         items = models.FlaggedPosts.objects.filter(Q(id__icontains=search) | Q(post__id__icontains=search))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/flagged-posts/?search=' + search + "&"
+        base_url = app_url+'/flagged-posts/?search=' + search + "&"
         return render(request, 'cadmin/flagged-posts.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search,})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class FlaggedPostDetailsView(View):
 
     def get(self, request):
@@ -842,7 +882,7 @@ class FlaggedPostDetailsView(View):
         return render(request, 'cadmin/flagged-post-details.html', {'item': item, })
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AddLandingPageView(View):
 
     def get(self, request, success='', error={}):
@@ -863,7 +903,7 @@ class AddLandingPageView(View):
         templates = models.Pages.objects.filter(~Q(id__in=exist_links))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/add-landing-page/?item_id=' + item_id + '&'
+        base_url = app_url+'/add-landing-page/?item_id=' + item_id + '&'
         return render(request, 'cadmin/add-landing-page.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
                       'templates': templates, 'success': success, 'error': error })
@@ -914,7 +954,7 @@ def check_link(link, item_id, table):
     return False
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AddPersLinkView(View):
 
     def get(self, request, success='', error=''):
@@ -933,7 +973,7 @@ class AddPersLinkView(View):
         users = models.Users.objects.all()
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/add-pers-link/?item_id=' + item_id + '&'
+        base_url = app_url+'/add-pers-link/?item_id=' + item_id + '&'
         return render(request, 'cadmin/add-pers-link.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
                       'landings': landings, 'users': users, 'success': success, 'error': error })
@@ -966,7 +1006,7 @@ class AddPersLinkView(View):
         return self.get(request, success, error)
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AddRedirectionLinkView(View):
 
     def get(self, request, success='', error=''):
@@ -982,7 +1022,7 @@ class AddRedirectionLinkView(View):
         items = models.RedirectionLinks.objects.all()
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/add-redirection-link/?item_id=' + item_id + '&'
+        base_url = app_url+'/add-redirection-link/?item_id=' + item_id + '&'
         return render(request, 'cadmin/add-redirection-link.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'item': item, 
                         'success': success, 'error': error })
@@ -1025,7 +1065,7 @@ def go_page(request, link):
         try:
             page = models.LandingPages.objects.get(personalized_link=cur_link).template_page
         except:
-            return HttpResponse('<h1>Page was found</h1>')
+            return render(request, 'theme/404-error.html', {})
     
     return return_custom_page(request, page)
 
@@ -1038,14 +1078,14 @@ def return_custom_page(request, item):
     return render(request, 'cadmin/custom-page.html', {'item': item, 'options': options})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class DocumentationsView(View):
 
     def get(self, request):
         return render(request, 'cadmin/documentations.html', {})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class PostIssueView(View):
 
     def get(self, request):
@@ -1069,12 +1109,12 @@ class PostIssueView(View):
         return render(request, 'cadmin/post-issue.html', {'item': item, 'success': 'Issue Posted'})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class SeoView(View):
 
     def get(self, request, success='', error=''):
         page_id = request.GET.get('page_id', '').strip()
-        items = models.Options.objects.filter(Q(option_type='seo') | Q(option_type='robots_txt'), option_param1=page_id)
+        items = models.Options.objects.filter(Q(option_type='seo', option_param1=page_id) | Q(option_type='seo', option_field='robots_txt'))
         items = query_set_to_array_option(items)
         pages = models.Pages.objects.all()
         return render(request, 'cadmin/seo.html', {'items': items, 'pages': pages, 'page_id': page_id, 'success': success, 'error': error})
@@ -1135,7 +1175,7 @@ def get_last_nth_date(day, nth):
     end = dt
     return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class SecurityStatusView(View):
 
     def get(self, request):
@@ -1147,7 +1187,7 @@ class SecurityStatusView(View):
         return render(request, 'cadmin/security-status.html', {'items': items, 'server_status': server_status})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class OptionsView(View):
 
     def get(self, request, nav='', success='', error=''):
@@ -1164,7 +1204,7 @@ class OptionsView(View):
         return self.get(request, nav, success, error)
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class OptionsRouterBlogView(View):
 
     def post(self, request):
@@ -1173,7 +1213,7 @@ class OptionsRouterBlogView(View):
         return OptionsView.as_view()(request, 'router', 'Saved')
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class OptionsRouterForgotPasswordView(View):
 
     def post(self, request):
@@ -1182,7 +1222,7 @@ class OptionsRouterForgotPasswordView(View):
         return OptionsView.as_view()(request, 'router', 'Saved')
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class CampaignsView(View):
 
     def get(self, request):
@@ -1193,13 +1233,13 @@ class CampaignsView(View):
         items = models.Campaigns.objects.filter(campaign_name__icontains=search, updated_on__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/campaigns/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/campaigns/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/campaigns.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'start_date': start_date, 'end_date': end_date})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class CampaignUpdatedView(View):
 
     def get(self, request):
@@ -1241,7 +1281,7 @@ class CampaignUpdatedView(View):
         return render(request, 'cadmin/campaign-updated.html', {'item': item, 'title': title, 'success': 'Campaign Updated', 'country_code': COUNTRY_CODE})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AffiliatesView(View):
 
     def get(self, request):
@@ -1249,10 +1289,10 @@ class AffiliatesView(View):
         startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
         start_date = request.GET.get('start_date', startweek).strip()
         end_date = request.GET.get('end_date', endweek).strip()
-        items = models.Affiliates.objects.filter(email_address__icontains=search, created_at__range=(start_date, end_date))
+        items = models.Affiliates.objects.filter(user__email__icontains=search, user__date_joined__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/affiliates/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/affiliates/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/affiliates.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'start_date': start_date, 'end_date': end_date})
@@ -1265,7 +1305,7 @@ class AffiliatesView(View):
         return JsonResponse({'success': 'Affiliate suspended.', 'content': item.status})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class AddNewAffiliateView(View):
 
     def get(self, request):
@@ -1291,41 +1331,47 @@ class AddNewAffiliateView(View):
         send_login_details = request.POST.get('send_login_details', '').strip()
         try:
             item = models.Affiliates.objects.get(id=item_id)
+            user = item.user
         except:
-            item = models.Affiliates()
-            item.created_at = datetime.now()
-            item.password = make_password(password)
-        
-        item.first_name = first_name
-        item.last_name = last_name
-        item.organization = organization
-        item.address = address
-        item.postcode = postcode
-        item.country = country
-        item.email_address = email_address
+            user = models.Users()
+            user.joined_date = datetime.now()
+            item = models.Affiliates(
+                user = user.pk()
+            )
+        if password:
+            user.password = make_password(password)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.organization = organization
+        user.address = address
+        user.postcode = postcode
+        user.country = country
+        user.email = email_address
+        user.save()
         item.save()
         title = 'Edit Affiliate'
-        if send_login_details:
+        if send_login_details == 'on':
             # logger.info("Send user detail email to {}".format(temp_user.username))
-            item.send_info_email()
+            print(user.send_registered_email('affiliates', password))
 
         return render(request, 'cadmin/add-new-affiliate.html', {'item': item, 'title': title, 'success': 'This issue has been posted'})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class ReportsView(View):
 
     def get(self, request):
-        report_field = request.GET.get('report_field', '').strip()
+        campaign = request.GET.get('campaign', '').strip()
         startweek, endweek = get_weekdate(datetime.now().date().strftime("%Y-%m-%d"))
         start_date = request.GET.get('start_date', startweek).strip()
         end_date = request.GET.get('end_date', endweek).strip()
-        items = models.Reports.objects.filter(report_field__icontains=report_field, created_at__range=(start_date, end_date))
+        items = models.Reports.objects.filter(campaign_id=campaign, created_at__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/reports/?report_field=' + report_field + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        campaigns = models.Campaigns.objects.all()
+        base_url = app_url+'/reports/?campaign=' + campaign + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/reports.html',
-                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'report_field': report_field, 
+                      {'items': items, 'paginator' : paginator, 'base_url': base_url, 'campaign': campaign, 'campaigns': campaigns, 
                       'start_date': start_date, 'end_date': end_date})
 
     def post(self, request):
@@ -1336,7 +1382,7 @@ class ReportsView(View):
         return JsonResponse({'success': 'Report rejected.', 'content': 'Rejected'})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class CommunityPostsView(View):
 
     def get(self, request):
@@ -1347,13 +1393,13 @@ class CommunityPostsView(View):
         items = models.Posts.objects.filter(title__icontains=search, created_at__range=(start_date, end_date))
         page_number = request.GET.get('page', 1)
         items, paginator = do_paginate(items, page_number)
-        base_url = '/'+app_url+'/community-posts/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
+        base_url = app_url+'/community-posts/?search=' + search + "&start_date=" + start_date + "&end_date=" + end_date + "&"
         return render(request, 'cadmin/community-posts.html',
                       {'items': items, 'paginator' : paginator, 'base_url': base_url, 'search': search, 
                       'start_date': start_date, 'end_date': end_date})
 
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class CommunityPostDetailsView(View):
 
     def get(self, request):
@@ -1361,7 +1407,7 @@ class CommunityPostDetailsView(View):
         item = models.Posts.objects.get(id=item_id)
         return render(request, 'cadmin/community-post-details.html', {'item': item, })
 
-@method_decorator(cadmin_user_login_required, name='dispatch')
+@method_decorator(admin_login_required, name='dispatch')
 class CommunityPostRulesView(View):
 
     def get(self, request, success='', error=''):

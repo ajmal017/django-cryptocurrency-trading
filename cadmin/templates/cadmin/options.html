@@ -23,7 +23,7 @@
             </nav>
         </header>
         <div class="options__inner section__inner">
-            <form id="form1" action="/{{ app_url }}/options/" method="POST">{% csrf_token %}</form>
+            <form id="form1" action="{{ cadmin_url }}/options/" method="POST">{% csrf_token %}</form>
             <div class="js-tablist-tabs">
                 <!-- General-->
                 <div class="options__tab {% if nav != 'router' %}is-active{% endif %}">
@@ -111,9 +111,9 @@
                     <div class="options__add-field add-field">
                         <div class="add-field__desc">Blog</div>
                         <div class="add-field__form-group">
-                            <span class="add-field__base">https://raplev.com/</span>
+                            <span class="add-field__base">https://cryptptrade.com/</span>
                             <div class="add-field__inner">
-                                <form class="add-field__wrapper" action="/{{ app_url }}/options-router-blog/" method="POST">
+                                <form class="add-field__wrapper" action="{{ cadmin_url }}/options-router-blog/" method="POST">
                                     {% csrf_token %}
                                     <div class="add-field__field-group">
                                         <input class="add-field__input" name="router.blog" value="{{ items.router.blog }}" placeholder="Link">
@@ -134,9 +134,9 @@
                     <div class="options__add-field add-field">
                         <div class="add-field__desc">Forgot password (Admin)</div>
                         <div class="add-field__form-group">
-                            <span class="add-field__base">https://raplev.com/</span>
+                            <span class="add-field__base">https://cryptptrade.com/</span>
                             <div class="add-field__inner">
-                                <form class="add-field__wrapper"action="/{{ app_url }}/options-router-forgot-password/" method="POST">
+                                <form class="add-field__wrapper"action="{{ cadmin_url }}/options-router-forgot-password/" method="POST">
                                     {% csrf_token %}
                                     <div class="add-field__field-group">
                                         <input class="add-field__input" name="router.forgot_password" value="{{ items.router.forgot_password }}" placeholder="Link">

@@ -39,7 +39,7 @@
                         </svg>
                         <input id="fileupload" type="file" name="file" multiple
                             style="display: none;"
-                            data-url="/{{app_url}}/upload/"
+                            data-url="{{ cadmin_url }}/upload/"
                             data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
                         <!-- <span>Add featured image</span> -->
                     </label>
@@ -47,9 +47,9 @@
                 </div>
             </div>
             <div id="uploadlist">
-                {% for media in item.featured_images_as_file_list %}
+                {% for media in item.featured_images_list %}
                 <div class="drag-n-drop__uploading-file upload-bar" file_id="{{ media.id }}">
-                    <div class="upload-bar__file-name" style="width: 80%; word-break: break-all;">{{ media.file.name }}</div>
+                    <div class="upload-bar__file-name" style="width: 80%; word-break: break-all;">{{ media }}</div>
                     <div class="upload-bar__bar">
                         <a class="upload-bar__close-btn" href="javascript:void(0)" onclick="removeFileList('{{ media.id }}')">
                             <svg class="upload-bar__close-icon" width="30">
@@ -61,7 +61,7 @@
                 {% endfor %}
             </div> 
             <div class="editor__control-input">
-                <input class="editor__control-input-tag" name="tags" placeholder="Enter tags" value="{{ item.tags }}">
+                <input class="editor__control-input-tag" name="tags" placeholder="Enter tags" value="{{ item.tags|default_if_none:'' }}">
                 <svg class="editor__control-input-icon" width="30">
                     <use xlink:href="{% static 'cadmin/images/icons.svg' %}#plus"></use>
                 </svg>
@@ -177,9 +177,9 @@
 
 {% block bottom-script %}
 {{ block.super }}
-<script defer src="{% static 'cadmin/js/jquery.ui.widget.js' %}"></script>
-<script defer src="{% static 'cadmin/js/jquery.iframe-transport.js' %}"></script>
-<script defer src="{% static 'cadmin/js/jquery.fileupload.js' %}"></script>
+<script defer src="{% static 'js/jquery.ui.widget.js' %}"></script>
+<script defer src="{% static 'js/jquery.iframe-transport.js' %}"></script>
+<script defer src="{% static 'js/jquery.fileupload.js' %}"></script>
 <script defer src="{% static 'cadmin/js/upload.js' %}"></script>
 <script>
 var ICON_TIMES = '{% static "cadmin/images/icons.svg" %}#times';

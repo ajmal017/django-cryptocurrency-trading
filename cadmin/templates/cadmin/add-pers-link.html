@@ -31,13 +31,13 @@
                 </aside>
                 {% endif %}
             </div>
-            <form action="/{{ app_url }}/add-pers-link/" method="POST">
+            <form action="{{ cadmin_url }}/add-pers-link/" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <div class="add-header__bottom">
                     <div class="add-header__add-field add-field--large">
                         <div class="add-field__desc">SELECT LANDING PAGE</div>
-                        <div class="add-field__form-group"><span class="add-field__base">https://raplev.com/</span>
+                        <div class="add-field__form-group"><span class="add-field__base">https://cryptptrade.com/</span>
                             <div class="add-field__inner">
                                 <div class="add-field__wrapper">
                                     <div class="add-field__field-group">
@@ -57,7 +57,7 @@
                     </div>
                     <div class="add-header__add-field add-field add-field--small">
                         <div class="add-field__desc">PERSONALIZED LINK</div>
-                        <div class="add-field__form-group"><span class="add-field__base">https://raplev.com/</span>
+                        <div class="add-field__form-group"><span class="add-field__base">https://cryptptrade.com/</span>
                             <div class="add-field__inner">
                                 <div class="add-field__wrapper">
                                     <div class="add-field__field-group">
@@ -76,7 +76,7 @@
                     </div>
                     <div class="add-header__add-field add-field--large">
                         <div class="add-field__desc">ASSIGNED TO USER</div>
-                        <div class="add-field__form-group"><span class="add-field__base">https://raplev.com/</span>
+                        <div class="add-field__form-group"><span class="add-field__base">https://cryptptrade.com/</span>
                             <div class="add-field__inner">
                                 <div class="add-field__wrapper">
                                     <div class="add-field__field-group">
@@ -87,8 +87,8 @@
                                             <option value="{{ user.username }}" {% if user.username == item.assigned_to_user %}selected{% endif %}>{{ user.username }}</option>
                                             {% endfor %}
                                         </select>
-                                        <button class="add-field__btn btn btn--accent" type="submit">{% if item.id %}Edit{% else %}Add{% endif %}</button>
                                     </div>
+                                    <button class="add-field__btn btn btn--accent" type="submit">{% if item.id %}Edit{% else %}Add{% endif %}</button>
                                 </div>
                             </div>
                         </div>
@@ -116,8 +116,8 @@
                         <td><span class="table__mobile-heading">Leads</span><span>{{ item.leads }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span>
                             <div class="table-actions">
-                                <a class="table-actions__item table-actions__edit" href="/{{ app_url }}/add-pers-link/?item_id={{ item.id }}">Edit</a>
-                                <a class="table-actions__item" href="/{{ app_url }}/add-pers-link?delete_id={{ item.id }}">Delete</a>
+                                <a class="table-actions__item table-actions__edit" href="{{ cadmin_url }}/add-pers-link/?item_id={{ item.id }}">Edit</a>
+                                <a class="table-actions__item" href="{{ cadmin_url }}/add-pers-link?delete_id={{ item.id }}">Delete</a>
                             </div>
                         </td>
                     </tr>

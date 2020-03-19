@@ -8,7 +8,7 @@
 <main class="page__inner js-nav-close-trigger details offer-details">
     <section class="details__section section">
         <header class="section__header">
-            <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/offers">Offers ID</a><span> / </span><span>{{ item.id }}</span></h1>
+            <h1 class="section__heading"><a class="details__heading-text" href="{{ cadmin_url }}/offers">Offers ID</a><span> / </span><span>{{ item.id }}</span></h1>
         </header>
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
@@ -61,11 +61,11 @@
             </header>
             <p class="offer-details__text section__inner">{{ item.trade_overview }}</p>
         </section>
-        <section class="offer-details__ section section--small">
+        <section class="offer-details__section section section--small">
             <header class="section__header">
                 <h2 class="section__heading">Message for proof of transaction</h2>
             </header>
-            <p class="offer-details__text section__inner">{{ item.message_for_proof }}</p>
+            <div class="offer-details__text section__inner">{{ item.message_for_proof|safe }}</div>
         </section>
     </div>
     <section class="details__section section">

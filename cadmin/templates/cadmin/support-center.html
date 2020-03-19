@@ -11,9 +11,9 @@
             <div>
                 <h1 class="section__heading">Support Center</h1>
                 <nav class="section__nav page-nav">
-                    <a class="page-nav__item {% if is_dispute == '' %}is-active{% endif %}" href="/{{ app_url }}/support-center?search={{ search }}">All ({{ count|keyvalue:"All" }})</a>
-                    <a class="page-nav__item {% if is_dispute == 'False' %}is-active{% endif %}" href="/{{ app_url }}/support-center?search={{ search }}&is_dispute=False">General ({{ count|keyvalue:"General" }})</a>
-                    <a class="page-nav__item {% if is_dispute == 'True' %}is-active{% endif %}" href="/{{ app_url }}/support-center?search={{ search }}&is_dispute=True">Disputes ({{ count|keyvalue:"Disputes" }})</a>
+                    <a class="page-nav__item {% if is_dispute == '' %}is-active{% endif %}" href="{{ cadmin_url }}/support-center?search={{ search }}">All ({{ count|keyvalue:"All" }})</a>
+                    <a class="page-nav__item {% if is_dispute == 'False' %}is-active{% endif %}" href="{{ cadmin_url }}/support-center?search={{ search }}&is_dispute=False">General ({{ count|keyvalue:"General" }})</a>
+                    <a class="page-nav__item {% if is_dispute == 'True' %}is-active{% endif %}" href="{{ cadmin_url }}/support-center?search={{ search }}&is_dispute=True">Disputes ({{ count|keyvalue:"Disputes" }})</a>
                 </nav>
             </div>
             <form class="section__search form-group search" action="" method="GET">
@@ -38,8 +38,8 @@
                     {% for item in items %}
                     <tr>
                         <td><span class="table__mobile-heading">Ticket number</span><a href="#">{{ item.id }}</a></td>
-                        <td><span class="table__mobile-heading">Created by</span><a href="#">{{ item.transaction.trade_initiator }}</a></td>
-                        <td><span class="table__mobile-heading">Created on</span><span>{{ item.transaction.offer.created_at }}</span></td>
+                        <td><span class="table__mobile-heading">Created by</span><a href="#">{{ item.email }}</a></td>
+                        <td><span class="table__mobile-heading">Created on</span><span>{{ item.created_at }}</span></td>
                         <td><span class="table__mobile-heading">Topic</span><span>{{ item.topic }}</span></td>
                         <td><span class="table__mobile-heading">Is dispute?</span><span>{{ item.get_is_dispute_display }}</span></td>
                         <td><span class="table__mobile-heading">Ticket manager</span><a href="#">{{ item.ticket_manager }}</a></td>
@@ -47,7 +47,7 @@
                             <div class="table__priority-{{ item.ticket_priority|lower }}">{{ item.ticket_priority }}</div>
                         </td>
                         <td><span class="table__mobile-heading">Actions</span>
-                            <a href="/{{ app_url }}/ticket-details-{{ item.is_dispute|yesno:'dispute,no-dispute' }}?item_id={{ item.id }}">Details</a>
+                            <a href="{{ cadmin_url }}/ticket-details-{{ item.is_dispute|yesno:'dispute,no-dispute' }}?item_id={{ item.id }}">Details</a>
                         </td>
                     </tr>
                     {% endfor %}

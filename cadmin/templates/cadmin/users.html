@@ -29,13 +29,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user in user_list %}
+                    {% for item in user_list %}
                     <tr>
-                        <td><span class="table__mobile-heading">User ID</span><span>{{ user.id }}</span></td>
-                        <td><span class="table__mobile-heading">Name</span>{{ user.fullname }}</td>
-                        <td><span class="table__mobile-heading">Email address</span><span>{{ user.email }}</span></td>
-                        <td><span class="table__mobile-heading">Role</span><span>{{ user.get_role_display }}</span></td>
-                        <td><span class="table__mobile-heading">Username</span>{{ user.username }}</td>
+                        <td><span class="table__mobile-heading">User ID</span><span>{{ item.user.id }}</span></td>
+                        <td><span class="table__mobile-heading">Name</span>{{ item.user.fullname }}</td>
+                        <td><span class="table__mobile-heading">Email address</span><span>{{ item.user.email }}</span></td>
+                        <td><span class="table__mobile-heading">Role</span><span>{{ item.get_role_display }}</span></td>
+                        <td><span class="table__mobile-heading">Username</span>{{ item.user.username }}</td>
                         <td><span class="table__mobile-heading">Actions</span><a href="#">Details</a></td>
                     </tr>
                     {% endfor %}

@@ -52,11 +52,11 @@
                         <td><span class="table__mobile-heading">Created By</span><a href="#">{{ item.posted_by }}</a></td>
                         <td><span class="table__mobile-heading">Created on</span><span>{{ item.created_at }}</span></td>
                         <td><span class="table__mobile-heading">Post Title</span><span>{{ item.title }}</span></td>
-                        <td><span class="table__mobile-heading">Post excerpt</span><span>{{ item.context|safe }}</span></td>
-                        <td><span class="table__mobile-heading">Upvoted</span><span>{{ item.upvoted }}</span></td>
-                        <td><span class="table__mobile-heading">Comments</span><span>{{ item.comments }}</span></td>
+                        <td><span class="table__mobile-heading">Post excerpt</span><span>{{ item.beauty_context }}</span></td>
+                        <td><span class="table__mobile-heading">Upvoted</span><span>{{ item.upvotes_count }}</span></td>
+                        <td><span class="table__mobile-heading">Comments</span><span>{{ item.comments_count }}</span></td>
                         <td><span class="table__mobile-heading">Status</span><span>{{ item.get_status_display }}</span></td>
-                        <td><span class="table__mobile-heading">Actions</span><a href="/{{ app_url }}/community-post-details?item_id={{ item.id }}">Details</a></td>
+                        <td><span class="table__mobile-heading">Actions</span><a href="{{ cadmin_url }}/community-post-details?item_id={{ item.id }}">Details</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

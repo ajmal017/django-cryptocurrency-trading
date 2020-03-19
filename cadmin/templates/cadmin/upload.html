@@ -7,11 +7,11 @@
 {% block page-inner %}
 <main class="page__inner js-nav-close-trigger uploading-page">
     <section class="uploading-page__section section">
-        <h1 class="uploading-page__heading section__heading"><a class="uploading-page__heading-link" href="/{{ app_url }}/media-library">Back to Media Files</a></h1>
+        <h1 class="uploading-page__heading section__heading"><a class="uploading-page__heading-link" href="{{ cadmin_url }}/media-library">Back to Media Files</a></h1>
         <div class="drag-n-drop">
             <form
                 id="fileupload"
-                action="/{{ app_url }}/upload/"
+                action="{{ cadmin_url }}/upload/"
                 method="POST"
                 enctype="multipart/form-data">
                 {% csrf_token %}
@@ -45,9 +45,9 @@
 
 {% block bottom-script %}
 {{ block.super }}
-<script defer src="{% static 'cadmin/js/jquery.ui.widget.js' %}"></script>
-<script defer src="{% static 'cadmin/js/jquery.iframe-transport.js' %}"></script>
-<script defer src="{% static 'cadmin/js/jquery.fileupload.js' %}"></script>
+<script defer src="{% static 'js/jquery.ui.widget.js' %}"></script>
+<script defer src="{% static 'js/jquery.iframe-transport.js' %}"></script>
+<script defer src="{% static 'js/jquery.fileupload.js' %}"></script>
 <script defer src="{% static 'cadmin/js/upload.js' %}"></script>
 <script>
 var ICON_TIMES = '{% static "cadmin/images/icons.svg" %}#times';

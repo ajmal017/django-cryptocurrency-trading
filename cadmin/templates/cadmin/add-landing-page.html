@@ -31,13 +31,13 @@
                 </aside>
                 {% endif %}
             </div>
-            <form action="/{{ app_url }}/add-landing-page/" method="POST">
+            <form action="{{ cadmin_url }}/add-landing-page/" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <div class="add-header__bottom">
                     <div class="add-header__add-field add-field add-field--large">
                         <div class="add-field__desc">SELECT PAGE TEMPLATE</div>
-                        <div class="add-field__form-group"><span class="add-field__base">https://raplev.com/</span>
+                        <div class="add-field__form-group"><span class="add-field__base">https://cryptptrade.com/</span>
                             <div class="add-field__inner">
                                 <div class="add-field__wrapper">
                                     <div class="add-field__field-group">
@@ -57,7 +57,7 @@
                     </div>
                     <div class="add-header__add-field add-field add-field--large">
                         <div class="add-field__desc">personalized LINK</div>
-                        <div class="add-field__form-group"><span class="add-field__base">https://raplev.com/</span>
+                        <div class="add-field__form-group"><span class="add-field__base">https://cryptptrade.com/</span>
                             <div class="add-field__inner">
                                 <div class="add-field__wrapper">
                                     <div class="add-field__field-group">
@@ -92,13 +92,13 @@
                 <tbody>
                     {% for item in items %}
                     <tr>
-                        <td><span class="table__mobile-heading">Old link</span><a href="/{{ app_url }}/custom_page?item_id={{ item.template_page.id }}">{{ item.template_page.id }}</a></td>
+                        <td><span class="table__mobile-heading">Old link</span><a href="{{ cadmin_url }}/custom_page?item_id={{ item.template_page.id }}">{{ item.template_page.id }}</a></td>
                         <td><span class="table__mobile-heading">New link</span><a href="/{{ item.personalized_link }}">{{ item.personalized_link }}</a></td>
                         <td><span class="table__mobile-heading">Redirection type</span><span>{{ item.redirection_type }}</span></td>
                         <td><span class="table__mobile-heading">Actions</span>
                             <div class="table-actions">
-                                <a class="table-actions__item table-actions__edit" href="/{{ app_url }}/add-landing-page/?item_id={{ item.id }}">Edit</a>
-                                <a class="table-actions__item" href="/{{ app_url }}/add-landing-page?delete_id={{ item.id }}">Delete</a>
+                                <a class="table-actions__item table-actions__edit" href="{{ cadmin_url }}/add-landing-page/?item_id={{ item.id }}">Edit</a>
+                                <a class="table-actions__item" href="{{ cadmin_url }}/add-landing-page?delete_id={{ item.id }}">Delete</a>
                             </div>
                         </td>
                     </tr>

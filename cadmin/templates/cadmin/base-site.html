@@ -19,7 +19,7 @@
                 </svg></button>
             <div class="user-menu">
                 <div class="user-menu__main">
-                    <div class="user-menu__text"><span class="user-menu__greeting">Welcome back, </span><span class="user-menu__name">{{ cadmin_user.fullname }}</span></div>
+                    <div class="user-menu__text"><span class="user-menu__greeting">Welcome back, </span><span class="user-menu__name">{{ user.get_fullname }}</span></div>
                     <div class="user-menu__pic" onclick="user_dropdown.classList.toggle('is-active')">
                         <div class="user-menu__default-icon"><svg class="user-menu__icon" width="30">
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#user"></use>
@@ -34,22 +34,19 @@
                                 </svg></div><img class="user-menu__img" src="{% static 'cadmin/images/draft/user.jpg' %}" alt="User">
                         </div>
                         <div class="user-menu__dropdown-control">
-                            <p class="user-menu__name">{{ cadmin_user.fullname }}</p>
-                            <p class="user-menu__dropdown-control-options"><a href="/{{ app_url }}/profile">Edit profile </a><span>| </span><a href="/{{ app_url }}/profile#change_password">Change PW</a></p>
+                            <p class="user-menu__name">{{ user.get_fullname }}</p>
+                            <p class="user-menu__dropdown-control-options"><a href="{{ cadmin_url }}/profile">Edit profile </a><span>| </span><a href="{{ cadmin_url }}/profile#change_password">Change PW</a></p>
                         </div>
                     </div>
                     <ul class="user-menu__dropdown-bottom">
                         <li class="user-menu__dropdown-item"><svg class="user-menu__dropdown-item-icon" width="30">
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#user"></use>
-                            </svg><a href="/{{ app_url }}/profile">View profile</a></li>
+                            </svg><a href="{{ cadmin_url }}/profile">View profile</a></li>
                         <li class="user-menu__dropdown-item"><svg class="user-menu__dropdown-item-icon" width="30">
                                 <use xlink:href="{% static 'cadmin/images/icons.svg' %}#sign-out-alt"></use>
                             </svg>
-                            {% if user.is_superuser %}
-                            <a href="/super-admin/logout">Log out</a></li>
-                            {% else %}
-                            <a href="/{{ app_url }}/logout">Log out</a></li>
-                            {% endif %}
+                            <a href="{{ cadmin_url }}/logout">Log out</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -58,15 +55,15 @@
     {% block page-inner %}{% endblock %}
 </div>
 <nav class="page__nav nav js-nav-target-secondary">
-    <header class="nav__header"><a class="nav__logo" href="/{{ app_url }}/"><img class="nav__logo-img" src="{% static 'cadmin/images/raplev-logo.png' %}" alt="Raplev logo"></a></header>
+    <header class="nav__header"><a class="nav__logo" href="{{ cadmin_url }}/"><img class="nav__logo-img" src="{% static 'cadmin/images/cryptptrade-logo.png' %}" alt="Cryptptrade logo"></a></header>
     <div class="nav__container">
         <div class="nav__group">
-            <h3 class="nav__heading"><a href="/{{ app_url }}/revenue">REVENUE</a></h3>
+            <h3 class="nav__heading"><a href="{{ cadmin_url }}/revenue">REVENUE</a></h3>
             <ul>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#chart-line"></use>
-                        </svg><a href="/{{ app_url }}/rev-stats">Status & Chart</a></div>
+                        </svg><a href="{{ cadmin_url }}/rev-stats">Status & Chart</a></div>
                 </li>
             </ul>
         </div>
@@ -75,113 +72,113 @@
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#percent"></use>
-                        </svg><a href="/{{ app_url }}/offers">Offers</a></div>
+                        </svg><a href="{{ cadmin_url }}/offers">Offers</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#user"></use>
-                        </svg><a href="/{{ app_url }}/customers">Customers</a></div>
+                        </svg><a href="{{ cadmin_url }}/customers">Customers</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#coins"></use>
-                        </svg><a href="/{{ app_url }}/trades">Trades</a></div>
+                        </svg><a href="{{ cadmin_url }}/trades">Trades</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#file-invoice"></use>
-                        </svg><a href="/{{ app_url }}/transactions">Transactions</a></div>
+                        </svg><a href="{{ cadmin_url }}/transactions">Transactions</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#hand-holding-usd"></use>
-                        </svg><a href="/{{ app_url }}/escrows">Escrows</a></div>
+                        </svg><a href="{{ cadmin_url }}/escrows">Escrows</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#headset"></use>
-                        </svg><a href="/{{ app_url }}/support-center">Support Center</a></div>
+                        </svg><a href="{{ cadmin_url }}/support-center">Support Center</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#id-badge"></use>
-                        </svg><a href="/{{ app_url }}/id-verify-app">ID Verify App</a></div>
+                        </svg><a href="{{ cadmin_url }}/id-verify-app">ID Verify App</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#envelope-open-text"></use>
-                        </svg><a href="/{{ app_url }}/contact-form">Contact form</a></div>
+                        </svg><a href="{{ cadmin_url }}/contact-form">Contact form</a></div>
                 </li><!-- Placeholder menu-->
                 <li class="nav__item">
                     <div class="nav__item-wrapper">
                         <svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#sitemap"></use>
                         </svg>
-                        <a href="/{{ app_url }}/additional-pages">Additional Pages</a>
+                        <a href="{{ cadmin_url }}/additional-pages">Additional Pages</a>
                         <button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-pages-list">
                             <span class="nav__toggle-icon"></span>
                         </button>
                     </div>
                     <ul class="nav__nested-list js-nav-pages-list">
-                        <li class="nav__item"> <a href="/{{ app_url }}/add-new-page">Add New Page</a></li>
-                        <li class="nav__item"> <a href="/{{ app_url }}/#">Page 2</a></li>
-                        <li class="nav__item"> <a href="/{{ app_url }}/#">Page 3</a></li>
-                        <li class="nav__item"> <a href="/{{ app_url }}/#">Page 4</a></li>
-                        <li class="nav__item"> <a href="/{{ app_url }}/#">Page 5</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/add-new-page">Add New Page</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/#">Page 2</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/#">Page 3</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/#">Page 4</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/#">Page 5</a></li>
                     </ul>
                 </li><!-- Placeholder menu-->
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#align-left"></use>
-                        </svg><a href="/{{ app_url }}/blog">Blog</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-blog-list"><span class="nav__toggle-icon"></span></button></div>
+                        </svg><a href="{{ cadmin_url }}/blog">Blog</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-blog-list"><span class="nav__toggle-icon"></span></button></div>
                     <ul class="nav__nested-list js-nav-blog-list">
-                        <li class="nav__item"> <a href="/{{ app_url }}/add-new-post">Add new</a></li>
-                        <li class="nav__item"> <a href="/{{ app_url }}/tags">Tags</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/add-new-post">Add new</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/tags">Tags</a></li>
                     </ul>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#play-circle"></use>
-                        </svg><a href="/{{ app_url }}/media-library">Media Files</a></div>
+                        </svg><a href="{{ cadmin_url }}/media-library">Media Files</a></div>
                 </li><!-- Placeholder menu-->
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#plane-arrival"></use>
-                        </svg><a href="/{{ app_url }}/add-landing-page">Landing Pages</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-landings-list"><span class="nav__toggle-icon"></span></button></div>
+                        </svg><a href="{{ cadmin_url }}/add-landing-page">Landing Pages</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-landings-list"><span class="nav__toggle-icon"></span></button></div>
                     <ul class="nav__nested-list js-nav-landings-list">
-                        <li class="nav__item"> <a href="/{{ app_url }}/add-landing-page">Landing Pages</a></li>
-                        <li class="nav__item"> <a href="/{{ app_url }}/add-pers-link">Personalized Links</a></li>
-                        <li class="nav__item"> <a href="/{{ app_url }}/add-redirection-link">Redirection Links</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/add-landing-page">Landing Pages</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/add-pers-link">Personalized Links</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/add-redirection-link">Redirection Links</a></li>
                     </ul>
                 </li><!-- Placeholder menu-->
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#users"></use>
-                        </svg><a href="/{{ app_url }}/users">Users</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-user-list"><span class="nav__toggle-icon"></span></button></div>
+                        </svg><a href="{{ cadmin_url }}/users">Users</a><button class="nav__toggle-btn js-collapse-trigger" type="button" data-target=".js-nav-user-list"><span class="nav__toggle-icon"></span></button></div>
                     <ul class="nav__nested-list js-nav-user-list">
-                        <li class="nav__item"> <a href="/{{ app_url }}/add-user">Add User</a></li>
-                        <li class="nav__item"> <a href="/{{ app_url }}/#">User 2</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/add-user">Add User</a></li>
+                        <li class="nav__item"> <a href="{{ cadmin_url }}/#">User 2</a></li>
                     </ul>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#searchengin"></use>
-                        </svg><a href="/{{ app_url }}/seo">SEO</a></div>
+                        </svg><a href="{{ cadmin_url }}/seo">SEO</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#lock"></use>
-                        </svg><a href="/{{ app_url }}/security-status">Security status</a></div>
+                        </svg><a href="{{ cadmin_url }}/security-status">Security status</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#cogs"></use>
-                        </svg><a href="/{{ app_url }}/options">Options</a></div>
+                        </svg><a href="{{ cadmin_url }}/options">Options</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#book"></use>
-                        </svg><a href="/{{ app_url }}/documentations">Documentations</a></div>
+                        </svg><a href="{{ cadmin_url }}/documentations">Documentations</a></div>
                 </li>
             </ul>
         </div>
@@ -191,37 +188,37 @@
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#copy"></use>
-                        </svg><a href="/{{ app_url }}/community-posts">All Posts</a></div>
+                        </svg><a href="{{ cadmin_url }}/community-posts">All Posts</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#font-awesome-flag"></use>
-                        </svg><a href="/{{ app_url }}/flagged-posts">Flagged Content</a></div>
+                        </svg><a href="{{ cadmin_url }}/flagged-posts">Flagged Content</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#cogs"></use>
-                        </svg><a href="/{{ app_url }}/options">Options</a></div>
+                        </svg><a href="{{ cadmin_url }}/options">Options</a></div>
                 </li>
             </ul>
         </div>
         <div class="nav__group">
-            <h3 class="nav__heading"><a href="/{{ app_url }}/affiliates">AFFILIATES</a></h3>
+            <h3 class="nav__heading"><a href="{{ cadmin_url }}/affiliates">AFFILIATES</a></h3>
             <ul>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#chess"></use>
-                        </svg><a href="/{{ app_url }}/campaigns">Campaigns</a></div>
+                        </svg><a href="{{ cadmin_url }}/campaigns">Campaigns</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#flag"></use>
-                        </svg><a href="/{{ app_url }}/reports">Report</a></div>
+                        </svg><a href="{{ cadmin_url }}/reports">Report</a></div>
                 </li>
                 <li class="nav__item">
                     <div class="nav__item-wrapper"><svg class="nav__icon" width="30">
                             <use xlink:href="{% static 'cadmin/images/icons.svg' %}#comment-dots"></use>
-                        </svg><a href="/{{ app_url }}/community-posts">Messages</a></div>
+                        </svg><a href="{{ cadmin_url }}/community-posts">Messages</a></div>
                 </li>
             </ul>
         </div>
@@ -236,7 +233,7 @@
             <div class="file-details__wrapper">
                 <h3 class="file-details__url-heading">File URL</h3>
                 <div class="file-details__url-field form-group">
-                    <div class="form-group__field-group"><input class="form-group__field" name="unfilled" placeholder="https://raplev.com/uploads/medialibrary/jetprobe.jpg' %}"></div>
+                    <div class="form-group__field-group"><input class="form-group__field" name="unfilled" placeholder="https://cryptptrade.com/uploads/medialibrary/jetprobe.jpg' %}"></div>
                 </div>
                 <h3 class="file-details__size-heading">Size</h3>
                 <p class="file-details__size-value">1280x720px</p><button class="file-details__delete-btn btn btn--red" type="button">Delete file</button>

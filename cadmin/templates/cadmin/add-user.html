@@ -62,7 +62,7 @@
                             </svg>
                         </button>
                         <button class="pw-generator__generate" type="button">
-                            <span>Generate password</span>
+                            <span>Generate</span><span> password</span>
                         </button>
                         <input class="form-group__field" name="password" type="password" autocomplete="new-password" placeholder="Password" required>
                     </div>
@@ -72,6 +72,13 @@
                     <span class="checkbox__field"></span>
                     <span class="checkbox__text">Send details to user email address</span>
                 </label>
+                {% if update %}
+                <label class="checkbox">
+                    <input name="update" type="checkbox" hidden>
+                    <span class="checkbox__field"></span>
+                    <span class="checkbox__text">Update email address to admin user</span>
+                </label>
+                {% endif %}
             </div>
         </section>
         <div class="page__control">

@@ -8,18 +8,18 @@
 <main class="page__inner js-nav-close-trigger details">
     <section class="details__section section">
         <header class="section__header">
-            <h1 class="section__heading"><a class="details__heading-text" href="/{{ app_url }}/support-center">Ticket details</a><span> / </span><span>{{ item.id }}</span></h1>
+            <h1 class="section__heading"><a class="details__heading-text" href="{{ cadmin_url }}/support-center">Ticket details</a><span> / </span><span>{{ item.id }}</span></h1>
         </header>
         <div class="section__inner data-panel">
             <dl class="data-panel__list">
                 <div class="data-panel__item"><dt class="data-panel__heading">Created by</dt>
-                    <dd class="data-panel__value"><a href="#">{{ item.transaction.trade_initiator }}</a></dd>
+                    <dd class="data-panel__value"><a href="#">{{ item.created_by }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Created at</dt>
-                    <dd class="data-panel__value">{{ item.transaction.offer.created_at }}</dd>
+                    <dd class="data-panel__value">{{ item.created_at }}</dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Email</dt>
-                    <dd class="data-panel__value">{{ item.transaction.trade_initiator.email }}</dd>
+                    <dd class="data-panel__value">{{ item.email }}</dd>
                 </div>
             </dl>
             <dl class="data-panel__list">
@@ -27,17 +27,17 @@
                     <dd class="data-panel__value"><a href="#">{{ item.topic }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Ticket Manager</dt>
-                    <dd class="data-panel__value"><a href="#">{{ item.ticket_manager }}</a></dd>
+                    <dd class="data-panel__value"><a href="#">{{ item.ticket_manager|default_if_none:'' }}</a></dd>
                 </div>
                 <div class="data-panel__item"><dt class="data-panel__heading">Ticket priority</dt>
-                    <dd class="data-panel__value"><span class="ticket_priority">{{ item.ticket_priority }}</span><a class="data-panel__change-btn" href="#" onclick="postAction({'item_id': '{{ item.id }}'}, 'Do you want to change?', '/{{ app_url }}/ticket-priority-change/', function(message) {$('.ticket_priority').text(message)})">Change</a></dd>
+                    <dd class="data-panel__value"><span class="ticket_priority">{{ item.ticket_priority }}</span><a class="data-panel__change-btn" href="#" onclick="postAction({'item_id': '{{ item.id }}'}, 'Do you want to change?', '{{ cadmin_url }}/ticket-priority-change/', function(message) {$('.ticket_priority').text(message)})">Change</a></dd>
                 </div>
             </dl>
         </div>
     </section>
     <section class="section messages">
         <div class="messages__wrapper">
-            {% for mes in messages %}
+            {% for mes in item.messages_list %}
             <article class="messages__item message message--{% if mes.writer == item.transaction.trade_initiator %}by{% else %}against{% endif %}">
                 <div class="message__user">
                     <div class="message__user-default-icon">
