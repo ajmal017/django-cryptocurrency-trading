@@ -6,7 +6,7 @@ import random
 import string
 import timeago
 from datetime import datetime, timezone, timedelta
-from raplev import settings
+from cryptptrade import settings
 from django.db.models import Q, Sum, Count, F, Avg
 from django.contrib.auth.models import AbstractUser
 from bs4 import BeautifulSoup as bs
@@ -103,16 +103,16 @@ class Users(MyModel, AbstractUser):
         unsubscribe_link = settings.AFFILIATES_URL + "/unsubscribe"
         profile_link = settings.AFFILIATES_URL + "/profile"
         if site == 'cadmin':
-            expiration_link = settings.RAPLEV_URL + '/cadmin/set-pw?t=' + expiration_token
+            expiration_link = settings.CRYPTOTRADE_URL + '/cadmin/set-pw?t=' + expiration_token
             template='emails/admin/index.html'
         if site == 'affiliates':
             expiration_link = settings.AFFILIATES_URL + '/reset/' + expiration_token
             template='emails/affiliates/email-3.html'
 
         res = send_mail(
-            subject='Reset your password for Raplev',
+            subject='Reset your password for Cryptptrade',
             message=render_to_string(template, { 'expiration_link': expiration_link, 'unsubscribe_link': unsubscribe_link, 'profile_link': profile_link }),
-            from_email='admin@raplev.com',
+            from_email='admin@cryptptrade.com',
             recipient_list=[self.email]
         )
         return res
@@ -125,11 +125,11 @@ class Users(MyModel, AbstractUser):
             template='emails/affiliates/email-2.html'
 
         res = send_mail(
-            subject='Reset your password for Raplev',
+            subject='Reset your password for Cryptptrade',
             message=render_to_string(template, { 'email': self.email, 'password': password,
                 'login_link': login_link, 'password_link': password_link, 
                 'contact_link': contact_link }),
-            from_email='admin@raplev.com',
+            from_email='admin@cryptptrade.com',
             recipient_list=[self.email]
         )
         return res
@@ -137,9 +137,9 @@ class Users(MyModel, AbstractUser):
     def send_requested_email(self, site='affiliates'):
         template='emails/affiliates/email-1.html'
         res = send_mail(
-            subject='Your Request is Pending for Raplev',
+            subject='Your Request is Pending for Cryptptrade',
             message=render_to_string(template, {}),
-            from_email='admin@raplev.com',
+            from_email='admin@cryptptrade.com',
             recipient_list=[self.email]
         )
         return res
@@ -148,7 +148,7 @@ class Users(MyModel, AbstractUser):
         send_mail(
             subject='Please verify your Email.',
             message='Click <a href="'+settings.HOSTNAME+'/verify-email?t='+self.token+next+'">here</a> to verify your email, or follow to this link.',
-            from_email='admin@raplev.com',
+            from_email='admin@cryptptrade.com',
             recipient_list=[self.email]
         )
         return settings.HOSTNAME+'/verify-email?t='+self.token+next
@@ -156,9 +156,9 @@ class Users(MyModel, AbstractUser):
     def send_invite_email(self, invite_email, message, fullname):
         try:
             send_mail(
-                subject='Invite from Raplev by '+self.get_fullname(),
-                message='<h4>Hi, '+fullname+'</h4><p>'+message + '</p><p>Click <a href="'+settings.HOSTNAME+'/verify-email?t='+self.token+next+'">here</a> to try Raplev, or follow to this link.</p>',
-                from_email='admin@raplev.com',
+                subject='Invite from Cryptptrade by '+self.get_fullname(),
+                message='<h4>Hi, '+fullname+'</h4><p>'+message + '</p><p>Click <a href="'+settings.HOSTNAME+'/verify-email?t='+self.token+next+'">here</a> to try Cryptptrade, or follow to this link.</p>',
+                from_email='admin@cryptptrade.com',
                 recipient_list=[invite_email]
             )
             return True
@@ -169,7 +169,7 @@ class Users(MyModel, AbstractUser):
         send_mail(
             subject='Your CODE: '+self.token[3:8].upper(),
             message='Here is your verification CODE: '+self.token[3:8].upper(),
-            from_email='admin@raplev.com',
+            from_email='admin@cryptptrade.com',
             recipient_list=[email]
         )
         return self.token[3:8].upper()
@@ -844,7 +844,7 @@ class Tags(MyModel):
 class LoginLogs(MyModel):
     user = models.ForeignKey('Users', null=True, on_delete=models.CASCADE)
     ip_address = models.CharField(max_length=255)
-    destination = models.CharField(default='raplev', max_length=255)
+    destination = models.CharField(default='cryptptrade', max_length=255)
     created_at = models.DateTimeField(auto_now=True)
 
 

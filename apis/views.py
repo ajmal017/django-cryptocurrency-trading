@@ -26,7 +26,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from .models import Token
 from rest_framework.response import Response
 
-from raplev import settings
+from cryptptrade import settings
 from django.core.files.storage import FileSystemStorage
 
 

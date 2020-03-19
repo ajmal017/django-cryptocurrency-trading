@@ -23,7 +23,7 @@ from django.template.defaulttags import register
 from django.contrib.auth import (login as auth_login, logout as auth_logout)
 import string, random
 
-logger = logging.getLogger('raplev')
+logger = logging.getLogger('cryptptrade')
 logger.setLevel(logging.INFO)
 app_url = ''
 

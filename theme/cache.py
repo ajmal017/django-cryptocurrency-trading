@@ -13,7 +13,7 @@ r = redis.Redis(
     port=settings.REDIS_PORT
 )
 
-logger = logging.getLogger('raplev')
+logger = logging.getLogger('cryptptrade')
 logger.setLevel(logging.INFO)
 from cadmin.models import Pricing
 

@@ -20,19 +20,19 @@ msgstr ""
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: raplev/settings.py:139
+#: cryptptrade/settings.py:139
 msgid "English"
 msgstr ""
 
-#: raplev/settings.py:140
+#: cryptptrade/settings.py:140
 msgid "Русский"
 msgstr ""
 
-#: raplev/settings.py:141
+#: cryptptrade/settings.py:141
 msgid "Nigeria"
 msgstr ""
 
-#: raplev/settings.py:142
+#: cryptptrade/settings.py:142
 msgid "简体中文"
 msgstr ""
 

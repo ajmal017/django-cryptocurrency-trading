@@ -26,7 +26,7 @@ from .form import MediasForm
 from .decorators import admin_login_required, user_not_logged_in
 from django.contrib.auth import (login as auth_login, logout as auth_logout)
 
-logger = logging.getLogger('raplev')
+logger = logging.getLogger('cryptptrade')
 logger.setLevel(logging.INFO)
 app_url = '/cadmin'
 

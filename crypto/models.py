@@ -4,7 +4,7 @@ from django.db import models
 # import string
 # import timeago
 # from datetime import datetime, timezone
-# from raplev import settings
+# from cryptptrade import settings
 # from django.db.models import Q, Sum, Count, F
 # from bs4 import BeautifulSoup as bs
 
